@@ -17,6 +17,21 @@ const THEMES = [
   { value: 'dark', label: 'Dark', hint: 'Dark everywhere. Easier on the eyes at night.' },
 ];
 
+// Period tracking mode, read by Layal's cycle screen: localStorage key nabd-cycle-mode-<crewId>, "cycle" or "suppression".
+const CYCLE_MODES = [
+  { value: 'cycle', label: 'Cycle tracking', hint: 'Follows your cycle and your next period.' },
+  { value: 'suppression', label: 'Period suppression', hint: 'Tracks your daily pill and how many are left.' },
+];
+
+function readCycleMode(crewId) {
+  try {
+    const saved = localStorage.getItem(`nabd-cycle-mode-${crewId}`);
+    return saved === 'suppression' ? 'suppression' : 'cycle';
+  } catch {
+    return 'cycle';
+  }
+}
+
 function Chevron() {
   return <span className={s.chevron} aria-hidden="true">›</span>;
 }
@@ -25,6 +40,7 @@ export default function ProfilePage() {
   const session = useSession();
   const navigate = useNavigate();
   const [theme, setThemeChoice] = useState(getTheme());
+  const [cycleMode, setCycleMode] = useState(() => readCycleMode(session?.id));
   const [data, setData] = useState({ state: 'loading' }); // loading | ready | error
 
   useEffect(() => {
@@ -48,6 +64,15 @@ export default function ProfilePage() {
     setThemeChoice(value);
   }
 
+  function chooseCycleMode(value) {
+    try {
+      localStorage.setItem(`nabd-cycle-mode-${session?.id}`, value);
+    } catch {
+      // storage blocked: the choice still shows for this visit
+    }
+    setCycleMode(value);
+  }
+
   function leave() {
     signOut();
     navigate('/signin');
@@ -56,6 +81,7 @@ export default function ProfilePage() {
   const name = session?.name ?? 'Crew member';
   const missionName = data.missionName?.replace(/\s*\(.*\)/, '');
   const current = THEMES.find((t) => t.value === theme) ?? THEMES[0];
+  const currentCycle = CYCLE_MODES.find((m) => m.value === cycleMode) ?? CYCLE_MODES[0];
 
   return (
     <main>
@@ -79,6 +105,16 @@ export default function ProfilePage() {
         ))}
       </div>
       <p className={s.hint}>{current.hint}</p>
+
+      <h2 className={s.label}>Period tracking</h2>
+      <div className={s.modes} role="group" aria-label="Period tracking">
+        {CYCLE_MODES.map((m) => (
+          <Chip key={m.value} selected={cycleMode === m.value} onClick={() => chooseCycleMode(m.value)}>
+            {m.label}
+          </Chip>
+        ))}
+      </div>
+      <p className={s.hint}>{currentCycle.hint} Only you can see this.</p>
 
       <h2 className={s.label}>Who sees what</h2>
       <ListRow title="Mission Control" right={<span className={s.right}>Status, check-ins, alerts</span>} />
