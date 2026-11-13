@@ -7,11 +7,15 @@
 // Sources:
 // - NASA Human Research Program: astronauts show average strength and aerobic losses of 10-12% on
 //   long missions. DAILY_KEEP is tuned so an untrained muscle loses about 11% over 6 months (180 days).
-// - NASA SPRINT study: high-intensity resistance training on ARED (squat, deadlift, heel raise, with
-//   bench press measured) plus interval training on the CEVIS cycle and the T2 treadmill with a harness
-//   (8 x 30 s, 6 x 2 min or 4 x 4 min intervals). The ISS program uses "rotating upper-body exercises" on ARED.
-// - Canadian Space Agency (CSA): ARED squats, deadlifts and heel raises; the Orion flywheel device
-//   supports rows, squats and deadlifts.
+// - NASA SPRINT study: high-intensity resistance training on ARED plus interval training on the CEVIS cycle
+//   and the T2 treadmill with a harness (8 x 30 s, 6 x 2 min or 4 x 4 min intervals).
+// - European Space Agency (ESA): ARED squats, deadlifts, heel raises, biceps curls and bench press.
+// - Canadian Space Agency (CSA): the exercise bike, the treadmill with a harness, and the Orion flywheel
+//   device (rows, squats and deadlifts).
+// Only exercises named by these sources are listed. Shoulders have no exercise of their own; they are
+// trained as a helper muscle by the bench press and the flywheel row.
+// PROTOTYPE ASSUMPTION: the Mars transit ship carries ISS-style exercise devices (ARED, a CEVIS-style bike,
+// a T2-style treadmill with a harness) plus the Orion flywheel.
 // Starting strengths are set slightly low to match data/today.json (workouts at 68% of plan).
 // Legs and back start lowest: the muscles that hold you up against gravity lose the most in space.
 
@@ -67,14 +71,6 @@ export const EXERCISES = [
     sets: '3 × 8',
     how: 'Lie on the bench, lower the bar to your chest, then press it straight up.',
     trains: { chest: 1, arms: 0.5, shoulders: 0.5 },
-  },
-  {
-    id: 'aredShoulderPress',
-    kind: 'resistance',
-    name: 'ARED shoulder press',
-    sets: '3 × 8',
-    how: 'Press the bar from your shoulders to straight overhead, then lower it slowly.',
-    trains: { shoulders: 1, arms: 0.5, chest: 0.5 },
   },
   {
     id: 'aredBicepsCurl',
@@ -171,7 +167,13 @@ export function normalize(saved, today) {
   const updatedOn = isIsoDate(saved.updatedOn) && daysBetween(saved.updatedOn, today) >= 0 ? saved.updatedOn : today;
   const workouts = (Array.isArray(saved.workouts) ? saved.workouts : [])
     .filter((w) => w && exerciseById(w.exerciseId) && isIsoDate(w.date))
-    .map((w) => ({ exerciseId: w.exerciseId, date: w.date, at: typeof w.at === 'string' ? w.at : `${w.date}T00:00:00.000Z` }))
+    .map((w) => ({
+      exerciseId: w.exerciseId,
+      date: w.date,
+      at: typeof w.at === 'string' ? w.at : `${w.date}T00:00:00.000Z`,
+      ...(LEVELS.includes(w.level) ? { level: w.level } : {}),
+      ...(w.source === 'twin' ? { source: 'twin' } : {}),
+    }))
     .slice(0, MAX_WORKOUTS);
   return { version: 1, updatedOn, strength, workouts };
 }
@@ -185,9 +187,13 @@ export function applyDrop(state, today) {
   return { ...state, updatedOn: today, strength };
 }
 
+// Workout levels from todaysWorkout.js. Every level restores the same amount (points race counts them equally).
+export const LEVELS = ['full', 'lighter', 'light'];
+
 // A completed workout: drop up to today first, then restore the muscles it trains.
+// extra: optional { level, source: 'twin' } saved with the entry (workout mode).
 // Returns the new state and the main muscles that grew (for the "Saved" line).
-export function completeWorkout(state, exerciseId, today, now = new Date()) {
+export function completeWorkout(state, exerciseId, today, now = new Date(), extra = {}) {
   const exercise = exerciseById(exerciseId);
   if (!exercise) return { state, grown: [] };
   const base = applyDrop(state, today);
@@ -195,7 +201,10 @@ export function completeWorkout(state, exerciseId, today, now = new Date()) {
   Object.entries(exercise.trains).forEach(([id, weight]) => {
     strength[id] = clamp(strength[id] + (weight === 1 ? RESTORE_MAIN : RESTORE_HELPER));
   });
-  const workouts = [{ exerciseId, date: today, at: now.toISOString() }, ...base.workouts].slice(0, MAX_WORKOUTS);
+  const entry = { exerciseId, date: today, at: now.toISOString() };
+  if (LEVELS.includes(extra.level)) entry.level = extra.level;
+  if (extra.source === 'twin') entry.source = 'twin';
+  const workouts = [entry, ...base.workouts].slice(0, MAX_WORKOUTS);
   const grown = MUSCLES.filter((m) => exercise.trains[m.id] === 1).map((m) => m.id);
   return { state: { ...base, strength, workouts }, grown };
 }

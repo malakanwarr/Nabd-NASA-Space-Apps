@@ -26,6 +26,7 @@ import JoinPage from './features/family-app/JoinPage.jsx';
 import HomeWindowPage from './features/home-window/HomeWindowPage.jsx';
 import AvatarPage from './features/avatar/AvatarPage.jsx';
 import MusclesPage from './features/muscles/MusclesPage.jsx';
+import WorkoutPage from './features/muscles/WorkoutPage.jsx';
 import GardenPage from './features/garden/GardenPage.jsx';
 import AdminSignInPage from './features/admin/AdminSignInPage.jsx';
 import CrewOverviewPage from './features/admin/CrewOverviewPage.jsx';
@@ -34,7 +35,7 @@ import CrewMemberPage from './features/admin/CrewMemberPage.jsx';
 import SurgeonPage from './features/surgeon/SurgeonPage.jsx';
 
 // Phone screens without the tab bar.
-const NO_TABBAR = ['/signin', '/send', '/join', '/checkin/record', '/checkin/game', '/body/cycle/log'];
+const NO_TABBAR = ['/signin', '/send', '/join', '/checkin/record', '/checkin/game', '/body/cycle/log', '/body/muscles/workout'];
 
 function isLaptop(pathname) {
   return pathname === '/surgeon' || pathname === '/admin' || pathname.startsWith('/admin/');
@@ -92,6 +93,7 @@ export default function App() {
           <Route path="/body/cycle" element={<CyclePage />} />
           <Route path="/body/cycle/log" element={<LogSymptomPage />} />
           <Route path="/body/muscles" element={<MusclesPage />} />
+          <Route path="/body/muscles/workout" element={<WorkoutPage />} />
           <Route path="/body/:system" element={<SystemDetailPage />} />
           <Route path="/measure" element={<MeasurePage />} />
           <Route path="/doctor" element={<DoctorPage />} />
