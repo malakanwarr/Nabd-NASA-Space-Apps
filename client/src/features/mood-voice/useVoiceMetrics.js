@@ -204,7 +204,7 @@ export default function useVoiceMetrics() {
     if (!result) {
       setMetrics(EMPTY);
       setStatus('error');
-      setMessage('We could not hear enough. Find a quieter spot and read the sentence out loud.');
+      setMessage('We could not hear enough. Find a quieter spot and read the sentence out loud twice.');
       return;
     }
     setMetrics(result);
