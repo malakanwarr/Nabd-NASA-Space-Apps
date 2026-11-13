@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { apiFetch } from '../../shared/api.js';
 import Button from '../../shared/Button.jsx';
 import Chip from '../../shared/Chip.jsx';
@@ -10,6 +10,7 @@ import styles from './styles.module.css';
 
 const FILTERS = [
   { id: 'all', label: 'All' },
+  { id: 'attention', label: 'Watch or Act' },
   { id: 'watch', label: 'Watch' },
   { id: 'act', label: 'Act' },
   { id: 'missed', label: 'Missed check-in' },
@@ -46,7 +47,10 @@ function formatReadiness(value) {
 
 export default function CrewOverviewPage() {
   const [request, setRequest] = useState({ key: null, status: 'loading', crew: [], error: '' });
-  const [filter, setFilter] = useState('all');
+  // The filter lives in the address (?filter=attention), so the sidebar's Alerts link can open it.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filter = FILTERS.some((f) => f.id === searchParams.get('filter')) ? searchParams.get('filter') : 'all';
+  const setFilter = (id) => setSearchParams(id === 'all' ? {} : { filter: id }, { replace: true });
   const [search, setSearch] = useState('');
   const [reload, setReload] = useState(0);
   const requestKey = String(reload);
@@ -76,8 +80,11 @@ export default function CrewOverviewPage() {
   const visibleCrew = useMemo(() => {
     const query = search.trim().toLowerCase();
     return crew.filter((member) => {
+      const status = String(member.status).toLowerCase();
       const matchesFilter = filter === 'all'
-        || (filter === 'missed' ? isMissedCheckIn(member) : String(member.status).toLowerCase() === filter);
+        || (filter === 'missed' ? isMissedCheckIn(member)
+          : filter === 'attention' ? status === 'watch' || status === 'act'
+            : status === filter);
       const matchesSearch = !query || `${member.name || ''} ${member.role || ''}`.toLowerCase().includes(query);
       return matchesFilter && matchesSearch;
     });
