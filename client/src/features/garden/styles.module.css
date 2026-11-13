@@ -97,7 +97,7 @@
   justify-items: center;
   gap: var(--space-1);
   color: var(--muted);
-  font-size: var(--fs-12);
+  font-size: var(--fs-14);
 }
 
 .stat + .stat {
@@ -135,7 +135,7 @@
 
 .habitHeading > span:last-child {
   flex: 0 0 auto;
-  font-size: var(--fs-12);
+  font-size: var(--fs-14);
 }
 
 .lowStatus {
@@ -197,7 +197,7 @@
 
 .greenhouseCopy span {
   color: var(--muted);
-  font-size: var(--fs-12);
+  font-size: var(--fs-14);
 }
 
 /* A gentle note about the plant that needs care, and the crew tree when the crew is low. */
