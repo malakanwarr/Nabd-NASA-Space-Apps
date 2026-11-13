@@ -84,10 +84,10 @@ export default function HomeScene({ avatars, city }) {
       </svg>
 
       {/* You, from space: a round window into the dark, next to the sofa. */}
-      <div className={s.porthole} style={{ left: pctX(256), top: pctY(104), width: pctX(86) }}>
+      <div className={s.porthole} style={{ left: pctX(256), top: pctY(100), width: pctX(86), height: pctY(86) }}>
         <AvatarFigure person={avatars.you} crew label={describe(avatars.you, you)} className={s.youFigure} suitClass={s.suitEdge} />
       </div>
-      <figcaption className={s.youLabel} style={{ left: pctX(239), top: pctY(198), width: pctX(120) }}>
+      <figcaption className={s.youLabel} style={{ left: pctX(239), top: pctY(192), width: pctX(120) }}>
         You, from space
       </figcaption>
     </figure>

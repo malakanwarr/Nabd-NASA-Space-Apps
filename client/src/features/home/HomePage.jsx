@@ -104,12 +104,12 @@ export default function HomePage() {
     );
   }
 
-  const { today, mission, bodySystems, baseline, hugs, profile, reaction } = state.data;
+  const { today, mission, bodySystems, baseline, profile, reaction } = state.data;
   const garden = reaction.crewGreenhouse.myGarden;
   const firstName = (session?.name || profile.preferredName || '').split(' ')[0];
   const tone = toneFromLabel(today.readiness.label);
   const attention = buildAttentionRows({ systems: bodySystems.systems, today, baseline });
-  const forYou = buildForYouRows({ garden, hugs, profile });
+  const forYou = buildForYouRows({ garden });
 
   return (
     <main className={s.page}>

@@ -6,20 +6,10 @@ export const FROM_HOME_FALLBACK = {
   delayMinutes: 18,
   messages: [
     {
-      id: 'mom-voice',
-      kind: 'voice',
-      title: 'Voice message from Mom',
-      when: '2 days ago',
-      mediaUrl: '/demo/empty-message.mp4',
-      demoPlaceholder: true,
-    },
-    {
       id: 'laila-rocket',
       kind: 'photo',
       title: 'Laila drew you a rocket',
-      when: 'Photo · yesterday',
-      mediaUrl: '/demo/empty-photo.png',
-      alt: 'Blank demo photo placeholder',
+      when: 'Drawing · yesterday',
     },
   ],
 };

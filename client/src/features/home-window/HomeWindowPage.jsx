@@ -13,6 +13,7 @@ import { loadWithSavedCopy } from '../mood-face/savedData.js';
 import { FROM_HOME_FALLBACK } from './fromHomeSample.js';
 import { ImageIcon, MicIcon } from './Icons.jsx';
 import HomeScene from './HomeScene.jsx';
+import RocketDrawing from './RocketDrawing.jsx';
 import { sendVoiceMessage } from './voiceMessageApi.js';
 import { FAMILY_IDS, personMeta, useAvatars } from './useAvatars.js';
 import AvatarFigure from '../avatar/AvatarFigure.jsx';
@@ -20,12 +21,6 @@ import { describe } from '../avatar/avatarOptions.js';
 import s from './styles.module.css';
 
 const MAX_SECONDS = 60;
-
-// "19:40" -> "7:40 pm"
-function twelveHour(time) {
-  const [h, m] = time.split(':').map(Number);
-  return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h >= 12 ? 'pm' : 'am'}`;
-}
 
 function joinNames(names) {
   if (names.length <= 1) return names[0] ?? '';
@@ -279,22 +274,23 @@ export default function HomeWindowPage() {
   const { home, family, delayMinutes } = data;
   const delayLine = `It reaches ${home.city} in about ${delayMinutes} minutes.`;
 
+  const headerRight = (
+    <span className={s.clock}>
+      <span className={s.time}>{home.localTime}</span> · {home.city} · {home.period}
+    </span>
+  );
+
   const top = (
     <>
       {data.saved && <SavedNote />}
-
-      <div className={s.clock}>
-        <span className={s.time}>{home.localTime}</span>
-        <span className={s.place}>{home.city} · {home.period}</span>
-      </div>
-
       <HomeScene avatars={avatars} city={home.city} />
     </>
   );
 
-  const bottom = (
-    <>
+  // Only messages with something to show: the demo voice message has no audio, so it is left out.
+  const messages = home.messages.filter((m) => !m.demoPlaceholder);
 
+  const afterActions = (
       <div className={s.record}>
         {phase === 'sent' && (
           <p className={s.sent} role="status">
@@ -368,12 +364,15 @@ export default function HomeWindowPage() {
         )}
         {phase !== 'sent' && <p className={s.note}>{delayLine}</p>}
       </div>
+  );
 
+  const bottom = (
+    <>
       <h2 className={s.section}>From home</h2>
-      {home.messages.length === 0 ? (
+      {messages.length === 0 ? (
         <p className={s.empty}>No messages yet. Record one for your family.</p>
       ) : (
-        home.messages.map((m) => (
+        messages.map((m) => (
           <div key={m.id}>
             <ListRow
               icon={<span className={s.kind}>{m.kind === 'voice' ? <MicIcon /> : <ImageIcon />}</span>}
@@ -381,26 +380,24 @@ export default function HomeWindowPage() {
               subtitle={m.when}
             />
             {m.kind === 'voice' && m.mediaUrl && (
-              m.demoPlaceholder
-                ? <p className={s.emptyMedia}>No audio attached in this demo message.</p>
-                : (
-                  <audio className={s.historyAudio} controls preload="none" src={m.mediaUrl}>
-                    Your browser cannot play this audio.
-                  </audio>
-                )
+              <audio className={s.historyAudio} controls preload="none" src={m.mediaUrl}>
+                Your browser cannot play this audio.
+              </audio>
             )}
-            {m.kind === 'photo' && m.mediaUrl && (
-              <img className={s.historyPhoto} src={m.mediaUrl} alt={m.alt || m.title} />
+            {m.id === 'laila-rocket' ? (
+              <div className={s.paper}>
+                <RocketDrawing label="A child's crayon drawing of a rocket with a flame and stars, by Laila" />
+              </div>
+            ) : (
+              m.kind === 'photo' && m.mediaUrl && (
+                <img className={s.historyPhoto} src={m.mediaUrl} alt={m.alt || m.title} />
+              )
             )}
           </div>
         ))
       )}
 
 
-      <section className={s.homeCard} aria-label="Time at home">
-        <h2>It's {twelveHour(home.localTime)} at home</h2>
-        <p>Night has fallen over {home.city}. Your family is probably having dinner.</p>
-      </section>
 
       <ListRow
         to="/family/avatar"
@@ -426,5 +423,5 @@ export default function HomeWindowPage() {
     </>
   );
 
-  return <FamilyPage top={top} bottom={bottom} />;
+  return <FamilyPage top={top} bottom={bottom} headerRight={headerRight} afterActions={afterActions} />;
 }
