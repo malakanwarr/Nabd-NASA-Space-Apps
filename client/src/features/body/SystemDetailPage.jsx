@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import StatusLabel from '../../shared/StatusLabel.jsx';
+import Button from '../../shared/Button.jsx';
 import { getSampleData } from '../../shared/sampleData.js';
 import { HAZARDS, SYSTEM_INFO } from './systemInfo.js';
 import s from './styles.module.css';
@@ -214,6 +215,8 @@ export default function SystemDetailPage() {
           </div>
         </div>
       </header>
+
+      {id === 'bones' && <Button to="/body/muscles">Check your muscles</Button>}
 
       <section className={s.textSection} aria-label="What it does">
         <h2 className={s.label}>What it does</h2>
