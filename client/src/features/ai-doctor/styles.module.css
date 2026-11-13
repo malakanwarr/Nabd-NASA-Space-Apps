@@ -1,1 +1,511 @@
-/* Styles for ai-doctor (owner: Hana Haytham). Use only the variables from shared/theme.css. */
+/* Styles for ai-doctor (owner: Hana Haytham). Use only the variables from shared/theme.css.
+   Layout follows Doctor.dc.html in the design canvas. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-top: var(--space-5);
+}
+
+/* Room so the fixed chips + input bar never cover the last message. */
+.withComposer {
+  padding-bottom: calc(var(--space-6) * 4);
+}
+
+/* ---------- Header ---------- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.headText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-28);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.sub {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: calc(var(--space-1) + var(--space-1) / 2);
+  font-size: var(--fs-14);
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.summaryText {
+  font-size: var(--fs-14);
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.liveDot {
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--stable);
+  animation: breathe 2.4s ease-in-out infinite;
+}
+
+/* Outlined red: calling the medical officer is the emergency action. */
+.callBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--space-1) + var(--space-1) / 2);
+  flex-shrink: 0;
+  min-height: calc(var(--space-6) + var(--space-3)); /* 44 */
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--act);
+  background: transparent;
+  color: var(--act);
+  font: inherit;
+  font-size: var(--fs-14);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.callBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.icon16 {
+  width: var(--space-4);
+  height: var(--space-4);
+}
+
+.icon20 {
+  width: calc(var(--space-4) + var(--space-1));
+  height: calc(var(--space-4) + var(--space-1));
+}
+
+.paged {
+  margin: 0;
+  font-size: var(--fs-14);
+  color: var(--muted);
+}
+
+.paged strong {
+  color: var(--text);
+}
+
+/* ---------- Emergency banner ---------- */
+.banner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--act);
+  background: var(--surface);
+}
+
+/* ---------- Conversation ---------- */
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.emptyTitle {
+  margin: 0;
+  font-size: var(--fs-20);
+  font-weight: 700;
+}
+
+.muted {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-14);
+  line-height: 1.45;
+}
+
+.small {
+  font-size: var(--fs-12);
+  color: var(--muted);
+}
+
+.userMsg {
+  margin: 0;
+  align-self: flex-end;
+  max-width: 80%;
+  padding: var(--space-3);
+  border-radius: var(--radius-md) var(--radius-md) var(--space-1) var(--radius-md);
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+  font-size: var(--fs-16);
+  line-height: 1.35;
+}
+
+.doctorMsg {
+  align-self: flex-start;
+  max-width: 92%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md) var(--radius-md) var(--radius-md) var(--space-1);
+  background: var(--surface);
+  font-size: var(--fs-16);
+  line-height: 1.35;
+}
+
+.para {
+  margin: 0;
+}
+
+.steps {
+  margin: 0;
+  padding-left: calc(var(--space-4) + var(--space-1));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.danger {
+  margin: 0;
+  display: flex;
+  gap: var(--space-2);
+  color: var(--act);
+  font-weight: 600;
+}
+
+.warnIcon {
+  flex-shrink: 0;
+  width: calc(var(--space-4) + var(--space-1) / 2);
+  height: calc(var(--space-4) + var(--space-1) / 2);
+  margin-top: calc(var(--space-1) / 2);
+}
+
+.note {
+  margin: 0;
+  color: var(--watch);
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+
+
+/* NASA sources under a doctor reply: a divider, then one link per page, each 44 px tall to tap. */
+.sources {
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--line);
+}
+
+.sourceList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sourceLink {
+  display: flex;
+  align-items: center;
+  min-height: calc(var(--space-6) + var(--space-3)); /* 44 */
+  color: var(--primary);
+  font-size: var(--fs-14);
+  font-weight: 600;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.sourceLink:hover,
+.sourceLink:focus-visible {
+  text-decoration: underline;
+}
+
+
+
+
+.srOnly {
+  position: absolute;
+  width: var(--space-1);
+  height: var(--space-1);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.thinking {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.dots {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+
+.dots span {
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--muted);
+  animation: breathe 1.6s ease-in-out infinite;
+}
+
+.dots span:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.dots span:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes breathe {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.sendError {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.errorText {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.secondaryBtn {
+  min-height: calc(var(--space-6) + var(--space-4)); /* 48 */
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ---------- Summary to Earth ---------- */
+.earth {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.linkBtn {
+  align-self: flex-start;
+  min-height: calc(var(--space-6) + var(--space-3)); /* 44 */
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-size: var(--fs-14);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.track {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.shipDot {
+  flex-shrink: 0;
+  width: calc(var(--space-2) + var(--space-1) / 2);
+  height: calc(var(--space-2) + var(--space-1) / 2);
+  border-radius: var(--radius-full);
+  background: var(--text);
+}
+
+.line {
+  position: relative;
+  flex-grow: 1;
+  height: calc(var(--space-2) + var(--space-1) / 2);
+}
+
+.lineDone,
+.lineTodo {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.lineDone {
+  left: 0;
+  height: calc(var(--space-1) / 2);
+  border-radius: var(--radius-full);
+  background: var(--primary);
+}
+
+.lineTodo {
+  right: 0;
+  height: calc(var(--space-1) / 2);
+  background-image: repeating-linear-gradient(to right, var(--muted) 0 calc(var(--space-1) / 2), transparent calc(var(--space-1) / 2) var(--space-2));
+  opacity: 0.6;
+  animation: march 1s linear infinite;
+}
+
+@keyframes march {
+  to {
+    background-position-x: calc(var(--space-4) * -1);
+  }
+}
+
+.pulse {
+  position: absolute;
+  top: 50%;
+  width: var(--space-2);
+  height: var(--space-2);
+  margin-left: calc(var(--space-1) * -1);
+  transform: translateY(-50%);
+  border-radius: var(--radius-full);
+  background: var(--primary);
+}
+
+.ping {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  animation: ping 2s ease-out infinite;
+}
+
+@keyframes ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+.earthImg {
+  flex-shrink: 0;
+  width: var(--space-5);
+  height: var(--space-5);
+}
+
+/* ---------- Fixed chips + input bar above the tab bar ---------- */
+.composer {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--space-6) * 3 - var(--space-1) - var(--space-1) / 4); /* 91: sits on the tab bar */
+  transform: translateX(-50%);
+  z-index: 5;
+  width: 100%;
+  max-width: calc(var(--space-6) * 15); /* 480, same as .phone */
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: var(--bg);
+}
+
+.chips {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chips > * {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.input {
+  flex-grow: 1;
+  min-width: 0;
+  min-height: calc(var(--space-6) + var(--space-4)); /* 48 */
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-16); /* 16 so phones don't zoom in */
+}
+
+.input::placeholder {
+  color: var(--muted);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.iconBtn,
+.sendBtn {
+  flex-shrink: 0;
+  width: calc(var(--space-6) + var(--space-4)); /* 48 */
+  height: calc(var(--space-6) + var(--space-4));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.iconBtn {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+}
+
+.listening {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.sendBtn {
+  border: 0;
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.sendBtn:disabled,
+.iconBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
