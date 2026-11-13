@@ -205,3 +205,25 @@
   justify-content: center;
   text-align: center;
 }
+
+/* A gentle note about the plant that needs care, and the crew tree when the crew is low. */
+.careNote { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); margin: var(--space-4) 0; padding: var(--space-3) var(--space-4); border-left: var(--space-1) solid var(--watch); border-radius: var(--radius-sm); background: var(--surface); font-size: var(--fs-14); }
+.careNote p { margin: 0; }
+.crewWilting .greenhouseIcon { transform: rotate(18deg); opacity: 0.6; }
+.greenhouseCopy .crewNeedsCare { color: var(--watch); font-size: var(--fs-14); }
+.greenhouseCopy .crewGrowing { color: var(--stable); font-size: var(--fs-14); }
+.crewWilting .greenhouseIcon { transform-origin: 50% 100%; }
+
+/* A plant that needs care: grey and lifeless, with yellow dead leaves that fall and lie on the soil. */
+.dying .stem,
+.dying .trunk { stroke: var(--muted); }
+.dying .canopy,
+.dying .flower,
+.dying .leafPrimary { fill: var(--muted); }
+.dying .flowerCenter { fill: var(--bg); }
+.groundLeaf { fill: var(--watch); opacity: 0.85; }
+.fallingLeaf { fill: var(--watch); transform-box: fill-box; animation: leafFall 7s ease-in infinite; }
+@keyframes leafFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(1000%) rotate(200deg); opacity: 0; }
+}
