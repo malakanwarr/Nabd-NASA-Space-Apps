@@ -110,7 +110,10 @@ export default function RecordPage() {
             <p className={s.words}>“{SENTENCE}”</p>
           </section>
 
-          <section className={s.listen} aria-label="Microphone">
+          <section
+            className={`${s.listen} ${status === 'done' ? s.listenDone : ''}`}
+            aria-label="Microphone"
+          >
             {status === 'idle' && (
               <p className={s.muted}>Tap the button, then read the sentence out loud.</p>
             )}
@@ -136,13 +139,9 @@ export default function RecordPage() {
             )}
 
             {status === 'done' && (
-              <div className={s.doneBlock}>
-                <p className={s.doneWord}>Voice check done</p>
-                <p className={s.numbers}>
-                  pitch range {metrics.pitchRangeHz} Hz · loudness {metrics.loudness} · pauses{' '}
-                  {Math.round(metrics.pauseRatio * 100)}% · pace {metrics.paceSegmentsPerSec}/s
-                </p>
-              </div>
+              <p className={s.doneWord} role="status">
+                Voice check done
+              </p>
             )}
 
             {(status === 'error' || status === 'blocked') && (
