@@ -1,13 +1,14 @@
 // Today's workout card on the muscle twin page (owner: Layal). Shows the plan from todaysWorkout.js:
-// why chips (focus, energy, cycle), the exercises with sets and minutes, and "Start with your twin"
-// (the workout mode comes next; for now it says "Coming soon").
-import { useState } from 'react';
+// why chips (focus, energy, cycle), the exercises with sets and minutes, and "Start with your twin",
+// which opens workout mode (/body/muscles/workout; ?demo=1 is passed along for filming).
+import { useLocation } from 'react-router-dom';
 import Button from '../../shared/Button.jsx';
 import ListRow from '../../shared/ListRow.jsx';
 import s from './styles.module.css';
 
 export default function TodaysWorkout({ status, workout, cycleError, onRetry }) {
-  const [soon, setSoon] = useState(false);
+  const { search } = useLocation();
+  const demo = new URLSearchParams(search).get('demo') === '1';
 
   return (
     <section className={s.workout} aria-labelledby="todays-workout-title">
@@ -58,13 +59,8 @@ export default function TodaysWorkout({ status, workout, cycleError, onRetry }) 
           {cycleError && <p className={s.note}>Cycle data unavailable, no cycle change today.</p>}
 
           <div className={s.single}>
-            <Button onClick={() => setSoon(true)}>Start with your twin</Button>
+            <Button to={`/body/muscles/workout${demo ? '?demo=1' : ''}`}>Start with your twin</Button>
           </div>
-          {soon && (
-            <p className={s.note} role="status">
-              Coming soon
-            </p>
-          )}
         </>
       )}
     </section>

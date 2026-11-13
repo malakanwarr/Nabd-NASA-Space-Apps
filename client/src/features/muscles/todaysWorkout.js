@@ -31,6 +31,16 @@ const MINUTES_PER_SET = 2; // including rest
 const INTERVAL_MINUTES = { cevisIntervals: 30, treadmillIntervals: 20 }; // with warm-up
 const STEADY_MINUTES = 30;
 const STEADY_NAMES = { cevisIntervals: 'CEVIS cycle, steady', treadmillIntervals: 'T2 treadmill with harness, steady' };
+// Easy recovery between intervals. PROTOTYPE CHOICE: our sources do not give NASA SPRINT's recovery times,
+// so these are our own: 4 × 4 min -> 3 min easy pedaling between; 8 × 30 s -> 60 s easy between.
+export const INTERVAL_REST_SECONDS = { cevisIntervals: 180, treadmillIntervals: 60 };
+
+// "4 × 4 min" -> { sets: 4, seconds: 240 }, "8 × 30 s" -> { sets: 8, seconds: 30 }
+function parseIntervals(text) {
+  const m = String(text).match(/(\d+)\s*×\s*(\d+)\s*(min|s)/);
+  if (!m) return null;
+  return { sets: Number(m[1]), seconds: Number(m[2]) * (m[3] === 'min' ? 60 : 1) };
+}
 
 // The newest check-in -> { level: 'rested' | 'tired' | 'veryTired' | null, score, date, isToday }.
 export function energyLevel(checkins, today) {
@@ -113,7 +123,8 @@ function energyText(energy, cycleChanged) {
  * energy:   energyLevel() result, or null
  * cycle:    cycleAdjustment() result, or null
  * Returns { focus, level: 'full' | 'lighter' | 'light', exercises, totalMinutes, reasons }.
- * exercises: [{ key, exerciseId (null for mobility), name, dose, detail, minutes }]
+ * exercises: [{ key, exerciseId (null for mobility), name, dose, detail, minutes, plan }]
+ *   plan: { type: 'reps', sets, reps } | { type: 'intervals', sets, seconds, restSeconds } | { type: 'timed', seconds }
  * reasons:   [{ kind: 'focus' | 'energy' | 'cycle', text }], at most 3
  */
 export function todaysWorkout({ strength, energy, cycle }) {
@@ -125,8 +136,24 @@ export function todaysWorkout({ strength, energy, cycle }) {
   let exercises;
   if (level === 'light') {
     exercises = [
-      { key: 'mobility', exerciseId: null, name: 'Mobility and stretching', dose: '10 min', detail: 'gentle, at your own pace', minutes: 10 },
-      { key: 'cevisEasy', exerciseId: 'cevisIntervals', name: 'CEVIS cycle, easy', dose: '20 min', detail: 'easy, steady pace', minutes: 20 },
+      {
+        key: 'mobility',
+        exerciseId: null,
+        name: 'Mobility and stretching',
+        dose: '10 min',
+        detail: 'gentle, at your own pace',
+        minutes: 10,
+        plan: { type: 'timed', seconds: 600 },
+      },
+      {
+        key: 'cevisEasy',
+        exerciseId: 'cevisIntervals',
+        name: 'CEVIS cycle, easy',
+        dose: '20 min',
+        detail: 'easy, steady pace',
+        minutes: 20,
+        plan: { type: 'timed', seconds: 1200 },
+      },
     ];
   } else {
     const sets = level === 'full' ? 4 : 3;
@@ -137,14 +164,30 @@ export function todaysWorkout({ strength, energy, cycle }) {
       dose: `${sets} × ${repsOf(e.sets)}`,
       detail: level === 'full' ? 'last set near max effort' : 'no max set',
       minutes: sets * MINUTES_PER_SET,
+      plan: { type: 'reps', sets, reps: Number(repsOf(e.sets)) || 8 },
     }));
     const c = pickCardio(focus);
-    if (c) {
-      exercises.push(
-        level === 'full'
-          ? { key: c.id, exerciseId: c.id, name: c.name, dose: c.sets, detail: 'intervals', minutes: INTERVAL_MINUTES[c.id] || STEADY_MINUTES }
-          : { key: c.id, exerciseId: c.id, name: STEADY_NAMES[c.id] || c.name, dose: `${STEADY_MINUTES} min`, detail: 'steady pace', minutes: STEADY_MINUTES },
-      );
+    const intervals = c && level === 'full' ? parseIntervals(c.sets) : null;
+    if (c && intervals) {
+      exercises.push({
+        key: c.id,
+        exerciseId: c.id,
+        name: c.name,
+        dose: c.sets,
+        detail: 'intervals',
+        minutes: INTERVAL_MINUTES[c.id] || STEADY_MINUTES,
+        plan: { type: 'intervals', ...intervals, restSeconds: INTERVAL_REST_SECONDS[c.id] || 60 },
+      });
+    } else if (c) {
+      exercises.push({
+        key: c.id,
+        exerciseId: c.id,
+        name: STEADY_NAMES[c.id] || c.name,
+        dose: `${STEADY_MINUTES} min`,
+        detail: 'steady pace',
+        minutes: STEADY_MINUTES,
+        plan: { type: 'timed', seconds: STEADY_MINUTES * 60 },
+      });
     }
   }
 

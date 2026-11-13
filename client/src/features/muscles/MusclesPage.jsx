@@ -11,18 +11,9 @@ import Button from '../../shared/Button.jsx';
 import Chip from '../../shared/Chip.jsx';
 import { useSession } from '../../shared/session.js';
 import MuscleFigure, { VB_H, VB_W, anchorOf, fillOf, groupsFor } from './MuscleFigure.jsx';
-import {
-  STATUS,
-  applyDrop,
-  completeWorkout,
-  exercisesFor,
-  freshState,
-  muscleById,
-  normalize,
-  statusOf,
-} from './muscleModel.js';
-import { normalize as normalizeAvatars } from '../avatar/avatarOptions.js';
-import { readLocal, todayIso, writeLocal } from './storage.js';
+import { STATUS, completeWorkout, exercisesFor, muscleById, statusOf } from './muscleModel.js';
+import { todayIso, writeLocal } from './storage.js';
+import { loadTwin, readGender, readYou, twinKey } from './twinState.js';
 import TodaysWorkout from './TodaysWorkout.jsx';
 import { focusMuscles, todaysWorkout } from './todaysWorkout.js';
 import useWorkoutInputs from './useWorkoutInputs.js';
@@ -40,25 +31,15 @@ function nameList(ids) {
   return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
 }
 
-function loadState(key) {
-  const today = todayIso();
-  const saved = normalize(readLocal(key, null), today);
-  return { model: applyDrop(saved || freshState(today), today), empty: !saved };
-}
-
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
-
-// Body shape from her avatar (Make your avatar): people.you.gender. Nothing saved: female (the avatar default).
-function readGender(crewId) {
-  return normalizeAvatars(readLocal(`nabd-avatars-${crewId}`, null)).you.gender === 'male' ? 'male' : 'female';
-}
 
 export default function MusclesPage() {
   const session = useSession();
-  const storageKey = `nabd-muscles-${session?.id}`;
+  const storageKey = twinKey(session?.id);
 
-  const [{ model, empty }, setLoaded] = useState(() => loadState(storageKey));
+  const [{ model, empty }, setLoaded] = useState(() => loadTwin(session?.id));
   const [gender] = useState(() => readGender(session?.id));
+  const [person] = useState(() => readYou(session?.id));
   const inputs = useWorkoutInputs(session?.id, gender);
   const workout =
     inputs.status === 'ready' ? todaysWorkout({ strength: model.strength, energy: inputs.energy, cycle: inputs.cycle }) : null;
@@ -195,7 +176,7 @@ export default function MusclesPage() {
         <p className={s.note}>Tap a muscle to see its strength and NASA exercises.</p>
 
         <div className={s.stage} ref={stageRef} style={place ? { minHeight: `${place.minHeight}px` } : undefined}>
-          <MuscleFigure view={view} gender={gender} focus={focus} strength={model.strength} selected={selected} onSelect={toggle} lineY={place?.lineY} />
+          <MuscleFigure view={view} gender={gender} person={person} focus={focus} strength={model.strength} selected={selected} onSelect={toggle} lineY={place?.lineY} />
 
           {muscle && (
             <section
