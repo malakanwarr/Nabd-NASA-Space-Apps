@@ -8,6 +8,20 @@
   padding-top: var(--space-5);
 }
 
+/* Title (and the emergency box) pinned to the top while the chat scrolls under it. */
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: calc(var(--space-5) * -1);
+  padding: var(--space-5) 0 var(--space-3);
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+
 /* Room so the fixed chips + input bar never cover the last message. */
 .withComposer {
   padding-bottom: calc(var(--space-6) * 4);
@@ -17,8 +31,83 @@
 .header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-3);
+}
+
+/* Round mark next to the title, same tint as the small doctor mark on each answer. */
+.titleMark {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--space-6) + var(--space-3)); /* 44 */
+  height: calc(var(--space-6) + var(--space-3));
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+  color: var(--primary);
+}
+
+.titleMark svg {
+  position: relative;
+  width: calc(var(--space-5) + var(--space-1)); /* 28 */
+  height: calc(var(--space-5) + var(--space-1));
+}
+
+/* The heartbeat line draws in, rests, then fades out: slow and soft. */
+.beat {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 0;
+  animation: beat 3.2s ease-in-out infinite;
+}
+
+@keyframes beat {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 1;
+  }
+  45% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  80% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+/* A soft ring breathes out from the mark, like the ping on the Earth line. */
+.titleRing {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--primary);
+  opacity: 0;
+  animation: ring 3.2s ease-out infinite;
+}
+
+@keyframes ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  60%,
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+/* With reduced motion the line simply stays drawn (the global rule already stops the animations). */
+@media (prefers-reduced-motion: reduce) {
+  .beat {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
 }
 
 .headText {
@@ -207,12 +296,97 @@
   font-weight: 600;
 }
 
+/* "AI doctor · 14:02" on top of each answer. */
+.who {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-12);
+}
+
+.whoName {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.time {
+  margin-left: auto;
+  color: var(--muted);
+  font-family: var(--font-mono);
+}
+
+/* Round doctor mark: a plus on a tinted circle. */
+.mark {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-5);
+  height: var(--space-5);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+  color: var(--primary);
+}
+
+.mark svg {
+  width: var(--space-4);
+  height: var(--space-4);
+}
+
+/* Citation badges: [1] in the text and in the source list. */
+.cites {
+  display: inline-flex;
+  gap: calc(var(--space-1) / 2);
+  margin-left: calc(var(--space-1) / 2);
+  vertical-align: text-top;
+}
+
+.cite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: calc(var(--space-4) + var(--space-1) / 2);
+  height: calc(var(--space-4) + var(--space-1) / 2);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+  color: var(--primary);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  font-weight: 500;
+  line-height: 1;
+}
+
 /* NASA sources under a doctor reply: a divider, then one link per page, each 44 px tall to tap. */
 .sources {
   display: flex;
   flex-direction: column;
   padding-top: var(--space-2);
   border-top: 1px solid var(--line);
+}
+
+.sourcesLabel {
+  margin: 0;
+  font-size: var(--fs-12);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.sourceTitle {
+  flex: 1;
+  min-width: 0;
+}
+
+.extIcon {
+  flex-shrink: 0;
+  width: var(--space-4);
+  height: var(--space-4);
+  opacity: 0.7;
 }
 
 .sourceList {
@@ -224,6 +398,7 @@
 .sourceLink {
   display: flex;
   align-items: center;
+  gap: var(--space-2);
   min-height: calc(var(--space-6) + var(--space-3)); /* 44 */
   color: var(--primary);
   font-size: var(--fs-14);
@@ -246,13 +421,147 @@
   white-space: nowrap;
 }
 
-.thinking {
+/* ---------- Chat history ---------- */
+/* Round clock button on the right of the header: quiet, so the blue send arrow stays the main action. */
+.historyBtn {
+  position: relative;
+  margin-left: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--space-6) + var(--space-3)); /* 44 */
+  height: calc(var(--space-6) + var(--space-3));
+  padding: 0;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.historyBtn .icon16 {
+  width: calc(var(--space-4) + var(--space-1));
+  height: calc(var(--space-4) + var(--space-1));
+}
+
+/* Count badge on the top-right of the clock button. */
+.historyBtn .count {
+  position: absolute;
+  top: calc(var(--space-1) * -1);
+  right: calc(var(--space-1) * -1);
+  border: calc(var(--space-1) / 2) solid var(--bg);
+}
+
+.historyBtn:focus-visible,
+.backBtn:focus-visible,
+.transit:focus-visible {
+  outline: calc(var(--space-1) / 2) solid var(--primary);
+  outline-offset: calc(var(--space-1) / 2);
+}
+
+.count {
+  min-width: calc(var(--space-4) + var(--space-1) / 2);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--raised);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  font-weight: 500;
+  text-align: center;
+}
+
+.historyBar {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  margin: 0;
-  color: var(--muted);
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: calc(var(--space-6) + var(--space-3)); /* 44 */
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
   font-size: var(--fs-14);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.historyTitle {
+  margin: 0;
+  font-size: var(--fs-20);
+  font-weight: 700;
+}
+
+/* "1 answer on its way to Dr. Nadia Fahmy · arrives 16:11" on the clean chat; opens History. */
+.transit {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: calc(var(--space-6) + var(--space-3)); /* 44 */
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--fs-14);
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.transitDot {
+  flex-shrink: 0;
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  animation: breathe 2.4s ease-in-out infinite;
+}
+
+/* "Earlier" / "Today": small-caps label between two thin lines. */
+.divider {
+  margin: var(--space-2) 0 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--fs-12);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--line);
+}
+
+/* What the doctor is doing while she waits. */
+.thinkText {
+  font-size: var(--fs-14);
+  color: var(--muted);
+}
+
+/* "Thinking" looks like a doctor bubble on its way. */
+.thinking {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md) var(--radius-md) var(--radius-md) var(--space-1);
+  background: var(--surface);
 }
 
 .dots {
@@ -439,6 +748,18 @@
   flex-direction: column;
   gap: var(--space-2);
   background: var(--bg);
+}
+
+/* Soft fade so messages slide under the bar instead of being cut off. */
+.composer::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: var(--space-5);
+  background: linear-gradient(to bottom, transparent, var(--bg));
+  pointer-events: none;
 }
 
 .chips {
