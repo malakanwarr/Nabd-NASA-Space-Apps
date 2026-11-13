@@ -1,1 +1,387 @@
-/* Styles for surgeon (owner: Hana Haytham). Use only the variables from shared/theme.css. */
+.dashboard {
+  display: grid;
+  grid-template-columns: minmax(14rem, 0.26fr) minmax(0, 1fr);
+  min-height: calc(100vh - var(--space-5) - var(--space-5));
+  border: thin solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.sidebar {
+  padding: var(--space-4);
+  border-right: thin solid var(--line);
+  background: var(--tabbar);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-2) var(--space-5);
+}
+
+.brandName {
+  font-size: var(--fs-20);
+  letter-spacing: 0.08em;
+}
+
+.brandRole,
+.brandNameSmall,
+.groupTitle,
+.vitalLabel,
+.noteTimes,
+.muted,
+.replyLabel,
+.delayLine,
+.crewSummary {
+  color: var(--muted);
+}
+
+.brandRole,
+.brandNameSmall,
+.crewSummary,
+.muted,
+.sidebarState,
+.sidebarError,
+.stateMessage,
+.errorState,
+.sampleNotice,
+.inlineError,
+.successMessage,
+.replyLabel,
+.delayLine {
+  font-size: var(--fs-14);
+}
+
+.crewGroup + .crewGroup {
+  margin-top: var(--space-4);
+}
+
+.groupTitle {
+  margin: 0;
+  padding: 0 var(--space-2) var(--space-2);
+  font-size: var(--fs-12);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.crewList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.crewItem {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-1);
+  width: 100%;
+  min-height: calc(var(--space-6) + var(--space-3));
+  padding: var(--space-2);
+  border: 0;
+  border-bottom: thin solid var(--line);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.crewItem:hover,
+.crewItemSelected {
+  border-radius: var(--radius-sm);
+  background: var(--raised);
+}
+
+.crewItem:focus-visible {
+  outline: thin solid var(--primary);
+  outline-offset: calc(-1 * var(--space-1));
+}
+
+.crewItem:disabled {
+  cursor: not-allowed;
+}
+
+.crewItemTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.crewName {
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+
+.crewStatus {
+  font-size: var(--fs-12);
+}
+
+.watch {
+  color: var(--watch);
+}
+
+.stable {
+  color: var(--stable);
+}
+
+.crewSummary {
+  overflow-wrap: anywhere;
+}
+
+.sidebarState,
+.sidebarError {
+  padding: 0 var(--space-2);
+}
+
+.sidebarError p {
+  margin: 0 0 var(--space-2);
+}
+
+.workspace {
+  min-width: 0;
+  padding: var(--space-5);
+}
+
+.missionBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+  color: var(--muted);
+  font-size: var(--fs-12);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.vitals {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: var(--space-4) 0 var(--space-5);
+  padding: var(--space-3) 0;
+  border-top: thin solid var(--line);
+  border-bottom: thin solid var(--line);
+}
+
+.vital {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: 0 var(--space-2);
+}
+
+.vital + .vital {
+  border-left: thin solid var(--line);
+}
+
+.vitalLabel {
+  font-size: var(--fs-12);
+}
+
+.vitalValue {
+  font-size: var(--fs-20);
+  overflow-wrap: anywhere;
+}
+
+.watchValue {
+  color: var(--watch);
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(15rem, 0.9fr);
+  gap: var(--space-5);
+}
+
+.notesColumn {
+  min-width: 0;
+}
+
+.detailSection + .detailSection {
+  margin-top: var(--space-4);
+}
+
+.sectionTitle {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-16);
+}
+
+.noteList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.note {
+  padding: var(--space-3) 0;
+  border-bottom: thin solid var(--line);
+}
+
+.note:first-child {
+  padding-top: 0;
+}
+
+.noteTimes {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: var(--fs-12);
+}
+
+.energyScore {
+  margin: var(--space-2) 0 0;
+  color: var(--muted);
+  font-size: var(--fs-12);
+}
+
+.noteText,
+.allergy,
+.cycleSummary {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-14);
+  line-height: 1.5;
+}
+
+.cycleSummary span {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--muted);
+  font-size: var(--fs-12);
+}
+
+.replySection {
+  min-width: 0;
+}
+
+.replyForm {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.replyLabel {
+  font-weight: 600;
+}
+
+.replyInput {
+  width: 100%;
+  min-height: calc(var(--space-6) * 4);
+  padding: var(--space-3);
+  border: thin solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-14);
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.replyInput:focus {
+  outline: thin solid var(--primary);
+  outline-offset: var(--space-1);
+}
+
+.delayLine {
+  align-self: stretch;
+  margin: 0 0 var(--space-1);
+  padding-top: var(--space-2);
+  border-top: thin dotted var(--line);
+}
+
+.stateMessage,
+.errorState,
+.sampleNotice,
+.inlineError,
+.successMessage {
+  margin: var(--space-4) 0;
+}
+
+.errorState,
+.sampleNotice,
+.inlineError,
+.successMessage {
+  padding: var(--space-3);
+  border: thin solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.errorState p {
+  margin: 0 0 var(--space-3);
+}
+
+.sampleNotice {
+  color: var(--watch);
+}
+
+.inlineError {
+  color: var(--act);
+}
+
+.successMessage {
+  color: var(--stable);
+}
+
+.muted {
+  line-height: 1.5;
+}
+
+@media (max-width: 48rem) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-right: 0;
+    border-bottom: thin solid var(--line);
+  }
+
+  .crewGroup {
+    display: inline-block;
+    width: min(100%, 22rem);
+    margin-right: var(--space-4);
+    vertical-align: top;
+  }
+
+  .crewGroup + .crewGroup {
+    margin-top: 0;
+  }
+
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 38rem) {
+  .workspace {
+    padding: var(--space-4);
+  }
+
+  .vitals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .vital {
+    padding: var(--space-2);
+  }
+
+  .vital + .vital {
+    border-left: 0;
+  }
+
+  .vital:nth-child(even) {
+    border-left: thin solid var(--line);
+  }
+
+  .vital:nth-child(n + 3) {
+    border-top: thin solid var(--line);
+  }
+}

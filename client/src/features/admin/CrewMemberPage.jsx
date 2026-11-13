@@ -8,28 +8,6 @@ import StatusLabel from '../../shared/StatusLabel.jsx';
 import AdminShell from './AdminShell.jsx';
 import styles from './styles.module.css';
 
-const SYSTEMS = [
-  ['bonesAndMuscles', 'Bones and muscles'],
-  ['mindAndSleep', 'Mind and sleep'],
-  ['kidneys', 'Kidneys'],
-  ['heart', 'Heart'],
-  ['eyes', 'Eyes'],
-  ['immuneAndSkin', 'Immune and skin'],
-  ['radiation', 'Radiation'],
-  ['cycle', 'Cycle and reproductive'],
-];
-
-function normalizeSystems(systems) {
-  if (Array.isArray(systems)) {
-    return Object.fromEntries(systems.map((system) => [system.id || system.name, system.status]));
-  }
-  return systems && typeof systems === 'object' ? systems : {};
-}
-
-function alertText(alert) {
-  return typeof alert === 'string' ? alert : alert?.message || 'Alert details unavailable';
-}
-
 function formatReadiness(value) {
   return value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value)) ? value : '—';
 }
@@ -42,12 +20,13 @@ export default function CrewMemberPage() {
 
   useEffect(() => {
     let active = true;
-    apiFetch(`/api/crew/${encodeURIComponent(id)}`)
+    apiFetch('/api/crew')
       .then((response) => {
-        const member = response?.crew || response;
-        if (!member || typeof member !== 'object' || Array.isArray(member)) {
-          throw new Error('Crew member details could not be read. Please try again.');
+        if (!Array.isArray(response?.crew)) {
+          throw new Error('The crew list could not be read. Please try again.');
         }
+        const member = response.crew.find((crewMember) => String(crewMember.id) === id);
+        if (!member) throw new Error('Crew member not found.');
         if (active) setRequest({ key: requestKey, status: 'success', member, error: '' });
       })
       .catch((requestError) => {
@@ -60,10 +39,7 @@ export default function CrewMemberPage() {
   const status = isCurrentRequest ? request.status : 'loading';
   const member = isCurrentRequest ? request.member : null;
   const error = isCurrentRequest ? request.error : '';
-  const systems = normalizeSystems(member?.systems);
-  const readinessHistory = Array.isArray(member?.readinessHistory) ? member.readinessHistory : [];
-  const checkIns = Array.isArray(member?.checkIns) ? member.checkIns : Array.isArray(member?.checkins) ? member.checkins : [];
-  const alerts = Array.isArray(member?.alerts) ? member.alerts : member?.alerts ? [member.alerts] : [];
+  const alerts = Array.isArray(member?.alerts) ? member.alerts : [];
 
   return (
     <AdminShell>
@@ -95,66 +71,21 @@ export default function CrewMemberPage() {
             </section>
 
             <section className={styles.detailSection}>
-              <h2 className={styles.sectionTitle}>Body systems</h2>
-              <ul className={styles.systemList}>
-              {SYSTEMS.map(([key, label]) => {
-                if (key === 'cycle') return <li key={key}><ListRow title={label} right={<span className={styles.privateValue}>Private</span>} /></li>;
-                const value = systems[key] ?? systems[label] ?? 'No update';
-                const right = ['stable', 'watch', 'act'].includes(String(value).toLowerCase())
-                  ? <StatusLabel status={String(value).toLowerCase()} />
-                  : <span className={styles.muted}>{value}</span>;
-                return <li key={key}><ListRow title={label} right={right} /></li>;
-              })}
-              </ul>
-            </section>
-
-            <section className={styles.detailSection}>
-              <h2 className={styles.sectionTitle}>Readiness, last 7 days</h2>
-              {readinessHistory.length > 0 ? (
-                <ol className={styles.readinessHistory}>
-                  {readinessHistory.slice(-7).map((entry, index) => {
-                    const value = Math.max(0, Math.min(100, Number(entry.value ?? entry.readiness) || 0));
-                    return (
-                      <li key={entry.date || index} className={styles.historyItem}>
-                        <span className={styles.historyDate}>{entry.label || entry.date || `Day ${index + 1}`}</span>
-                        <span className={styles.historyTrack}>
-                          <span className={styles.historyBar} style={{ '--readiness': `${value}%` }} />
-                        </span>
-                        <span className={styles.historyValue}>{value}</span>
-                      </li>
-                    );
-                  })}
-                </ol>
-              ) : <p className={styles.muted}>No readiness history available.</p>}
-            </section>
-
-            <section className={styles.detailSection}>
-              <h2 className={styles.sectionTitle}>Check-ins this week</h2>
-              <p className={styles.checkinSummary}>
-                {member.checkInSummary || member.checkinSummary || `${checkIns.length} ${checkIns.length === 1 ? 'check-in' : 'check-ins'} recorded`}
-              </p>
-              {checkIns.map((checkIn, index) => (
-                <ListRow
-                  key={checkIn.id || checkIn.date || index}
-                  title={checkIn.date || checkIn.day || `Check-in ${index + 1}`}
-                  right={<span className={styles.muted}>{checkIn.status || checkIn.label || 'Complete'}</span>}
-                />
-              ))}
+              <h2 className={styles.sectionTitle}>Last check-in</h2>
+              <ListRow title={member.lastCheckIn || 'No check-in recorded'} />
             </section>
 
             <section className={styles.detailSection} id="alerts">
               <h2 className={styles.sectionTitle}>Alerts</h2>
-              {alerts.length > 0 ? alerts.map((alert, index) => (
-                <ListRow
-                  key={alert.id || index}
-                  title={alertText(alert)}
-                  right={<span className={styles.muted}>{alert?.day || alert?.date || ''}</span>}
-                />
-              )) : <p className={styles.muted}>No active alerts.</p>}
+              {alerts.length > 0
+                ? alerts.map((alert, index) => (
+                  <ListRow key={`${alert}-${index}`} title={alert} />
+                ))
+                : <p className={styles.muted}>No active alerts.</p>}
             </section>
 
             <p className={styles.privacyNote}>
-              Hidden from Mission Control: cycle data, face and voice details, and AI doctor conversations. The flight surgeon can see medical details.
+              Mission Control sees status, check-ins, readiness and alerts only. Medical details remain private to the flight surgeon.
             </p>
           </>
         )}
