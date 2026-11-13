@@ -1,1 +1,618 @@
-/* Styles for admin (owner: Salma). Use only the variables from shared/theme.css. */
+.appShell {
+  display: grid;
+  grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr);
+  gap: var(--space-6);
+  max-width: 100rem;
+  margin: 0 auto;
+}
+
+.rectangularControls :global(button),
+.rectangularControls :global(a) {
+  border-radius: var(--radius-sm);
+}
+
+.sidebar {
+  position: sticky;
+  top: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  align-self: start;
+  min-height: calc(100vh - var(--space-5) - var(--space-5));
+  padding-right: var(--space-4);
+  border-right: thin solid var(--line);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) 0 var(--space-6);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.brandName {
+  margin: 0;
+  color: var(--primary);
+  font-size: var(--fs-20);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.brandLabel,
+.accountName {
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.navigation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.navLink:hover,
+.navLinkActive {
+  background: var(--raised);
+  color: var(--text);
+}
+
+.account {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  margin-top: auto;
+  padding-top: var(--space-5);
+  border-top: thin solid var(--line);
+}
+
+.accountName {
+  margin: 0;
+}
+
+.appContent {
+  min-width: 0;
+}
+
+.page {
+  max-width: 90rem;
+  margin: 0 auto;
+}
+
+.pageHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+
+.pageHeading .muted {
+  margin: 0;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.summary {
+  margin: var(--space-4) 0;
+  color: var(--text);
+  font-size: var(--fs-16);
+}
+
+.tableTools {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: var(--space-5) 0 var(--space-4);
+}
+
+.searchLabel,
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  color: var(--text);
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+
+.searchLabel {
+  min-width: min(100%, 20rem);
+}
+
+.searchLabel input,
+.field input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: thin solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-16);
+}
+
+.searchLabel input:focus,
+.field input:focus,
+.passwordField input:focus {
+  outline: thin solid var(--primary);
+  outline-offset: var(--space-1);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tableScroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.crewTable {
+  width: 100%;
+  min-width: 64rem;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.crewTable th,
+.crewTable td {
+  padding: var(--space-3);
+  border-bottom: thin solid var(--line);
+  vertical-align: middle;
+}
+
+.crewTable th {
+  color: var(--muted);
+  font-size: var(--fs-12);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.crewTable td {
+  font-size: var(--fs-14);
+}
+
+.memberName,
+.memberRole {
+  display: block;
+}
+
+.memberName {
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+
+.memberRole {
+  margin-top: var(--space-1);
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.alertCell {
+  max-width: 24rem;
+}
+
+.openLink,
+.crewLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.privacyNote {
+  max-width: 72rem;
+  margin: var(--space-5) 0;
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.stateMessage {
+  margin: var(--space-6) 0;
+  color: var(--muted);
+}
+
+.errorState,
+.successState {
+  max-width: 48rem;
+  margin: var(--space-5) 0;
+  padding: var(--space-4) 0;
+  border-top: thin solid var(--line);
+}
+
+.errorState {
+  color: var(--act);
+}
+
+.memberSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  margin: var(--space-3) 0;
+  padding: var(--space-4) 0;
+  border-bottom: thin solid var(--line);
+}
+
+.memberSummary .memberRole {
+  margin: 0 0 var(--space-2);
+}
+
+.readinessSummary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.readinessSummary strong {
+  color: var(--text);
+  font-size: var(--fs-28);
+}
+
+.detailSection {
+  max-width: 72rem;
+  margin: var(--space-5) 0;
+}
+
+.sectionTitle {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-20);
+}
+
+.systemList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.systemList li {
+  min-height: 56px;
+}
+
+.privateValue {
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.readinessHistory {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 42rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.historyItem {
+  display: grid;
+  grid-template-columns: minmax(5rem, 0.7fr) minmax(8rem, 3fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+}
+
+.historyDate,
+.historyValue {
+  font-size: var(--fs-14);
+}
+
+.historyDate {
+  color: var(--muted);
+}
+
+.historyTrack {
+  height: var(--space-2);
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--line);
+}
+
+.historyBar {
+  display: block;
+  width: var(--readiness);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+}
+
+.historyValue {
+  min-width: var(--space-6);
+  text-align: right;
+}
+
+.checkinSummary {
+  margin: 0;
+}
+
+.signInLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(22rem, 0.8fr);
+  align-items: center;
+  gap: var(--space-6);
+  max-width: 76rem;
+  min-height: calc(100vh - var(--space-6) - var(--space-6));
+  margin: 0 auto;
+}
+
+.signInIntro {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  max-width: 42rem;
+  min-height: 36rem;
+  padding: var(--space-6) 0;
+  overflow: hidden;
+}
+
+.signInIntro > *:not(.earthWrap) {
+  position: relative;
+  z-index: 1;
+}
+
+.earthWrap {
+  position: absolute;
+  right: -9rem;
+  bottom: -8rem;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.earthWrap > div {
+  animation-duration: 180s;
+}
+
+.signInIntro .brandName {
+  margin-bottom: var(--space-5);
+}
+
+.signInDescription {
+  max-width: 38rem;
+  color: var(--muted);
+  font-size: var(--fs-20);
+  line-height: 1.5;
+}
+
+.signInCard {
+  padding: var(--space-5);
+  border: thin solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: var(--fs-20);
+}
+
+.signInForm,
+.crewForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.passwordField {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.passwordField input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: thin solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-16);
+}
+
+.passwordToggle {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.prototypeNote,
+.formIntro {
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.prototypeNote {
+  margin: var(--space-4) 0;
+}
+
+.formIntro {
+  max-width: 48rem;
+  margin: 0 0 var(--space-5);
+}
+
+.crewForm {
+  max-width: 54rem;
+}
+
+.formSection {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: var(--space-4) 0;
+  border: 0;
+  border-bottom: thin solid var(--line);
+}
+
+.formSection legend {
+  grid-column: 1 / -1;
+  width: 100%;
+  padding: 0 0 var(--space-2);
+  font-size: var(--fs-20);
+  font-weight: 600;
+}
+
+.formSection .muted {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.formError {
+  margin: 0;
+  color: var(--act);
+  font-size: var(--fs-14);
+}
+
+.formActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.successState h2 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-20);
+}
+
+.pinPanel {
+  max-width: 32rem;
+  margin: var(--space-4) 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--raised);
+}
+
+.pinPanel span,
+.pinPanel strong {
+  display: block;
+}
+
+.pinPanel span {
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.pinPanel strong {
+  margin: var(--space-2) 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-28);
+}
+
+.pinPanel p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: var(--space-1);
+  height: var(--space-1);
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+@media (max-width: 58rem) {
+  .appShell {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+
+  .sidebar {
+    position: static;
+    min-height: auto;
+    padding: 0 0 var(--space-3);
+    border-right: 0;
+    border-bottom: thin solid var(--line);
+  }
+
+  .brand {
+    padding: 0 0 var(--space-3);
+  }
+
+  .navigation {
+    flex-direction: row;
+  }
+
+  .account {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--space-3);
+    padding-top: var(--space-2);
+  }
+}
+
+@media (max-width: 42rem) {
+  .pageHeading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .signInLayout {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    gap: var(--space-4);
+  }
+
+  .signInDescription {
+    font-size: var(--fs-16);
+  }
+
+  .signInIntro {
+    min-height: 28rem;
+  }
+
+  .earthWrap {
+    right: -14rem;
+    bottom: -12rem;
+  }
+
+  .formSection {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .formSection legend,
+  .formSection .muted {
+    grid-column: auto;
+  }
+
+  .memberSummary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
