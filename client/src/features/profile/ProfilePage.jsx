@@ -17,7 +17,8 @@ const THEMES = [
   { value: 'dark', label: 'Dark', hint: 'Dark everywhere. Easier on the eyes at night.' },
 ];
 
-// Period tracking mode, read by Layal's cycle screen: localStorage key nabd-cycle-mode-<crewId>, "cycle" or "suppression".
+// Period tracking mode, read by Layal's cycle screen: localStorage key nabd-cycle-mode-<crewId>.
+// The value is saved as JSON: JSON.stringify('cycle') or JSON.stringify('suppression'). Default: 'cycle'.
 const CYCLE_MODES = [
   { value: 'cycle', label: 'Cycle tracking', hint: 'Follows your cycle and your next period.' },
   { value: 'suppression', label: 'Period suppression', hint: 'Tracks your daily pill and how many are left.' },
@@ -25,7 +26,14 @@ const CYCLE_MODES = [
 
 function readCycleMode(crewId) {
   try {
-    const saved = localStorage.getItem(`nabd-cycle-mode-${crewId}`);
+    const raw = localStorage.getItem(`nabd-cycle-mode-${crewId}`);
+    if (raw === null) return 'cycle';
+    let saved = raw;
+    try {
+      saved = JSON.parse(raw); // normal case: "suppression" with quotes
+    } catch {
+      // an older plain value (suppression without quotes) still counts
+    }
     return saved === 'suppression' ? 'suppression' : 'cycle';
   } catch {
     return 'cycle';
@@ -66,7 +74,7 @@ export default function ProfilePage() {
 
   function chooseCycleMode(value) {
     try {
-      localStorage.setItem(`nabd-cycle-mode-${session?.id}`, value);
+      localStorage.setItem(`nabd-cycle-mode-${session?.id}`, JSON.stringify(value));
     } catch {
       // storage blocked: the choice still shows for this visit
     }
