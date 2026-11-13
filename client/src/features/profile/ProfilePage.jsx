@@ -5,6 +5,7 @@ import ScreenHeader from '../../shared/ScreenHeader.jsx';
 import ListRow from '../../shared/ListRow.jsx';
 import Chip from '../../shared/Chip.jsx';
 import Button from '../../shared/Button.jsx';
+import { apiFetch } from '../../shared/api.js';
 import { getSampleData } from '../../shared/sampleData.js';
 import { signOut, useSession } from '../../shared/session.js';
 import { getTheme, setTheme } from '../../shared/theme.js';
@@ -42,6 +43,23 @@ function readCycleMode(crewId) {
   }
 }
 
+// Research sharing, off by default. localStorage key nabd-research-sharing-<crewId>, saved as JSON true or false.
+// Prototype: this is only the choice. Nothing is sent anywhere yet.
+function readSharing(crewId) {
+  try {
+    return JSON.parse(localStorage.getItem(`nabd-research-sharing-${crewId}`)) === true;
+  } catch {
+    return false;
+  }
+}
+
+// Her own check-ins as a CSV: mission day, date, energy score, label, reaction time.
+// No name, no crew id, and no face or voice numbers (only the crew member sees those).
+function checkinsToCsv(list) {
+  const rows = list.map((c) => [c.missionDay, c.date, c.energyScore, c.label ?? '', c.reactionMs ?? ''].join(','));
+  return ['mission_day,date,energy_score,label,reaction_ms', ...rows].join(String.fromCharCode(10));
+}
+
 function Chevron() {
   return <span className={s.chevron} aria-hidden="true">›</span>;
 }
@@ -51,6 +69,8 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const [theme, setThemeChoice] = useState(getTheme());
   const [cycleMode, setCycleMode] = useState(() => readCycleMode(session?.id));
+  const [sharing, setSharing] = useState(() => readSharing(session?.id));
+  const [download, setDownload] = useState({ state: 'idle' }); // idle | working | done | empty | error
   const [data, setData] = useState({ state: 'loading' }); // loading | ready | error
 
   useEffect(() => {
@@ -87,6 +107,36 @@ export default function ProfilePage() {
       // storage blocked: the choice still shows for this visit
     }
     setCycleMode(value);
+  }
+
+  function toggleSharing() {
+    const next = !sharing;
+    try {
+      localStorage.setItem(`nabd-research-sharing-${session?.id}`, JSON.stringify(next));
+    } catch {
+      // storage blocked: the choice still shows for this visit
+    }
+    setSharing(next);
+  }
+
+  async function downloadCheckins() {
+    setDownload({ state: 'working' });
+    try {
+      const list = await apiFetch(`/api/mood?crewId=${encodeURIComponent(session?.id)}`);
+      if (!Array.isArray(list) || list.length === 0) {
+        setDownload({ state: 'empty' });
+        return;
+      }
+      const url = URL.createObjectURL(new Blob([checkinsToCsv(list)], { type: 'text/csv' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'nabd-check-ins.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+      setDownload({ state: 'done' });
+    } catch (err) {
+      setDownload({ state: 'error', message: err.message });
+    }
   }
 
   function leave() {
@@ -134,6 +184,34 @@ export default function ProfilePage() {
         ))}
       </div>
       <p className={s.hint}>{currentCycle.hint} Only you can see this.</p>
+
+      <h2 className={s.label}>Research</h2>
+      <ListRow
+        title="Share anonymised results with researchers"
+        subtitle="Off by default. Only your energy score, label and reaction time, never your name, face or voice."
+        right={
+          <button
+            type="button"
+            role="switch"
+            aria-checked={sharing}
+            aria-label="Share anonymised results with researchers"
+            className={s.switchHit}
+            onClick={toggleSharing}
+          >
+            <span className={`${s.track} ${sharing ? s.trackOn : ''}`}>
+              <span className={`${s.knob} ${sharing ? s.knobOn : ''}`} />
+            </span>
+          </button>
+        }
+      />
+      <div className={s.exportRow}>
+        <Button variant="secondary" onClick={downloadCheckins} disabled={download.state === 'working'}>
+          {download.state === 'working' ? 'Preparing…' : 'Download my check-ins (CSV)'}
+        </Button>
+        {download.state === 'done' && <p className={s.hint} role="status">Downloaded. The file has no name or face and voice numbers.</p>}
+        {download.state === 'empty' && <p className={s.hint} role="status">No check-ins to download yet.</p>}
+        {download.state === 'error' && <p className={s.problem} role="alert">{download.message}</p>}
+      </div>
 
       <h2 className={s.label}>Who sees what</h2>
       <ListRow title="Mission Control" right={<span className={s.right}>Status, check-ins, alerts</span>} />
