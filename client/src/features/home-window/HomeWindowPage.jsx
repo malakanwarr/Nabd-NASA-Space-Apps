@@ -1,8 +1,8 @@
-// Home window (Board 15, route /family/window, the only Home window page). The living room at home
-// at night with the family on the sofa and you from space, drawn from the saved avatars; a voice-message
-// recorder, messages from home, the time at home, and a link to the avatar maker.
+// Family + Home window, ONE page at /family. It shows the Home window scene first (the living room at home
+// at night, drawn from the saved avatars), then the hugs content of features/hugs/FamilyPage, then the
+// voice-message recorder, messages from home, the time at home and a link to the avatar maker.
 import { useEffect, useRef, useState } from 'react';
-import ScreenHeader from '../../shared/ScreenHeader.jsx';
+import FamilyPage from '../hugs/FamilyPage.jsx';
 import ListRow from '../../shared/ListRow.jsx';
 import Button from '../../shared/Button.jsx';
 import { getSampleData } from '../../shared/sampleData.js';
@@ -273,21 +273,14 @@ export default function HomeWindowPage() {
   }
 
   if (data.state === 'loading') {
-    return (
-      <main>
-        <ScreenHeader backTo="/family" backLabel="Family" eyebrow="Family" title="Home window" />
-        <p className={s.status} role="status">Looking out of the window…</p>
-      </main>
-    );
+    return <FamilyPage top={<p className={s.status} role="status">Looking out of the window…</p>} />;
   }
 
   const { home, family, delayMinutes } = data;
   const delayLine = `It reaches ${home.city} in about ${delayMinutes} minutes.`;
 
-  return (
-    <main>
-      <ScreenHeader backTo="/family" backLabel="Family" eyebrow="Family" title="Home window" />
-
+  const top = (
+    <>
       {data.saved && <SavedNote />}
 
       <div className={s.clock}>
@@ -296,6 +289,11 @@ export default function HomeWindowPage() {
       </div>
 
       <HomeScene avatars={avatars} city={home.city} />
+    </>
+  );
+
+  const bottom = (
+    <>
 
       <div className={s.record}>
         {phase === 'sent' && (
@@ -425,6 +423,8 @@ export default function HomeWindowPage() {
         subtitle={joinNames(family.length ? family : FAMILY_IDS.map((id) => personMeta(id).name))}
         right={<span className={s.chevron} aria-hidden="true">›</span>}
       />
-    </main>
+    </>
   );
+
+  return <FamilyPage top={top} bottom={bottom} />;
 }

@@ -1,7 +1,7 @@
 // Make your avatar, /family/avatar (owner: Layal). Stretch screen.
 // Sara edits only her own avatar ("you", in the flight suit). Omar, Laila and Mona are always saved with
 // their default looks so the Home window can still show the family. Saved on the phone only:
-// localStorage `nabd-avatars-<crewId>` (shape: avatarOptions.js toSaved), then on to /family/window.
+// localStorage `nabd-avatars-<crewId>` (shape: avatarOptions.js toSaved), then on to /family.
 // Nothing loads from the network, so there is no loading state; with nothing saved, the defaults show.
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -104,7 +104,7 @@ export default function AvatarPage() {
 
   // Same JSON shape as before: her avatar plus the family's default looks.
   function save() {
-    if (writeLocal(storageKey, toSaved({ ...normalize(null), you: person }))) navigate('/family/window');
+    if (writeLocal(storageKey, toSaved({ ...normalize(null), you: person }))) navigate('/family');
     else setError('Could not save on this phone. Your changes are still here.');
   }
 
@@ -113,7 +113,7 @@ export default function AvatarPage() {
 
   return (
     <main className={s.page}>
-      <ScreenHeader backTo="/family/window" backLabel="Home window" title="Make your avatar" />
+      <ScreenHeader backTo="/family" backLabel="Family" title="Make your avatar" />
 
       <div className={s.preview}>
         <svg className={s.stars} viewBox="0 0 358 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
