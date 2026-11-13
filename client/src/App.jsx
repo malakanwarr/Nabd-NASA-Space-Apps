@@ -1,10 +1,9 @@
-// All routes live here (Malak only), so nobody needs to edit this file later.
 import { useEffect, useState } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { useSession } from './shared/session.js';
 import { getSampleData } from './shared/sampleData.js';
 import TabBar from './shared/TabBar.jsx';
-
+import DesktopLoadingPage from './features/admin/DesktopLoadingPage.jsx';
 import Opening from './features/home/Opening.jsx';
 import HomePage from './features/home/HomePage.jsx';
 import CrewSignInPage from './features/auth/CrewSignInPage.jsx';
@@ -77,7 +76,13 @@ export default function App() {
     Promise.all([minimum, load]).then(() => setReady(true));
   }, []);
 
-  if (!ready) return <Opening />;
+  if (!ready) {
+  const isDesktop =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(min-width: 58rem)').matches;
+
+  return isDesktop ? <DesktopLoadingPage /> : <Opening />;
+}
 
   return (
     <Routes>
