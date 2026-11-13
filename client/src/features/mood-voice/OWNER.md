@@ -1,4 +1,5 @@
 # mood-voice
 
-Owner: Malak
-Role: Role 2
+Owner: Shared team
+Role: Final version
+Access: All project members may edit this area without ownership restrictions.

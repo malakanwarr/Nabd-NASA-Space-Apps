@@ -1,4 +1,5 @@
 # avatar
 
-Owner: Layal
-Role: Role 4 (stretch)
+Owner: Shared team
+Role: Final version
+Access: All project members may edit this area without ownership restrictions.

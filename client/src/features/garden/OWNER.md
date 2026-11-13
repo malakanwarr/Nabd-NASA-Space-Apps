@@ -1,4 +1,5 @@
 # garden
 
-Owner: Salma
-Role: Role 6 (stretch)
+Owner: Shared team
+Role: Final version
+Access: All project members may edit this area without ownership restrictions.

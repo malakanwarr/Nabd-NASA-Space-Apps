@@ -15,6 +15,26 @@
   gap: var(--space-2);
 }
 
+.family {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.avatarGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-2);
+}
+
+.avatarCard {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+}
+
 /* Board headings are 12 px; 14 px here for the readable-text rule. */
 .heading {
   margin: 0;
@@ -48,13 +68,13 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
-/* ---------- Preview: 260 high = 8 x 32 + 4 ---------- */
+/* ---------- Family previews ---------- */
 .preview {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: calc(var(--space-6) * 8 + var(--space-1));
+  height: calc(var(--space-6) * 5 + var(--space-1));
   border-radius: var(--radius-md);
   background: var(--surface);
   overflow: hidden;
@@ -69,10 +89,11 @@
   opacity: 0.6;
 }
 
-/* Figure 200 x 240: width 200 = 6 x 32 + 8 */
+/* Figure 200 x 240: width 128 = 4 x 32 */
 .figure {
   position: relative;
-  width: calc(var(--space-6) * 6 + var(--space-2));
+  width: calc(var(--space-6) * 4);
+  max-width: 100%;
   height: auto;
   animation: float 5s ease-in-out infinite;
 }
@@ -90,15 +111,8 @@
 }
 
 .caption {
-  position: absolute;
-  left: var(--space-3);
-  bottom: var(--space-3);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-  background: var(--bg);
-  color: var(--text);
-  font-size: var(--fs-14);
-  font-weight: 600;
+  display: flex;
+  justify-content: center;
 }
 
 /* ---------- Color dots ---------- */

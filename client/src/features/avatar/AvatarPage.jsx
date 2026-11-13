@@ -1,7 +1,6 @@
 // Make your avatar, /family/avatar (owner: Layal). Stretch screen.
-// Sara edits only her own avatar ("you", in the flight suit). Omar, Laila and Mona are always saved with
-// their default looks so the Home window can still show the family. Saved on the phone only:
-// localStorage `nabd-avatars-<crewId>` (shape: avatarOptions.js toSaved), then on to /family.
+// Sara can edit each family avatar. Omar, Laila and Mona start with their default looks. Saved on the phone only:
+// localStorage `nabd-avatars-<crewId>` (shape: avatarOptions.js toSaved), then on to /family/window.
 // Nothing loads from the network, so there is no loading state; with nothing saved, the defaults show.
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -87,22 +86,22 @@ export default function AvatarPage() {
   const navigate = useNavigate();
   const storageKey = `nabd-avatars-${session?.id}`;
 
-  // Only her own avatar is edited here.
-  const [person, setPerson] = useState(() => normalize(readLocal(storageKey, null)).you);
+  const [people, setPeople] = useState(() => normalize(readLocal(storageKey, null)));
+  const [selectedId, setSelectedId] = useState('you');
   const [error, setError] = useState('');
 
-  const meta = PEOPLE.find((m) => m.id === 'you');
+  const selectedMeta = PEOPLE.find((meta) => meta.id === selectedId) || PEOPLE[0];
+  const person = people[selectedMeta.id];
   const covering = coveringOf(person);
   const male = person.gender === 'male';
 
   function update(next) {
-    setPerson(next);
+    setPeople((current) => ({ ...current, [selectedMeta.id]: next }));
     setError('');
   }
 
   const setField = (field) => (value) => update({ ...person, [field]: value });
 
-  // Same JSON shape as before: her avatar plus the family's default looks.
   function save() {
     if (writeLocal(storageKey, toSaved({ ...normalize(null), you: person }))) navigate('/family');
     else setError('Could not save on this phone. Your changes are still here.');
@@ -113,24 +112,41 @@ export default function AvatarPage() {
 
   return (
     <main className={s.page}>
-      <ScreenHeader backTo="/family" backLabel="Family" title="Make your avatar" />
+      <ScreenHeader
+        backTo="/family/window"
+        backLabel="Home window"
+        title={selectedMeta.id === 'you' ? 'Make your avatar' : `Edit ${selectedMeta.name}'s avatar`}
+      />
 
-      <div className={s.preview}>
-        <svg className={s.stars} viewBox="0 0 358 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          {STARS.map((st) => (
-            <circle key={`${st.cx}-${st.cy}`} cx={st.cx} cy={st.cy} r={st.r} />
+      <section className={s.family} aria-label="Family avatars">
+        <h2 className={s.heading}>Your family</h2>
+        <div className={s.avatarGrid}>
+          {PEOPLE.map((meta) => (
+            <figure className={s.avatarCard} key={meta.id}>
+              <div className={s.preview}>
+                <svg className={s.stars} viewBox="0 0 358 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                  {STARS.map((st) => (
+                    <circle key={`${st.cx}-${st.cy}`} cx={st.cx} cy={st.cy} r={st.r} />
+                  ))}
+                </svg>
+                <AvatarFigure
+                  person={people[meta.id]}
+                  crew={meta.crew}
+                  child={meta.child}
+                  label={describe(people[meta.id], meta)}
+                  className={s.figure}
+                  suitClass={s.suitOutline}
+                />
+              </div>
+              <figcaption className={s.caption}>
+                <Chip selected={selectedId === meta.id} onClick={() => setSelectedId(meta.id)}>
+                  {meta.id === 'you' ? 'You' : meta.name}
+                </Chip>
+              </figcaption>
+            </figure>
           ))}
-        </svg>
-        <AvatarFigure
-          person={person}
-          crew={meta.crew}
-          child={meta.child}
-          label={describe(person, meta)}
-          className={s.figure}
-          suitClass={s.suitOutline}
-        />
-        <span className={s.caption}>You, in your flight suit</span>
-      </div>
+        </div>
+      </section>
 
       <ChipRow title="Gender" options={GENDERS} value={person.gender} onPick={(g) => update(setGender(person, g))} />
       <Swatches title="Skin tone" options={SKIN} value={person.skin} onPick={setField('skin')} noun="skin tone" />
@@ -161,11 +177,11 @@ export default function AvatarPage() {
         onPick={(id) => update({ ...person, glasses: id === 'yes' })}
       />
       <Swatches
-        title="Suit stripe color"
+        title={selectedMeta.crew ? 'Suit stripe color' : 'Shirt color'}
         options={CLOTHES}
         value={person.clothesColor}
         onPick={setField('clothesColor')}
-        noun="suit stripe"
+        noun={selectedMeta.crew ? 'suit stripe' : 'shirt'}
       />
 
       {error && (
