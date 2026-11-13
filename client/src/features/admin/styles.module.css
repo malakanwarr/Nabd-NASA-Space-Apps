@@ -166,7 +166,7 @@
 
 .crewTable {
   width: 100%;
-  min-width: 64rem;
+  min-width: 52rem;
   border-collapse: collapse;
   text-align: left;
 }
@@ -389,8 +389,12 @@
   margin-bottom: var(--space-5);
 }
 
+.signInIntro header,
 .signInDescription {
-  max-width: 38rem;
+  max-width: 22rem;
+}
+
+.signInDescription {
   color: var(--muted);
   font-size: var(--fs-20);
   line-height: 1.5;
