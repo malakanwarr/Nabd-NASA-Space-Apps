@@ -16,15 +16,17 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  margin-top: calc(var(--space-5) * -1);
-  padding: var(--space-5) 0 var(--space-3);
+  /* Reaches up behind the iPhone status bar (safe area) so its background covers it,
+     while the title itself stays below the clock and battery. */
+  margin-top: calc((var(--space-5) + env(safe-area-inset-top)) * -1);
+  padding: calc(var(--space-5) + env(safe-area-inset-top)) 0 var(--space-3);
   background: var(--bg);
   border-bottom: 1px solid var(--line);
 }
 
 /* Room so the fixed chips + input bar never cover the last message. */
 .withComposer {
-  padding-bottom: calc(var(--space-6) * 4);
+  padding-bottom: calc(var(--space-6) * 4 + env(safe-area-inset-bottom));
 }
 
 /* ---------- Header ---------- */
@@ -738,7 +740,8 @@
 .composer {
   position: fixed;
   left: 50%;
-  bottom: calc(var(--space-6) * 3 - var(--space-1) - var(--space-1) / 4); /* 91: sits on the tab bar */
+  /* Sits on the tab bar: 91 tall, plus the iPhone home-indicator area the tab bar adds below itself. */
+  bottom: calc(var(--space-6) * 3 - var(--space-1) - var(--space-1) / 4 + env(safe-area-inset-bottom));
   transform: translateX(-50%);
   z-index: 5;
   width: 100%;
