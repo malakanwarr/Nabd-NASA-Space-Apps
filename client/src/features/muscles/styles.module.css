@@ -9,6 +9,18 @@
   padding-bottom: var(--space-5);
 }
 
+/* Which way muscle colors get "darker" (fillOf in MuscleFigure.jsx): toward --bg in dark mode and toward
+   --text in light mode, so a weak muscle always moves away from the suit color. Only theme variables. */
+.page,
+.workoutPage {
+  --muscle-dim: var(--bg);
+}
+
+:global(:root[data-theme='light']) .page,
+:global(:root[data-theme='light']) .workoutPage {
+  --muscle-dim: var(--text);
+}
+
 .section {
   display: flex;
   flex-direction: column;
@@ -135,10 +147,11 @@
   fill: transparent;
 }
 
+/* Thin --text outline: the colour that contrasts most with the suit in both themes (12.6:1 dark, 15.8:1 light). */
 .shape {
   fill: var(--fill);
-  stroke: var(--bg);
-  stroke-width: 1.5;
+  stroke: var(--text);
+  stroke-width: 1;
   transform: scale(var(--k));
   transform-box: fill-box;
   transform-origin: center;
@@ -373,6 +386,361 @@
   font-weight: 600;
 }
 
+/* Summary twin: a picture only (not tappable). */
+.muscleStill {
+  pointer-events: none;
+}
+
+/* ---------- Workout mode (/body/muscles/workout) ---------- */
+.workoutPage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-bottom: var(--space-5);
+}
+
+.demoLine {
+  align-self: flex-start;
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-full);
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.eyebrowLine {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+
+.exerciseName {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--fs-28);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.twinStage {
+  display: flex;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+/* The moving twin: 200 x 260 viewBox, as tall as fits comfortably on a phone. */
+.twinMove {
+  display: block;
+  width: 100%;
+  max-width: calc(var(--space-6) * 9);
+  height: auto;
+}
+
+.twinEdgeFar {
+  fill: none;
+  stroke: var(--muted);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.45;
+}
+
+.twinFillFar {
+  fill: none;
+  stroke: var(--raised);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.9;
+}
+
+.twinDarkFar {
+  fill: var(--line);
+  stroke: var(--muted);
+  stroke-width: 2;
+  opacity: 0.55;
+}
+
+.gearLine {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.barPlate {
+  fill: var(--line);
+  stroke: var(--muted);
+  stroke-width: 2;
+}
+
+.barHub {
+  fill: var(--muted);
+}
+
+.counter {
+  display: block;
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-28);
+  font-weight: 700;
+  text-align: center;
+}
+
+.counterUnit {
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+
+.next {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-16);
+  text-align: center;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.controlsRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.confirmText {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--fs-16);
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ---------- Workout polish ---------- */
+
+/* Target muscles on the moving twin: fill, glow and brightness are set per frame (WorkoutTwin). */
+.twinMuscle {
+  stroke: var(--text);
+  stroke-width: 0.8;
+}
+
+/* Progress ring (and the breathing ring) around the counter: 160 = 5 x 32. */
+.ringWrap {
+  position: relative;
+  align-self: center;
+  width: calc(var(--space-6) * 5);
+  height: calc(var(--space-6) * 5);
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ringTrack {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 6;
+}
+
+.ringFill {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+.ringCenter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Rest: a soft circle that grows on the in-breath and shrinks on the out-breath. */
+.breathe {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) 0;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.breatheTrack {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.breatheFill {
+  fill: color-mix(in srgb, var(--primary) 18%, transparent);
+  stroke: var(--primary);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.breatheWords {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+
+/* Next up card on rests. */
+.nextCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--raised);
+}
+
+.nextLabel {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-14);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nextName {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--fs-20);
+  font-weight: 700;
+}
+
+/* Slim segment bar at the top: one segment per exercise. */
+.segments {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.segment {
+  flex: 1;
+  height: var(--space-1);
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--line);
+}
+
+.segmentFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  transition: width 0.3s linear;
+}
+
+/* Finish */
+.weekLine {
+  margin: 0;
+  color: var(--stable);
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+
+.grownNumber {
+  flex: none;
+  color: var(--stable);
+  font-size: var(--fs-16);
+  font-weight: 700;
+}
+
+.finishStage {
+  position: relative;
+  overflow: hidden;
+}
+
+/* The side view turns away, the front view turns in (a soft half-turn, no flashing). */
+.turnOut {
+  display: flex;
+  justify-content: center;
+  animation: turnOut 0.5s ease-in 0.4s both;
+}
+
+.turnIn {
+  animation: turnIn 0.5s ease-out both;
+}
+
+@keyframes turnOut {
+  to {
+    transform: scaleX(0.05);
+    opacity: 0.4;
+  }
+}
+
+@keyframes turnIn {
+  from {
+    transform: scaleX(0.05);
+    opacity: 0.4;
+  }
+}
+
+/* One soft burst of small stars: each flies out once and fades (1.4 s, never repeats). */
+.burst {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--space-6) * 6);
+  height: calc(var(--space-6) * 6);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  overflow: visible;
+}
+
+.burstStar {
+  fill: var(--watch);
+  opacity: 0;
+  animation: starOut 1.4s ease-out both;
+}
+
+@keyframes starOut {
+  0% {
+    transform: translate(0, 0) scale(0.4);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Read by screen readers only. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -390,7 +758,15 @@
   }
   .card,
   .callout,
-  .focus .shape {
+  .focus .shape,
+  .turnIn,
+  .turnOut {
     animation: none;
+  }
+  .segmentFill {
+    transition: none;
+  }
+  .burst {
+    display: none;
   }
 }

@@ -13,6 +13,7 @@
 // Strength sets a smooth size and color (status token mixed toward --bg): strong = full size and green,
 // watch = a bit smaller and amber, weak = thinner, dark, faded amber. Words appear only in the labels.
 import { MUSCLES, STATUS, statusOf } from './muscleModel.js';
+import VisorFace from './VisorFace.jsx';
 import s from './styles.module.css';
 
 export const VB_W = 320;
@@ -213,14 +214,17 @@ export function scaleOf(strength) {
   return lerp(0.75, 1, (strength - 40) / 45);
 }
 
-// Color: the status token mixed toward --bg (preview: strong 85%, watch 70%, weak 38%).
+// Color: the status token, made darker toward --muscle-dim (styles.module.css: --bg in dark mode, --text in
+// light mode, so "darker" always moves away from the suit). Every muscle keeps at least 3:1 against the suit
+// (--raised) in both themes; with the --text outline it reads clearly even when weak:
+//   dark:  strong 7.2–8.5, watch 6.8–8.3, weak 3.9–4.9      light: strong 4.0–4.5, watch 4.4–5.1, weak 6.3–7.4
 export function fillOf(strength) {
   const status = statusOf(strength);
   let pct;
-  if (status === 'strong') pct = lerp(72, 85, (strength - 75) / 25);
-  else if (status === 'watch') pct = lerp(56, 70, (strength - 60) / 14);
-  else pct = lerp(24, 40, strength / 60);
-  return `color-mix(in srgb, var(${STATUS[status].token}) ${Math.round(pct)}%, var(--bg))`;
+  if (status === 'strong') pct = lerp(92, 100, (strength - 75) / 25);
+  else if (status === 'watch') pct = lerp(86, 96, (strength - 60) / 14);
+  else pct = lerp(62, 72, strength / 60);
+  return `color-mix(in srgb, var(${STATUS[status].token}) ${Math.round(pct)}%, var(--muscle-dim))`;
 }
 
 function Shape({ shape, className }) {
@@ -236,7 +240,7 @@ function Shape({ shape, className }) {
 }
 
 // The astronaut suit, line-art like the Body screen. Arms: an outline line under a fill line, round joints.
-function Suit({ body, view }) {
+function Suit({ body, view, person }) {
   return (
     <g aria-hidden="true">
       {body.legs.map((d) => (
@@ -257,14 +261,10 @@ function Suit({ body, view }) {
       <path className={s.suit} d={body.torso} />
       <rect className={s.suitDark} x={C - 15} y={70} width={30} height={10} rx={4} />
       <circle className={s.helmet} cx={C} cy={40} r={34} />
-      {view === 'back' ? (
-        <path className={s.helmetBack} d={`M ${C - 20} 52 Q ${C} 60 ${C + 20} 52`} />
-      ) : (
-        <>
-          <ellipse className={s.visor} cx={C} cy={44} rx={25} ry={21} />
-          <path className={s.shine} d={`M ${C - 20} 30 C ${C - 15} 21 ${C - 5} 17 ${C + 4} 18`} />
-        </>
-      )}
+      {/* Visor (front) or a clear back window (back), with her head filling about 80% of it. */}
+      <ellipse className={s.visor} cx={C} cy={42} rx={27} ry={24} />
+      <VisorFace person={person} kind={view === 'back' ? 'back' : 'front'} cx={C} cy={42} rx={27} ry={24} />
+      <path className={s.shine} d={`M ${C - 22} 28 C ${C - 17} 19 ${C - 7} 15 ${C + 2} 16`} />
     </g>
   );
 }
@@ -286,7 +286,7 @@ function Labels({ view, gender, strength, hidden, onSelect }) {
             className={s.label}
             onClick={(e) => {
               e.stopPropagation();
-              if (!hidden) onSelect(r.id);
+              if (!hidden && onSelect) onSelect(r.id);
             }}
           >
             <rect className={s.hit} x={left ? 0 : RIGHT_EDGE} y={r.cy - 22} width={LEFT_EDGE} height={44} />
@@ -305,15 +305,33 @@ function Labels({ view, gender, strength, hidden, onSelect }) {
 }
 
 // focus: today's target muscles (Today's workout); they glow softly.
-export default function MuscleFigure({ view, gender, focus = [], strength, selected, onSelect, lineY }) {
+// interactive = false (workout summary): a picture only, nothing tappable; label describes it.
+// person: her normalized avatar (people.you); her face is drawn inside the visor on the front view.
+export default function MuscleFigure({
+  view,
+  gender,
+  person = null,
+  focus = [],
+  strength,
+  selected,
+  onSelect,
+  lineY,
+  interactive = true,
+  label,
+}) {
   const body = bodyOf(gender);
   const open = Boolean(selected);
   const anchor = open ? anchorOf(view, selected, gender) : null;
-  const label = `${gender === 'male' ? 'Male' : 'Female'} astronaut, ${view === 'back' ? 'back' : 'front'} view`;
+  const viewLabel = `${gender === 'male' ? 'Male' : 'Female'} astronaut, ${view === 'back' ? 'back' : 'front'} view`;
   return (
-    <svg className={s.figure} viewBox={`0 0 ${VB_W} ${VB_H}`} role="group" aria-label={label}>
+    <svg
+      className={s.figure}
+      viewBox={`0 0 ${VB_W} ${VB_H}`}
+      role={interactive ? 'group' : 'img'}
+      aria-label={label || viewLabel}
+    >
       <g className={s.body} style={{ transform: `translateX(${open ? SHIFT_OPEN : SHIFT_CLOSED}px)` }}>
-        <Suit body={body} view={view} />
+        <Suit body={body} view={view} person={person} />
         {groupsFor(view, gender).map((g) => {
           const m = MUSCLES.find((mm) => mm.id === g.id);
           const value = strength[g.id];
@@ -322,6 +340,19 @@ export default function MuscleFigure({ view, gender, focus = [], strength, selec
             e.stopPropagation();
             onSelect(g.id);
           };
+          if (!interactive) {
+            return (
+              <g
+                key={g.id}
+                className={`${s.muscleStill} ${focus.includes(g.id) ? s.focus : ''}`}
+                style={{ '--k': scaleOf(value).toFixed(3), '--fill': fillOf(value) }}
+              >
+                {g.shapes.map((sh, i) => (
+                  <Shape key={i} shape={sh} className={s.shape} />
+                ))}
+              </g>
+            );
+          }
           return (
             <g
               key={g.id}
@@ -351,7 +382,7 @@ export default function MuscleFigure({ view, gender, focus = [], strength, selec
         })}
       </g>
       {/* Drawn over the body so the leader lines reach the muscles (lines ignore taps). */}
-      <Labels view={view} gender={gender} strength={strength} hidden={open} onSelect={onSelect} />
+      <Labels view={view} gender={gender} strength={strength} hidden={open} onSelect={interactive ? onSelect : null} />
       {anchor && lineY != null && (
         <g className={s.callout} aria-hidden="true">
           <line x1={anchor[0]} y1={anchor[1]} x2={CARD_X} y2={lineY} />
