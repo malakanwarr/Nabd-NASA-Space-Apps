@@ -231,7 +231,7 @@ export default function ResultsPage() {
       <main>
         <ScreenHeader backTo="/" backLabel="Home" eyebrow="Check-in" title="No check-in yet today" />
         <p className={s.muted}>
-          The check-in takes two minutes: read one sentence out loud, then catch some pollen.
+          The check-in takes two minutes: read one sentence out loud twice, then catch some pollen.
         </p>
         {points.length > 0 && (
           <section className={s.block} aria-label="Energy, last days">
