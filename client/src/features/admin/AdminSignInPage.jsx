@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../../shared/api.js';
 import { signIn } from '../../shared/session.js';
 import Button from '../../shared/Button.jsx';
+import Planet from '../../shared/Planet.jsx';
 import ScreenHeader from '../../shared/ScreenHeader.jsx';
 import styles from './styles.module.css';
 
@@ -36,8 +37,11 @@ export default function AdminSignInPage() {
   }
 
   return (
-    <main className={styles.signInLayout}>
+    <main className={`${styles.signInLayout} ${styles.rectangularControls}`}>
       <section className={styles.signInIntro}>
+        <div className={styles.earthWrap} aria-hidden="true">
+          <Planet kind="earth" size={460} />
+        </div>
         <p className={styles.brandName}>NABD</p>
         <ScreenHeader eyebrow="Mission Control" title="Every crew member, at a glance" />
         <p className={styles.signInDescription}>

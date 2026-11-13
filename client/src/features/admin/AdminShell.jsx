@@ -13,7 +13,7 @@ export default function AdminShell({ children }) {
   }
 
   return (
-    <div className={styles.appShell}>
+    <div className={`${styles.appShell} ${styles.rectangularControls}`}>
       <aside className={styles.sidebar}>
         <Link to="/admin" className={styles.brand}>
           <span className={styles.brandName}>NABD</span>

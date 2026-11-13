@@ -6,6 +6,11 @@
   margin: 0 auto;
 }
 
+.rectangularControls :global(button),
+.rectangularControls :global(a) {
+  border-radius: var(--radius-sm);
+}
+
 .sidebar {
   position: sticky;
   top: var(--space-5);
@@ -355,7 +360,31 @@
 }
 
 .signInIntro {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   max-width: 42rem;
+  min-height: 36rem;
+  padding: var(--space-6) 0;
+  overflow: hidden;
+}
+
+.signInIntro > *:not(.earthWrap) {
+  position: relative;
+  z-index: 1;
+}
+
+.earthWrap {
+  position: absolute;
+  right: -9rem;
+  bottom: -8rem;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.earthWrap > div {
+  animation-duration: 180s;
 }
 
 .signInIntro .brandName {
@@ -562,6 +591,15 @@
 
   .signInDescription {
     font-size: var(--fs-16);
+  }
+
+  .signInIntro {
+    min-height: 28rem;
+  }
+
+  .earthWrap {
+    right: -14rem;
+    bottom: -12rem;
   }
 
   .formSection {
