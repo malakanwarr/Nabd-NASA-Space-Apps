@@ -57,7 +57,7 @@ export function buildForYouRows({ garden, hugs, profile }) {
       subtitle: `${garden.grownPercent}% grown`,
       to: '/garden',
     },
-    { id: 'window', title: 'Home window', subtitle: `7:40 pm in ${city}`, to: '/family/window' },
+    { id: 'window', title: 'Home window', subtitle: `7:40 pm in ${city}`, to: '/family' },
   ];
   if (latest) {
     rows.push({

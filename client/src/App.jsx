@@ -19,7 +19,6 @@ import CheckinStartPage from './features/mood-face/CheckinStartPage.jsx';
 import RecordPage from './features/mood-voice/RecordPage.jsx';
 import GamePage from './features/game/GamePage.jsx';
 import ResultsPage from './features/mood-results/ResultsPage.jsx';
-import FamilyPage from './features/hugs/FamilyPage.jsx';
 import SendHugPage from './features/hugs/SendHugPage.jsx';
 import JoinPage from './features/family-app/JoinPage.jsx';
 import HomeWindowPage from './features/home-window/HomeWindowPage.jsx';
@@ -114,8 +113,7 @@ export default function App() {
           <Route path="/checkin/record" element={<RecordPage />} />
           <Route path="/checkin/game" element={<GamePage />} />
           <Route path="/checkin/results" element={<ResultsPage />} />
-          <Route path="/family" element={<FamilyPage />} />
-          <Route path="/family/window" element={<HomeWindowPage />} />
+          <Route path="/family" element={<HomeWindowPage />} />
           <Route path="/family/avatar" element={<AvatarPage />} />
           <Route path="/garden" element={<GardenPage />} />
         </Route>

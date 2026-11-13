@@ -103,7 +103,7 @@ export default function AvatarPage() {
   const setField = (field) => (value) => update({ ...person, [field]: value });
 
   function save() {
-    if (writeLocal(storageKey, toSaved(people))) navigate('/family/window');
+    if (writeLocal(storageKey, toSaved({ ...normalize(null), you: person }))) navigate('/family');
     else setError('Could not save on this phone. Your changes are still here.');
   }
 

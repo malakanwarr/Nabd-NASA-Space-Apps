@@ -1,7 +1,8 @@
-// Home window (Board 15, route /family/window). Earth at night over Cairo,
-// messages from home, and a voice-message recorder.
+// Family + Home window, ONE page at /family. It shows the Home window scene first (the living room at home
+// at night, drawn from the saved avatars), then the hugs content of features/hugs/FamilyPage, then the
+// voice-message recorder, messages from home, the time at home and a link to the avatar maker.
 import { useEffect, useRef, useState } from 'react';
-import ScreenHeader from '../../shared/ScreenHeader.jsx';
+import FamilyPage from '../hugs/FamilyPage.jsx';
 import ListRow from '../../shared/ListRow.jsx';
 import Button from '../../shared/Button.jsx';
 import { getSampleData } from '../../shared/sampleData.js';
@@ -11,7 +12,11 @@ import SavedNote from '../mood-face/SavedNote.jsx';
 import { loadWithSavedCopy } from '../mood-face/savedData.js';
 import { FROM_HOME_FALLBACK } from './fromHomeSample.js';
 import { ImageIcon, MicIcon } from './Icons.jsx';
+import HomeScene from './HomeScene.jsx';
 import { sendVoiceMessage } from './voiceMessageApi.js';
+import { FAMILY_IDS, personMeta, useAvatars } from './useAvatars.js';
+import AvatarFigure from '../avatar/AvatarFigure.jsx';
+import { describe } from '../avatar/avatarOptions.js';
 import s from './styles.module.css';
 
 const MAX_SECONDS = 60;
@@ -68,6 +73,7 @@ export default function HomeWindowPage() {
   const mounted = useRef(true);
   const session = useSession();
   const crewId = session?.role === 'crew' ? session.id : '';
+  const avatars = useAvatars(crewId);
 
   useEffect(() => {
     let cancelled = false;
@@ -267,21 +273,14 @@ export default function HomeWindowPage() {
   }
 
   if (data.state === 'loading') {
-    return (
-      <main>
-        <ScreenHeader backTo="/family" backLabel="Family" eyebrow="Family" title="Home window" />
-        <p className={s.status} role="status">Looking out of the window…</p>
-      </main>
-    );
+    return <FamilyPage top={<p className={s.status} role="status">Looking out of the window…</p>} />;
   }
 
   const { home, family, delayMinutes } = data;
   const delayLine = `It reaches ${home.city} in about ${delayMinutes} minutes.`;
 
-  return (
-    <main>
-      <ScreenHeader backTo="/family" backLabel="Family" eyebrow="Family" title="Home window" />
-
+  const top = (
+    <>
       {data.saved && <SavedNote />}
 
       <div className={s.clock}>
@@ -289,49 +288,12 @@ export default function HomeWindowPage() {
         <span className={s.place}>{home.city} · {home.period}</span>
       </div>
 
-      <div className={s.window}>
-        <img className={s.earth} src="/images/earth_cairo_night.png" alt={`Earth at night, with the lights of ${home.city}`} />
-      </div>
+      <HomeScene avatars={avatars} city={home.city} />
+    </>
+  );
 
-      <h2 className={s.headline}>It's {twelveHour(home.localTime)} at home</h2>
-      <p className={s.lead}>Night has fallen over {home.city}. Your family is probably having dinner.</p>
-
-      {family.length > 0 && (
-        <ListRow
-          to="/family/avatar"
-          icon={<span className={s.initials} aria-hidden="true">{family.map((n) => n[0]).join('')}</span>}
-          title={joinNames(family)}
-          subtitle="Change how you see your family"
-          right={<span className={s.chevron} aria-hidden="true">›</span>}
-        />
-      )}
-
-      <h2 className={s.section}>From home</h2>
-      {home.messages.length === 0 ? (
-        <p className={s.empty}>No messages yet. Record one for your family.</p>
-      ) : (
-        home.messages.map((m) => (
-          <div key={m.id}>
-            <ListRow
-              icon={<span className={s.kind}>{m.kind === 'voice' ? <MicIcon /> : <ImageIcon />}</span>}
-              title={m.title}
-              subtitle={m.when}
-            />
-            {m.kind === 'voice' && m.mediaUrl && (
-              m.demoPlaceholder
-                ? <p className={s.emptyMedia}>No audio attached in this demo message.</p>
-                : (
-                  <audio className={s.historyAudio} controls preload="none" src={m.mediaUrl}>
-                    Your browser cannot play this audio.
-                  </audio>
-                )
-            )}
-            {m.kind === 'photo' && m.mediaUrl && (
-              <img className={s.historyPhoto} src={m.mediaUrl} alt={m.alt || m.title} />
-            )}
-          </div>
-        ))
-      )}
+  const bottom = (
+    <>
 
       <div className={s.record}>
         {phase === 'sent' && (
@@ -406,6 +368,63 @@ export default function HomeWindowPage() {
         )}
         {phase !== 'sent' && <p className={s.note}>{delayLine}</p>}
       </div>
-    </main>
+
+      <h2 className={s.section}>From home</h2>
+      {home.messages.length === 0 ? (
+        <p className={s.empty}>No messages yet. Record one for your family.</p>
+      ) : (
+        home.messages.map((m) => (
+          <div key={m.id}>
+            <ListRow
+              icon={<span className={s.kind}>{m.kind === 'voice' ? <MicIcon /> : <ImageIcon />}</span>}
+              title={m.title}
+              subtitle={m.when}
+            />
+            {m.kind === 'voice' && m.mediaUrl && (
+              m.demoPlaceholder
+                ? <p className={s.emptyMedia}>No audio attached in this demo message.</p>
+                : (
+                  <audio className={s.historyAudio} controls preload="none" src={m.mediaUrl}>
+                    Your browser cannot play this audio.
+                  </audio>
+                )
+            )}
+            {m.kind === 'photo' && m.mediaUrl && (
+              <img className={s.historyPhoto} src={m.mediaUrl} alt={m.alt || m.title} />
+            )}
+          </div>
+        ))
+      )}
+
+
+      <section className={s.homeCard} aria-label="Time at home">
+        <h2>It's {twelveHour(home.localTime)} at home</h2>
+        <p>Night has fallen over {home.city}. Your family is probably having dinner.</p>
+      </section>
+
+      <ListRow
+        to="/family/avatar"
+        icon={
+          <span className={s.heads} aria-hidden="true">
+            {[...FAMILY_IDS, 'you'].map((id) => (
+              <span key={id} className={s.head}>
+                <AvatarFigure
+                  person={avatars[id]}
+                  crew={id === 'you'}
+                  child={personMeta(id).child}
+                  label={describe(avatars[id], personMeta(id))}
+                  className={s.headFigure}
+                />
+              </span>
+            ))}
+          </span>
+        }
+        title="Change how you and your family look"
+        subtitle={joinNames(family.length ? family : FAMILY_IDS.map((id) => personMeta(id).name))}
+        right={<span className={s.chevron} aria-hidden="true">›</span>}
+      />
+    </>
   );
+
+  return <FamilyPage top={top} bottom={bottom} />;
 }
