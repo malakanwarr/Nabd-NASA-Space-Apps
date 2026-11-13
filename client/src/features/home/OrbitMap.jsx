@@ -27,6 +27,11 @@ export default function OrbitMap({ day, totalDays }) {
   const [ex, ey] = pt(R_EARTH, START + (TAU * day) / 365);
   const [mx, my] = pt(R_MARS, START + SWEEP - (TAU * (totalDays - day)) / 687);
 
+  // Near the end of the trip the ship and Mars are close together. Each label goes on the outer
+  // side of its own dot, so "Sara" and "Mars" never sit on top of each other or on the other dot.
+  const shipOnLeft = sx <= mx;
+  const SIDE = 16; // how far a label sits from its dot
+
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
@@ -47,13 +52,23 @@ export default function OrbitMap({ day, totalDays }) {
       </text>
 
       <circle cx={mx} cy={my} r="6" className={s.mars} />
-      <text x={mx} y={my + 22} textAnchor="middle" className={s.orbitLabel}>
+      <text
+        x={shipOnLeft ? mx + SIDE : mx - SIDE}
+        y={my + 5}
+        textAnchor={shipOnLeft ? 'start' : 'end'}
+        className={s.orbitLabel}
+      >
         Mars
       </text>
 
       <circle cx={sx} cy={sy} r="9" className={s.shipHalo} />
       <circle cx={sx} cy={sy} r="4" className={s.ship} />
-      <text x={sx} y={sy - 14} textAnchor="middle" className={s.orbitLabelStrong}>
+      <text
+        x={shipOnLeft ? sx - SIDE : sx + SIDE}
+        y={sy + 5}
+        textAnchor={shipOnLeft ? 'end' : 'start'}
+        className={s.orbitLabelStrong}
+      >
         Sara
       </text>
     </svg>
