@@ -180,3 +180,20 @@
     animation: none;
   }
 }
+
+/* The cycle context line under "What changed". */
+.cycleLine {
+  margin-top: var(--space-2);
+}
+
+.cycleIcon {
+  width: var(--space-5);
+  height: var(--space-5);
+  flex-shrink: 0;
+  color: var(--primary);
+}
+
+.chevron {
+  color: var(--muted);
+  font-size: var(--fs-20);
+}

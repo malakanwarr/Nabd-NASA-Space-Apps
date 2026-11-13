@@ -18,7 +18,15 @@ import { apiFetch } from '../../shared/api.js';
 import { getSampleData } from '../../shared/sampleData.js';
 import { useSession } from '../../shared/session.js';
 import { clearDraft, readDraft } from '../mood-voice/checkinDraft.js';
-import { computeEnergyScore, describeChanges, labelWords } from './energyScore.js';
+import {
+  FIRST_LABEL,
+  baselineFromCheckin,
+  computeEnergyScore,
+  describeChanges,
+  isExperimentId,
+  labelWords,
+} from './energyScore.js';
+import CycleContext from './CycleContext.jsx';
 import EnergyChart from './EnergyChart.jsx';
 import {
   NORMAL_SPREAD,
@@ -101,7 +109,14 @@ export default function ResultsPage() {
           getSampleData('today'),
         ]);
         if (!alive) return;
-        setBaseline(baselineFile);
+        // Test people (exp- ids) are compared with their own first check-in, not with Sara.
+        // Sara and the demo crew keep data/baseline.json.
+        const own = isExperimentId(crewId)
+          ? baselineFromCheckin(await apiFetch(`/api/mood/baseline?crewId=${encodeURIComponent(crewId)}`))
+          : null;
+        if (!alive) return;
+        const baselineToUse = own || baselineFile;
+        setBaseline(baselineToUse);
         setToday(todayFile);
 
         // ---- Opened directly: show the latest check-in saved today.
@@ -122,7 +137,10 @@ export default function ResultsPage() {
 
         // ---- Just checked in: score it, show it, save it.
         const { face, voice, reactionMs } = numbers;
-        const { energyScore, label } = computeEnergyScore(face, voice, baselineFile, reactionMs);
+        // No saved first check-in yet: this one is their normal, so it gets the "set" label.
+        const scored = computeEnergyScore(face, voice, baselineToUse, reactionMs);
+        const energyScore = scored.energyScore;
+        const label = isExperimentId(crewId) && !own && energyScore !== null ? FIRST_LABEL : scored.label;
         if (energyScore === null) {
           setProblem('We did not get enough from the camera or the microphone to work out a score.');
           setPhase('error');
@@ -285,6 +303,32 @@ export default function ResultsPage() {
     window.scrollTo(0, 0);
   }
 
+  // A test person's first check-in is not scored: it only sets their normal.
+  if (label === FIRST_LABEL) {
+    return (
+      <main>
+        <ScreenHeader
+          backTo={mode === 'latest' ? '/' : undefined}
+          backLabel="Home"
+          eyebrow={eyebrow}
+          title={FIRST_LABEL}
+        />
+        <section className={s.block} aria-label="Your normal">
+          <StatusLabel status="stable" />
+          <p className={s.advice}>Later check-ins are compared with this one.</p>
+          {saveProblem && !viewingPast && (
+            <p className={s.problem} role="alert">
+              We could not save it: {saveProblem}
+            </p>
+          )}
+        </section>
+        <div className={s.actions}>
+          <Button to="/">Back to home</Button>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main>
       <ScreenHeader
@@ -335,6 +379,8 @@ export default function ResultsPage() {
         {!face && <p className={s.muted}>Voice only, so the face numbers are missing.</p>}
         {!voice && <p className={s.muted}>No voice numbers, so only the face was compared.</p>}
       </section>
+
+      <CycleContext />
 
       <section className={s.block} aria-label="Energy, last 7 days">
         <h2 className={s.heading}>Energy, last 7 days</h2>

@@ -194,25 +194,89 @@ function voiceNumbers(voice) {
   };
 }
 
-// GET /api/mood/experiment: every check-in saved by an exp- test id, sorted by person, then time.
-// Only exp- ids are ever returned here, never Sara's or the demo crew's check-ins.
+// Everything saved by exp- ids, oldest first. Same shape from the database or the memory list.
+async function experimentRows() {
+  const rows = hasDb()
+    ? await MoodCheckin.find({ crewId: new RegExp(`^${EXPERIMENT_PREFIX}`) }).lean()
+    : savedWithoutDb.filter((c) => isExperiment(c.crewId));
+  return rows
+    .map((c) => ({
+      crewId: c.crewId,
+      time: c.time ? new Date(c.time).toISOString() : null,
+      energyScore: c.energyScore ?? null,
+      label: c.label ?? null,
+      face: faceNumbers(c.face),
+      voice: voiceNumbers(c.voice),
+      reactionMs: c.reactionMs ?? null,
+    }))
+    .sort((a, b) => a.crewId.localeCompare(b.crewId) || String(a.time).localeCompare(String(b.time)));
+}
+
+// The eight numbers compared between round 1 and round 2.
+const COMPARED = [
+  ['blinksPerMin', (r) => r.face.blinksPerMin],
+  ['eyeOpenness', (r) => r.face.eyeOpenness],
+  ['smileRate', (r) => r.face.smileRate],
+  ['pitchRangeHz', (r) => r.voice.pitchRangeHz],
+  ['loudness', (r) => r.voice.loudness],
+  ['pauseRatio', (r) => r.voice.pauseRatio],
+  ['paceSegmentsPerSec', (r) => r.voice.paceSegmentsPerSec],
+  ['reactionMs', (r) => r.reactionMs],
+];
+
+function isNum(n) {
+  return typeof n === 'number' && Number.isFinite(n);
+}
+
+// Round 2 minus round 1 for every number. null when either round did not measure it.
+function changes(round1, round2) {
+  const out = {};
+  for (const [key, pick] of COMPARED) {
+    const a = pick(round1);
+    const b = pick(round2);
+    out[key] = isNum(a) && isNum(b) ? { change: b - a, percent: a ? ((b - a) / a) * 100 : null } : null;
+  }
+  return out;
+}
+
+// GET /api/mood/baseline?crewId=exp-malak: a test person's own normal, their first check-in.
+// null if they have not checked in yet. The numbers are the raw ones that were saved.
+router.get('/baseline', async (req, res) => {
+  const id = typeof req.query.crewId === 'string' ? req.query.crewId.toLowerCase() : '';
+  if (!CREW_ID_PATTERN.test(id) || !isExperiment(id)) {
+    return res.status(400).json({ error: 'A baseline is only kept for test ids like exp-malak.' });
+  }
+  try {
+    const first = (await experimentRows()).find((r) => r.crewId === id);
+    return res.json(first ? { ...first } : null);
+  } catch (err) {
+    console.error('[mood] could not read the baseline:', err.message);
+    return res.status(500).json({ error: 'Could not read the baseline.' });
+  }
+});
+
+// GET /api/mood/experiment: every check-in saved by an exp- test id, sorted by person, then time,
+// and for each person round 1 against round 2. Only exp- ids are ever returned here.
+//   checkins  the raw list
+//   people    [{ crewId, rounds, round1, round2, change, round2ScoreVsRound1 }]
+// Round 1 is each person's own normal, and round 2's score was worked out against it.
 router.get('/experiment', async (req, res) => {
   try {
-    const rows = hasDb()
-      ? await MoodCheckin.find({ crewId: new RegExp(`^${EXPERIMENT_PREFIX}`) }).lean()
-      : savedWithoutDb.filter((c) => isExperiment(c.crewId));
-    const list = rows
-      .map((c) => ({
-        crewId: c.crewId,
-        time: c.time ? new Date(c.time).toISOString() : null,
-        energyScore: c.energyScore ?? null,
-        label: c.label ?? null,
-        face: faceNumbers(c.face),
-        voice: voiceNumbers(c.voice),
-        reactionMs: c.reactionMs ?? null,
-      }))
-      .sort((a, b) => a.crewId.localeCompare(b.crewId) || String(a.time).localeCompare(String(b.time)));
-    return res.json(list);
+    const checkins = await experimentRows();
+    const ids = [...new Set(checkins.map((c) => c.crewId))];
+    const people = ids.map((crewId) => {
+      const mine = checkins.filter((c) => c.crewId === crewId);
+      const [round1, round2 = null] = mine;
+      return {
+        crewId,
+        rounds: mine.length,
+        round1,
+        round2,
+        change: round2 ? changes(round1, round2) : null,
+        round2ScoreVsRound1: round2 ? round2.energyScore : null,
+      };
+    });
+    return res.json({ checkins, people });
   } catch (err) {
     console.error('[mood] could not read the experiment check-ins:', err.message);
     return res.status(500).json({ error: 'Could not read the experiment check-ins.' });
