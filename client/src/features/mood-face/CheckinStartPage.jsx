@@ -1,7 +1,7 @@
 // Check-in: before you start (owner: Habiba). Board 7, route /checkin.
 // "Allow camera and mic, then start" asks the phone for permission, then opens /checkin/record.
 // "Voice only today" opens /checkin/record in voice-only mode: navigation state { mode: 'voice' }.
-// (Agree this signal with Malak. The face path sends { mode: 'face', permitted: true }.)
+// The face path sends { mode: 'face', permitted: true }.)
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ScreenHeader from '../../shared/ScreenHeader.jsx';

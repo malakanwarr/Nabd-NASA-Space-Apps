@@ -29,6 +29,5 @@ Models in `server/src/models/` belong to the owner of the matching route.
 
 - One branch per person: `feature/<folder>` (for example `feature/mood-face`).
 - Push every hour.
-- Only Malak merges into `main`.
 - After each merge, everyone runs `git pull origin main`.
 - Never commit `.env`.

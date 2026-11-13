@@ -1,4 +1,3 @@
-// Vite config (Malak only): React, dev proxy to the server, and the PWA (installable app) setup.
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
