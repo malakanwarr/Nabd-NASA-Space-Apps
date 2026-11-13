@@ -1,9 +1,29 @@
-import { Router } from 'express';
+import express, { Router } from 'express';
+import mongoose from 'mongoose';
+import FamilyMessage from '../models/FamilyMessage.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const router = Router();
+const memoryMessages = [];
+const MAX_MESSAGE_SECONDS = 60;
+
+function isDatabaseConnected() {
+  return mongoose.connection.readyState === 1;
+}
+
+function messageJson(message) {
+  const id = String(message._id || message.id);
+  return {
+    id,
+    crewId: message.crewId,
+    mimeType: message.mimeType,
+    durationSeconds: message.durationSeconds,
+    createdAt: new Date(message.createdAt).toISOString(),
+    audioUrl: `/api/family/messages/${encodeURIComponent(id)}/audio`,
+  };
+}
 
 // Helper to find the data folder (adjust path if your data folder is elsewhere)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -39,6 +59,86 @@ router.get('/circle', (req, res) => {
   } catch (err) {
     console.error('Family circle error:', err);
     return res.status(500).json({ error: 'could not load family circle' });
+  }
+});
+
+router.post(
+  '/messages',
+  express.raw({ type: 'audio/*', limit: '8mb' }),
+  async (req, res) => {
+    const crewId = String(req.query.crewId || '').trim();
+    const mimeType = String(req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
+    const durationSeconds = Number(req.headers['x-duration-seconds']);
+
+    if (!crewId) return res.status(400).json({ error: 'crewId is required' });
+    if (!mimeType.startsWith('audio/')) return res.status(415).json({ error: 'An audio recording is required' });
+    if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
+      return res.status(400).json({ error: 'The audio recording is empty' });
+    }
+    if (!Number.isInteger(durationSeconds) || durationSeconds < 1 || durationSeconds > MAX_MESSAGE_SECONDS) {
+      return res.status(400).json({ error: `duration must be from 1 to ${MAX_MESSAGE_SECONDS} seconds` });
+    }
+
+    const message = {
+      crewId,
+      mimeType,
+      durationSeconds,
+      audio: req.body,
+      createdAt: new Date(),
+    };
+
+    try {
+      let savedMessage;
+      let storage;
+      if (isDatabaseConnected()) {
+        savedMessage = await FamilyMessage.create(message);
+        storage = 'database';
+      } else {
+        savedMessage = {
+          ...message,
+          id: `memory-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        };
+        memoryMessages.push(savedMessage);
+        storage = 'memory';
+      }
+
+      return res.status(201).json({ message: messageJson(savedMessage), storage });
+    } catch (error) {
+      console.error('Family voice message save error:', error);
+      return res.status(500).json({ error: 'Could not save the voice message' });
+    }
+  },
+);
+
+router.get('/messages', async (req, res) => {
+  const crewId = String(req.query.crewId || '').trim();
+  if (!crewId) return res.status(400).json({ error: 'crewId is required' });
+
+  try {
+    const messages = isDatabaseConnected()
+      ? await FamilyMessage.find({ crewId }).sort({ createdAt: -1 }).limit(50)
+      : memoryMessages.filter((message) => message.crewId === crewId).slice(-50).reverse();
+    return res.json({ messages: messages.map(messageJson) });
+  } catch (error) {
+    console.error('Family voice message load error:', error);
+    return res.status(500).json({ error: 'Could not load voice messages' });
+  }
+});
+
+router.get('/messages/:id/audio', async (req, res) => {
+  const id = String(req.params.id);
+  try {
+    const message = isDatabaseConnected() && mongoose.Types.ObjectId.isValid(id)
+      ? await FamilyMessage.findById(id).select('mimeType audio')
+      : memoryMessages.find((entry) => entry.id === id);
+    if (!message) return res.status(404).json({ error: 'Voice message not found' });
+
+    res.set('Content-Type', message.mimeType);
+    res.set('Cache-Control', 'private, no-store');
+    return res.send(message.audio);
+  } catch (error) {
+    console.error('Family voice message playback error:', error);
+    return res.status(500).json({ error: 'Could not load the voice message' });
   }
 });
 

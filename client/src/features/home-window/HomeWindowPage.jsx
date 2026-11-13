@@ -1,18 +1,17 @@
-// Home window (owner: Habiba). Board 15, route /family/window. Stretch screen.
-// Earth at night over Cairo, seen from the ship, the family row, messages from home and "Record a message home".
-//
-// Prototype limit: the recorded message is not uploaded anywhere (the team plan has no endpoint for it).
-// The microphone is used only to show the recording flow, and the audio is thrown away.
+// Home window (Board 15, route /family/window). Earth at night over Cairo,
+// messages from home, and a voice-message recorder.
 import { useEffect, useRef, useState } from 'react';
 import ScreenHeader from '../../shared/ScreenHeader.jsx';
 import ListRow from '../../shared/ListRow.jsx';
 import Button from '../../shared/Button.jsx';
 import { getSampleData } from '../../shared/sampleData.js';
+import { useSession } from '../../shared/session.js';
 import { CheckCircleIcon } from '../mood-face/Icons.jsx';
 import SavedNote from '../mood-face/SavedNote.jsx';
 import { loadWithSavedCopy } from '../mood-face/savedData.js';
 import { FROM_HOME_FALLBACK } from './fromHomeSample.js';
 import { ImageIcon, MicIcon } from './Icons.jsx';
+import { sendVoiceMessage } from './voiceMessageApi.js';
 import s from './styles.module.css';
 
 const MAX_SECONDS = 60;
@@ -32,11 +31,42 @@ function clock(total) {
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 }
 
+function currentTime() {
+  return Date.now();
+}
+
+function recordingErrorMessage(error) {
+  if (error?.name === 'NotAllowedError' || error?.name === 'SecurityError') {
+    return 'The browser did not allow microphone access. Allow the microphone for this site and try again.';
+  }
+  if (error?.name === 'NotFoundError' || error?.name === 'DevicesNotFoundError') {
+    return 'No microphone is available on this device.';
+  }
+  if (error?.name === 'NotReadableError' || error?.name === 'TrackStartError') {
+    return 'The microphone is busy or unavailable. Close other apps using it and try again.';
+  }
+  if (error?.name === 'NotSupportedError') {
+    return 'This browser cannot record audio. Try a current browser.';
+  }
+  return error?.message ? `Recording failed: ${error.message}` : 'Recording failed. Please try again.';
+}
+
 export default function HomeWindowPage() {
   const [data, setData] = useState({ state: 'loading' }); // loading | ready
-  const [phase, setPhase] = useState('idle'); // idle | recording | sent | blocked
+  const [phase, setPhase] = useState('idle'); // idle | requesting | recording | sending | sent | error
   const [seconds, setSeconds] = useState(0);
+  const [recordingError, setRecordingError] = useState('');
+  const [uploadStorage, setUploadStorage] = useState('');
+  const [canRetryUpload, setCanRetryUpload] = useState(false);
   const recorder = useRef(null);
+  const stream = useRef(null);
+  const chunks = useRef([]);
+  const startedAt = useRef(0);
+  const pendingRecording = useRef(null);
+  const discardRecording = useRef(false);
+  const mounted = useRef(true);
+  const session = useSession();
+  const crewId = session?.role === 'crew' ? session.id : '';
 
   useEffect(() => {
     let cancelled = false;
@@ -72,39 +102,149 @@ export default function HomeWindowPage() {
   // Count the seconds while recording.
   useEffect(() => {
     if (phase !== 'recording') return undefined;
-    const timer = setInterval(() => setSeconds((n) => n + 1), 1000);
+    const timer = setInterval(() => {
+      setSeconds(Math.min(MAX_SECONDS, Math.floor((Date.now() - startedAt.current) / 1000)));
+    }, 1000);
     return () => clearInterval(timer);
   }, [phase]);
 
-  // Leaving the page always turns the microphone off.
-  useEffect(() => () => recorder.current?.stream?.getTracks().forEach((t) => t.stop()), []);
+  useEffect(() => {
+    if (phase !== 'recording') return undefined;
+    const remaining = Math.max(0, MAX_SECONDS * 1000 - (currentTime() - startedAt.current));
+    const timer = setTimeout(() => {
+      if (recorder.current?.state === 'recording') recorder.current.stop();
+    }, remaining);
+    return () => clearTimeout(timer);
+  }, [phase]);
+
+  // Leaving the page always stops the microphone and discards an unfinished recording.
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      discardRecording.current = true;
+      const activeRecorder = recorder.current;
+      if (activeRecorder && activeRecorder.state !== 'inactive') {
+        activeRecorder.ondataavailable = null;
+        activeRecorder.onstop = null;
+        activeRecorder.onerror = null;
+        activeRecorder.stop();
+      }
+      stream.current?.getTracks().forEach((track) => track.stop());
+      stream.current = null;
+      recorder.current = null;
+    };
+  }, []);
 
   async function startRecording() {
+    if (phase === 'requesting' || phase === 'recording' || phase === 'sending') return;
+    if (!crewId) {
+      setRecordingError('Sign in as a crew member before recording a message.');
+      setPhase('error');
+      return;
+    }
+
+    setRecordingError('');
+    setUploadStorage('');
+    setCanRetryUpload(false);
+    pendingRecording.current = null;
+    setPhase('requesting');
+
+    let activeStream;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const media = new MediaRecorder(stream);
-      media.stream = stream;
+      if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+        const error = new Error('Audio recording is not supported in this browser.');
+        error.name = 'NotSupportedError';
+        throw error;
+      }
+
+      activeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (!mounted.current) {
+        activeStream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+
+      const supportedTypes = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'];
+      const mimeType = supportedTypes.find((type) => MediaRecorder.isTypeSupported(type));
+      const media = mimeType
+        ? new MediaRecorder(activeStream, { mimeType })
+        : new MediaRecorder(activeStream);
+
+      stream.current = activeStream;
       recorder.current = media;
+      chunks.current = [];
+      discardRecording.current = false;
+      startedAt.current = currentTime();
+      media.ondataavailable = (event) => {
+        if (event.data?.size) chunks.current.push(event.data);
+      };
+      media.onerror = (event) => {
+        discardRecording.current = true;
+        activeStream.getTracks().forEach((track) => track.stop());
+        stream.current = null;
+        recorder.current = null;
+        setRecordingError(recordingErrorMessage(event.error));
+        setPhase('error');
+      };
+      media.onstop = () => {
+        activeStream.getTracks().forEach((track) => track.stop());
+        stream.current = null;
+        if (recorder.current === media) recorder.current = null;
+        if (!mounted.current || discardRecording.current) return;
+
+        const audio = new Blob(chunks.current, { type: media.mimeType || 'audio/webm' });
+        chunks.current = [];
+        if (!audio.size) {
+          setRecordingError('No audio was captured. Check the microphone and try again.');
+          setPhase('error');
+          return;
+        }
+
+        const durationSeconds = Math.max(
+          1,
+          Math.min(MAX_SECONDS, Math.ceil((currentTime() - startedAt.current) / 1000)),
+        );
+        pendingRecording.current = { audio, durationSeconds };
+        setCanRetryUpload(true);
+        void uploadRecording(pendingRecording.current);
+      };
+
       media.start();
       setSeconds(0);
       setPhase('recording');
-    } catch {
-      setPhase('blocked');
+    } catch (error) {
+      activeStream?.getTracks().forEach((track) => track.stop());
+      stream.current = null;
+      recorder.current = null;
+      if (!mounted.current) return;
+      setRecordingError(recordingErrorMessage(error));
+      setPhase('error');
     }
   }
 
   function stopRecording() {
     const media = recorder.current;
-    if (!media) return;
-    media.stream.getTracks().forEach((t) => t.stop());
-    recorder.current = null;
-    setPhase('sent');
+    if (media?.state === 'recording') media.stop();
   }
 
-  // Stop by itself at the time limit.
-  useEffect(() => {
-    if (phase === 'recording' && seconds >= MAX_SECONDS) stopRecording();
-  });
+  async function uploadRecording(recording) {
+    setPhase('sending');
+    setRecordingError('');
+    try {
+      const result = await sendVoiceMessage(crewId, recording.audio, recording.durationSeconds);
+      if (!result?.message?.id) throw new Error('The server did not confirm the saved message.');
+      if (!mounted.current) return;
+      pendingRecording.current = null;
+      setCanRetryUpload(false);
+      setUploadStorage(result.storage || 'database');
+      setPhase('sent');
+    } catch (error) {
+      if (!mounted.current) return;
+      setCanRetryUpload(true);
+      setRecordingError(`Your voice message could not be sent: ${error.message}`);
+      setPhase('error');
+    }
+  }
 
   if (data.state === 'loading') {
     return (
@@ -164,12 +304,19 @@ export default function HomeWindowPage() {
         {phase === 'sent' && (
           <p className={s.sent} role="status">
             <span className={s.sentIcon}><CheckCircleIcon /></span>
-            <span>Message recorded. {delayLine}</span>
+            <span>Message sent to your family. {delayLine}</span>
           </p>
         )}
-        {phase === 'blocked' && (
-          <p className={s.problem} role="alert">
-            The microphone is turned off. Turn it on in Settings › NABD › Permissions, then try again.
+        {recordingError && <p className={s.problem} role="alert">{recordingError}</p>}
+        {phase === 'requesting' && (
+          <p className={s.status} role="status">Connecting to the microphone…</p>
+        )}
+        {phase === 'sending' && (
+          <p className={s.status} role="status">Sending your voice message…</p>
+        )}
+        {phase === 'sent' && uploadStorage === 'memory' && (
+          <p className={s.note} role="status">
+            The server is using temporary storage. This message may be lost if the server restarts.
           </p>
         )}
         {phase === 'recording' ? (
@@ -181,8 +328,24 @@ export default function HomeWindowPage() {
             <Button onClick={stopRecording}>Stop and send</Button>
           </>
         ) : (
-          <Button variant={phase === 'sent' ? 'secondary' : 'primary'} onClick={startRecording}>
-            {phase === 'sent' ? 'Record another message' : 'Record a message home'}
+          <Button
+            variant={phase === 'sent' ? 'secondary' : 'primary'}
+            onClick={phase === 'error' && canRetryUpload
+              ? () => uploadRecording(pendingRecording.current)
+              : startRecording}
+            disabled={phase === 'requesting' || phase === 'sending'}
+          >
+            {phase === 'requesting'
+              ? 'Connecting…'
+              : phase === 'sending'
+                ? 'Sending…'
+                : phase === 'error' && canRetryUpload
+                  ? 'Try sending again'
+                  : phase === 'sent'
+                    ? 'Record another message'
+                    : phase === 'error'
+                      ? 'Try recording again'
+                      : 'Record a message home'}
           </Button>
         )}
         {phase !== 'sent' && <p className={s.note}>{delayLine}</p>}
