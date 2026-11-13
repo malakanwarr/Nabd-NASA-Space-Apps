@@ -118,7 +118,7 @@
 .bandNote {
   margin: 0;
   color: var(--muted);
-  font-size: var(--fs-12);
+  font-size: var(--fs-14);
 }
 
 /* The days under the chart, to open one of them. */
@@ -137,7 +137,7 @@
 .nasa {
   margin: 0;
   color: var(--muted);
-  font-size: var(--fs-12);
+  font-size: var(--fs-14);
   line-height: 1.5;
 }
 
