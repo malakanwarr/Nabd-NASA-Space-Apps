@@ -2,7 +2,7 @@
 .status { color: var(--muted); font-size: var(--fs-14); }
 
 .clock { display: flex; flex-direction: column; align-items: flex-end; margin-top: calc(var(--space-6) * -1); }
-.time { font-family: var(--font-mono); font-size: var(--fs-20); font-weight: 700; }
+.time { font-family: var(--font-mono); font-size: var(--fs-20); font-weight: 500; }
 .place { color: var(--muted); font-size: var(--fs-14); }
 
 .window { width: 78%; aspect-ratio: 1; margin: var(--space-4) auto var(--space-5); border: var(--space-2) solid var(--line); border-radius: var(--radius-full); overflow: hidden; background: var(--bg); box-shadow: 0 0 var(--space-6) color-mix(in srgb, var(--watch) 30%, transparent); }
