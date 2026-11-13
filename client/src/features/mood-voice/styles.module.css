@@ -1,1 +1,202 @@
 /* Styles for mood-voice (owner: Malak). Use only the variables from shared/theme.css. */
+
+/* Cancel on the left, the step and its bar on the right (canvas screen #8). */
+.top {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+}
+
+.cancel {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--primary);
+  font-size: var(--fs-14);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.step {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+}
+
+/* Voice-only mode: the panel where the camera would be. */
+.voiceOnly {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 220px;
+  margin-top: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  text-align: center;
+}
+
+.micBig {
+  width: var(--space-6);
+  height: var(--space-6);
+  color: var(--primary);
+}
+
+.voiceOnlyWord {
+  margin: 0;
+  font-size: var(--fs-20);
+  font-weight: 700;
+}
+
+/* The sentence to read out loud. */
+.sentence {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-12);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.words {
+  margin: 0;
+  font-size: var(--fs-20);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.listen {
+  min-height: 56px;
+  margin-top: var(--space-4);
+}
+
+.muted {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+/* Live waveform: every bar is scaled by the loudness the microphone hears. */
+.wave {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.bars {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-1);
+  height: var(--space-6);
+}
+
+.bar {
+  flex: 1;
+  height: var(--space-6);
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  transform: scaleY(var(--bar, 0.12));
+  transition: transform 120ms ease-out;
+}
+
+.timer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+}
+
+.rec {
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--act);
+  animation: blink 1.2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+.doneBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.doneWord {
+  margin: 0;
+  color: var(--stable);
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+
+.numbers {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  line-height: 1.5;
+}
+
+.problem {
+  margin: 0;
+  color: var(--watch);
+  font-size: var(--fs-14);
+  line-height: 1.4;
+}
+
+/* The action and the privacy line at the bottom of the screen. */
+.bottom {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.bottom > a,
+.bottom > button {
+  width: 100%;
+}
+
+.privacy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.lock {
+  width: var(--space-4);
+  height: var(--space-4);
+}
+
+/* Slow and soft, and nothing moves when the phone asks for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .rec {
+    animation: none;
+  }
+
+  .bar {
+    transition: none;
+  }
+}
