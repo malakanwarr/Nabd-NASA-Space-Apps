@@ -1,1 +1,429 @@
-/* Styles for womens-health (owner: Layal). Use only the variables from shared/theme.css. */
+/* Styles for womens-health (owner: Layal). Use only the variables from shared/theme.css.
+   Tap targets: 44 px = calc(var(--space-6) + var(--space-3)). Hairline borders are 1px, like shared.module.css. */
+
+/* ---------- Page ---------- */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-bottom: var(--space-5);
+}
+
+.top {
+  display: flex;
+  flex-direction: column;
+}
+
+.private {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.icon {
+  width: var(--space-4);
+  height: var(--space-4);
+  flex-shrink: 0;
+}
+
+.chevron {
+  width: var(--space-5);
+  height: var(--space-5);
+  flex-shrink: 0;
+  color: var(--muted);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.h2 {
+  margin: 0;
+  font-size: var(--fs-20);
+  font-weight: 700;
+}
+
+.lead {
+  margin: 0 0 var(--space-2);
+  color: var(--muted);
+  font-size: var(--fs-14);
+  line-height: 1.45;
+}
+
+.sub {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.big {
+  font-size: var(--fs-20);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.value {
+  color: var(--muted);
+  font-size: var(--fs-14);
+  text-align: right;
+}
+
+.good {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--stable);
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+
+.note {
+  color: var(--text);
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+
+.saved {
+  margin: 0;
+  color: var(--stable);
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+
+.error {
+  margin: 0;
+  color: var(--act);
+  font-size: var(--fs-16);
+}
+
+.info {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+
+/* "Saved" line with an optional Undo button. */
+.messageLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.undo {
+  min-height: calc(var(--space-6) + var(--space-3));
+  padding: 0 var(--space-2);
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-size: var(--fs-16);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Inline "Start a new cycle?" question under the buttons (not a pop-up). */
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.confirmText {
+  margin: 0;
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+
+.confirmActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.single {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ---------- Mode line (her mode is set in /profile) ---------- */
+.modeLine {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.modeLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: calc(var(--space-6) + var(--space-3));
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* ---------- Cycle ring ---------- */
+.today {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.todayText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+/* 140 = 4 x 32 + 12 */
+.ring {
+  width: calc(var(--space-6) * 4 + var(--space-3));
+  height: calc(var(--space-6) * 4 + var(--space-3));
+  flex-shrink: 0;
+}
+
+/* Ring of moons: one dot per cycle day, colored by phase. */
+.phasePeriod { fill: var(--phase-period); }
+.phaseFollicular { fill: var(--primary); }
+.phaseOvulation { fill: var(--phase-ovulation); }
+.phaseLuteal { fill: var(--phase-luteal); }
+.phaseNone { fill: var(--line); }
+
+/* Days still to come are dimmed. */
+.dayAfter { opacity: 0.35; }
+
+.todayDot { fill: var(--text); }
+
+.todayHalo {
+  fill: none;
+  stroke: var(--text);
+  opacity: 0.35;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: halo 3.2s ease-in-out infinite;
+}
+
+@keyframes halo {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.1;
+    transform: scale(1.25);
+  }
+}
+
+.ringDay {
+  fill: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-28);
+  font-weight: 700;
+}
+
+.ringOf {
+  fill: var(--muted);
+  font-family: var(--font);
+  font-size: var(--fs-14);
+}
+
+/* ---------- Period suppression ---------- */
+.pillDone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: calc(var(--space-6) + var(--space-3));
+}
+
+.meter {
+  height: var(--space-3);
+  margin-top: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--line);
+  overflow: hidden;
+}
+
+.meterFill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+}
+
+.meterLegend {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+/* ---------- Log a symptom ---------- */
+.logPage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.areaPicker {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* 96 x 180 figure: width 96 = 3 x 32 */
+.figure {
+  width: calc(var(--space-6) * 3);
+  height: auto;
+  flex-shrink: 0;
+}
+
+.figureBody {
+  fill: var(--raised);
+  stroke: var(--muted);
+}
+
+.figureLimb {
+  fill: none;
+  stroke: var(--muted);
+  stroke-linecap: round;
+}
+
+.figureSpot {
+  fill: var(--primary);
+  opacity: 0.85;
+  transition: opacity 0.4s ease;
+}
+
+.areaGrid {
+  flex-grow: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+
+.textInput {
+  min-height: calc(var(--space-6) + var(--space-3));
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-16);
+}
+
+.slider {
+  width: 100%;
+  min-height: calc(var(--space-6) + var(--space-3));
+  accent-color: var(--primary);
+}
+
+.sliderEnds {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.danger {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-14);
+  line-height: 1.45;
+}
+
+.dangerIcon {
+  width: var(--space-5);
+  height: var(--space-5);
+  flex-shrink: 0;
+  color: var(--act);
+}
+
+.dangerLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: calc(var(--space-6) + var(--space-3));
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Sticky bar at the bottom of the log page (no tab bar on this page). */
+.bottomBar {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0 calc(var(--space-4) * -1);
+  padding: var(--space-4) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+  background: var(--tabbar);
+  border-top: 1px solid var(--line);
+}
+
+.bottomBarSingle {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ---------- Motion: slow and soft, off for reduced motion ---------- */
+.rise {
+  animation: rise 0.5s ease-out both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-2));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .todayHalo {
+    animation: none;
+  }
+  .figureSpot {
+    transition: none;
+  }
+}
