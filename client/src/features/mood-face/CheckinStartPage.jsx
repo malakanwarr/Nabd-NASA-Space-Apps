@@ -7,13 +7,17 @@ import { useNavigate } from 'react-router-dom';
 import ScreenHeader from '../../shared/ScreenHeader.jsx';
 import ListRow from '../../shared/ListRow.jsx';
 import Button from '../../shared/Button.jsx';
+import { apiFetch } from '../../shared/api.js';
 import { getSampleData } from '../../shared/sampleData.js';
-import { LockIcon, PhoneIcon, QuietIcon, SunIcon } from './Icons.jsx';
+import { useSession } from '../../shared/session.js';
+import { CheckCircleIcon, LockIcon, PhoneIcon, QuietIcon, SunIcon } from './Icons.jsx';
 import s from './styles.module.css';
 
 export default function CheckinStartPage() {
   const navigate = useNavigate();
+  const session = useSession();
   const [missionDay, setMissionDay] = useState(null);
+  const [doneToday, setDoneToday] = useState(false);
   const [asking, setAsking] = useState(false);
 
   useEffect(() => {
@@ -27,6 +31,21 @@ export default function CheckinStartPage() {
       cancelled = true;
     };
   }, []);
+
+  // Has she already checked in today? GET /api/mood returns her last 7 check-ins, one per mission day.
+  // If the server cannot be reached we simply show the normal start screen.
+  useEffect(() => {
+    if (!missionDay || !session?.id) return undefined;
+    let cancelled = false;
+    apiFetch(`/api/mood?crewId=${encodeURIComponent(session.id)}`)
+      .then((list) => {
+        if (!cancelled && Array.isArray(list)) setDoneToday(list.some((c) => c.missionDay === missionDay));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [missionDay, session?.id]);
 
   // The tap is what lets the phone ask. We stop the test stream at once; the record page opens the camera itself.
   async function allowAndStart() {
@@ -47,6 +66,15 @@ export default function CheckinStartPage() {
     <main>
       <ScreenHeader eyebrow={missionDay ? `Daily · Day ${missionDay}` : 'Daily'} title="Today's check-in" />
       <p className={s.lead}>About 4 minutes · 2 steps</p>
+
+      {doneToday && (
+        <p className={s.checkedIn} role="status">
+          <span className={s.checkedInIcon}><CheckCircleIcon /></span>
+          <span>
+            <strong>You've already checked in today.</strong> Checking in again replaces today's result.
+          </span>
+        </p>
+      )}
 
       <ListRow
         icon={<span className={s.stepIcon}>1</span>}
@@ -77,8 +105,9 @@ export default function CheckinStartPage() {
       </p>
 
       <div className={s.startActions}>
-        <Button onClick={allowAndStart} disabled={asking}>
-          {asking ? 'Waiting for your phone…' : 'Allow camera and mic, then start'}
+        {doneToday && <Button to="/checkin/results">See today's results</Button>}
+        <Button variant={doneToday ? 'secondary' : 'primary'} onClick={allowAndStart} disabled={asking}>
+          {asking ? 'Waiting for your phone…' : doneToday ? 'Check in again' : 'Allow camera and mic, then start'}
         </Button>
         <Button variant="text" to="/checkin/record" state={{ mode: 'voice' }}>
           Voice only today
