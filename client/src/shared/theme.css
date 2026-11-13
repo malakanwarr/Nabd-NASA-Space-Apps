@@ -12,6 +12,9 @@
   --stable: #6ee0a8;
   --watch: #ffc857;
   --act: #ff6b5b;
+  --phase-period: #e58fb0;
+  --phase-ovulation: #c9a0ff;
+  --phase-luteal: #3b4a80;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -47,6 +50,9 @@
   --stable: #17855a;
   --watch: #9a6700;
   --act: #c9372c;
+  --phase-period: #c2457a;
+  --phase-ovulation: #7a4fd1;
+  --phase-luteal: #b7c3de;
 }
 
 * {
