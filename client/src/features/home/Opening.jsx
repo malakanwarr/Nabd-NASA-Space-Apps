@@ -1,18 +1,15 @@
 // Opening animation (owner: Hana Sakr). Shown by App.jsx while the app loads: no props, no data, no navigation.
 // Image credits: the planet images came from the team's "Real Space" file. Before submitting, find the
 // original source (NASA Blue Marble / Black Marble or similar) and give it to Layal for the data log.
-import { useLayoutEffect, useRef, useState } from 'react';
 import Planet from '../../shared/Planet.jsx';
-import { pointOnPath, ROCKET_STILL_T } from './rocketPath.js';
+import { ROCKET_STILL, ROUTE } from './rocketPath.js';
 import s from './styles.module.css';
 
-const W = 360;
-const H = 640;
-// Same centres in the SVG (units) and for the planets (percent), so they always line up.
-const MARS = { x: 280, y: 110 };
-const EARTH = { x: 84, y: 500 };
-const ROUTE = 'M 118 446 C 20 360, 40 160, 236 124';
-const FLIGHT_MS = 3000; // rocket flight time
+// The design canvas. The art layer keeps this shape and covers the screen, so the route meets both planets
+// on every phone.
+const W = 390;
+const H = 844;
+const pct = (n, of) => `${(n / of) * 100}%`;
 const ECG = 'M0 12 L50 12 L58 6 L66 18 L76 1 L86 23 L94 12 L160 12';
 
 // Fixed star field (same on every load)
@@ -27,86 +24,71 @@ const STARS = Array.from({ length: 44 }, (_, i) => ({
   delay: `${(rand() * 4).toFixed(1)}s`,
 }));
 
-// Rocket art faces right (+x) so rotate="auto" points it along the route.
-function Rocket() {
+// Drawn pointing UP (nose at the top). The moving copy is turned 90 degrees so rotate="auto" keeps the
+// nose along the route.
+function RocketShape() {
   return (
-    <g>
-      <path d="M-12 -2 L-21 0 L-12 2 Z" className={s.flame} />
-      <path d="M-4 -5 L-13 -11 L-12 -3 Z" className={s.fin} />
-      <path d="M-4 5 L-13 11 L-12 3 Z" className={s.fin} />
-      <path d="M15 0 C9 -6 -6 -6 -12 -4 L-12 4 C-6 6 9 6 15 0 Z" className={s.body} />
-      <circle cx="3" cy="0" r="2.5" className={s.window} />
-    </g>
+    <>
+      <path d="M-3.5 3 L-8 10 L-3.5 8 Z" className={s.fin} />
+      <path d="M3.5 3 L8 10 L3.5 8 Z" className={s.fin} />
+      <path d="M-2.2 8 L0 14 L2.2 8 Z" className={s.flame} />
+      <path d="M0 -12 C5 -7 5 5 3.5 8 L-3.5 8 C-5 5 -5 -7 0 -12 Z" className={s.body} />
+      <circle cx="0" cy="-3" r="2.2" className={s.window} />
+    </>
   );
 }
 
 export default function Opening() {
-  const reduced = useState(
-    () =>
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-  )[0];
-  const routeRef = useRef(null);
-  const rocketRef = useRef(null);
-
-  // The rocket is moved with JavaScript (works on every browser and phone; SVG animateMotion did not start).
-  // Reduce Motion: keep the rocket still, two-thirds along the route (day 142 of 210).
-  useLayoutEffect(() => {
-    const path = routeRef.current;
-    const rocket = rocketRef.current;
-    if (!path || !rocket) return undefined;
-    const place = (t) => {
-      const { x, y, angle } = pointOnPath(path, t);
-      rocket.setAttribute('transform', `translate(${x} ${y}) rotate(${angle})`);
-    };
-    if (reduced) {
-      place(ROCKET_STILL_T);
-      return undefined;
-    }
-    place(0);
-    let raf;
-    const start = performance.now();
-    const tick = (now) => {
-      const p = Math.min((now - start) / FLIGHT_MS, 1);
-      place(p * p * (3 - 2 * p)); // soft start and end
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [reduced]);
-
   return (
     <div className={s.opening} role="status" aria-live="polite">
       <div className={s.stage}>
-        <svg viewBox={`0 0 ${W} ${H}`} className={s.sky} aria-hidden="true">
-          {STARS.map((st, i) => (
-            <circle
-              key={i}
-              cx={st.x}
-              cy={st.y}
-              r={st.r}
-              className={st.twinkle ? s.starTwinkle : s.star}
-              style={st.twinkle ? { animationDelay: st.delay, opacity: st.o } : { opacity: st.o }}
-            />
-          ))}
-          <path id="route" ref={routeRef} d={ROUTE} className={s.route} />
+        <div className={s.art}>
+          <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" className={s.sky} aria-hidden="true">
+            {STARS.map((st, i) => (
+              <circle
+                key={i}
+                cx={st.x}
+                cy={st.y}
+                r={st.r}
+                className={st.twinkle ? s.starTwinkle : s.star}
+                style={st.twinkle ? { animationDelay: st.delay, opacity: st.o } : { opacity: st.o }}
+              />
+            ))}
 
-          <g ref={rocketRef}>
-            <Rocket />
-          </g>
-        </svg>
+            {/* The route: a dotted guide, and a blue line that draws in as the rocket flies. */}
+            <path d={ROUTE} className={s.routeGuide} />
+            <path d={ROUTE} pathLength="100" className={s.routeLine} />
 
-        <div
-          className={s.planet}
-          style={{ left: `${(MARS.x / W) * 100}%`, top: `${(MARS.y / H) * 100}%` }}
-        >
-          <Planet kind="mars" size={88} />
-        </div>
-        <div
-          className={s.planet}
-          style={{ left: `${(EARTH.x / W) * 100}%`, top: `${(EARTH.y / H) * 100}%` }}
-        >
-          <Planet kind="earth" size={120} />
+            {/* The rocket launches from Earth, flies up the curve nose first, arrives at Mars and fades. */}
+            <g className={s.rocketMoving}>
+              <animateMotion
+                dur="7s"
+                repeatCount="indefinite"
+                rotate="auto"
+                path={ROUTE}
+                keyPoints="0;1;1"
+                keyTimes="0;0.7;1"
+                calcMode="spline"
+                keySplines="0.42 0 0.58 1;0 0 1 1"
+              />
+              <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.7;0.78;1" dur="7s" repeatCount="indefinite" />
+              <g transform="rotate(90)">
+                <RocketShape />
+              </g>
+            </g>
+            {/* Less motion: the rocket waits two-thirds of the way, nose along the route. */}
+            <g className={s.rocketStill} transform={ROCKET_STILL}>
+              <RocketShape />
+            </g>
+          </svg>
+
+          {/* Above the route, so the line starts at Earth's rim and ends at Mars's. */}
+          <div className={s.planetBox} style={{ left: pct(-110, W), bottom: pct(-70, H), width: pct(320, W) }}>
+            <Planet kind="earth" size="100%" />
+          </div>
+          <div className={s.planetBox} style={{ right: pct(-36, W), top: pct(72, H), width: pct(150, W) }}>
+            <Planet kind="mars" size="100%" />
+          </div>
         </div>
 
         <div className={s.center}>

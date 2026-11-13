@@ -294,7 +294,7 @@ export default function SurgeonPage() {
                   <span className={styles.crewItemTop}>
                     <span className={styles.crewName}>{member.name || 'Crew member'}</span>
                     <span className={`${styles.crewStatus} ${className}`}>
-                      {reviewIds.includes(id) ? 'Watch' : String(member.status || 'Stable')}
+                      {reviewIds.includes(id) ? 'Watch' : String(member.status || 'Stable').replace(/^./, (c) => c.toUpperCase())}
                     </span>
                   </span>
                   <span className={styles.crewSummary}>

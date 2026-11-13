@@ -347,7 +347,7 @@ export default function HomeWindowPage() {
           </div>
         ) : (
           <Button
-            variant={phase === 'sent' ? 'secondary' : 'primary'}
+            variant="secondary"
             disabled={phase === 'requesting' || phase === 'sending'}
             onClick={startRecording}
           >
@@ -377,7 +377,7 @@ export default function HomeWindowPage() {
             <ListRow
               icon={<span className={s.kind}>{m.kind === 'voice' ? <MicIcon /> : <ImageIcon />}</span>}
               title={m.title}
-              subtitle={m.when}
+              subtitle={m.id === 'laila-rocket' ? String(m.when || '').replace('Photo', 'Drawing') : m.when}
             />
             {m.kind === 'voice' && m.mediaUrl && (
               <audio className={s.historyAudio} controls preload="none" src={m.mediaUrl}>

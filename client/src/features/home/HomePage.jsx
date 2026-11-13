@@ -141,7 +141,7 @@ export default function HomePage() {
           <dd className={s.statValue}>{mission.daysToMars} days</dd>
         </div>
       </dl>
-      <p className={s.source}>Distance and delay: NASA data, illustrative for this demo.</p>
+      <p className={s.source}>Distance and delay from NASA mission data. The map is not to scale.</p>
 
       <section className={s.cta} aria-busy={checkinNow === 'checking'}>
         {checkinNow === 'checking' && (

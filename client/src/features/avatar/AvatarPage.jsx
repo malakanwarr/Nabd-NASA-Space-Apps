@@ -114,7 +114,7 @@ export default function AvatarPage() {
     <main className={s.page}>
       <ScreenHeader
         backTo="/family/window"
-        backLabel="Home window"
+        backLabel="Family"
         title={selectedMeta.id === 'you' ? 'Make your avatar' : `Edit ${selectedMeta.name}'s avatar`}
       />
 

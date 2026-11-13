@@ -20,7 +20,6 @@ import RecordPage from './features/mood-voice/RecordPage.jsx';
 import GamePage from './features/game/GamePage.jsx';
 import ResultsPage from './features/mood-results/ResultsPage.jsx';
 import SendHugPage from './features/hugs/SendHugPage.jsx';
-import JoinPage from './features/family-app/JoinPage.jsx';
 import HomeWindowPage from './features/home-window/HomeWindowPage.jsx';
 import HealthPage from './features/health/HealthPage.jsx';
 import SleepPage from './features/health/SleepPage.jsx';
@@ -88,7 +87,8 @@ export default function App() {
       <Route element={<Layout />}>
         {/* Always open */}
         <Route path="/send" element={<SendHugPage />} />
-        <Route path="/join" element={<JoinPage />} />
+        {/* Joining as family has no screen yet: send people to the hug page until it does. */}
+        <Route path="/join" element={<Navigate to="/send" replace />} />
         <Route path="/signin" element={<CrewSignInPage />} />
         <Route path="/signin/pin" element={<PinPage />} />
         <Route path="/admin/signin" element={<AdminSignInPage />} />

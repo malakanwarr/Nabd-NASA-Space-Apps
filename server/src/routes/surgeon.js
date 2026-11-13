@@ -54,7 +54,10 @@ const plain = (t) => String(t || '').replace(/\*+/g, '').replace(/\s*\[\d+(,\s*\
 function plainSummary({ question, reply, redFlag, redFlagReason }) {
   const firstSentence = plain(reply).split(/(?<=[.!?])\s/)[0] || '';
   const flag = redFlag ? ` Red flag: ${String(redFlagReason || 'danger sign').toLowerCase()}; told to contact the crew medical officer.` : '';
-  return `Asked: "${plain(question)}". AI doctor: ${firstSentence}${flag}`.slice(0, 600);
+  // The question keeps its own full stop or question mark, inside the quotes: never ".".
+  const asked = plain(question);
+  const end = /[.!?]$/.test(asked) ? '' : '.';
+  return `Asked: "${asked}${end}" AI doctor: ${firstSentence}${flag}`.slice(0, 600);
 }
 
 async function aiSummary(exchange) {
