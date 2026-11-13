@@ -38,7 +38,7 @@ export default function TrendChart({ lines, baseline, baselineNote = 'The dashed
         <ResponsiveContainer width="100%" height={height ?? (compact ? 64 : 180)}>
           <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: compact ? 8 : 0 }}>
             <XAxis dataKey="x" hide={compact} axisLine={false} tickLine={false} tick={{ fill: colors.muted, fontSize: 12 }} interval="preserveStartEnd" />
-            <YAxis hide={compact} domain={[lo - pad, hi + pad]} width={44} axisLine={false} tickLine={false} tick={{ fill: colors.muted, fontSize: 12 }} tickFormatter={yFormat} />
+            <YAxis hide={compact} allowDecimals={false} domain={[lo - pad, hi + pad]} width={44} axisLine={false} tickLine={false} tick={{ fill: colors.muted, fontSize: 12 }} tickFormatter={yFormat} />
             {baseline != null && <ReferenceLine y={baseline} stroke={colors.muted} strokeDasharray="4 4" />}
             {lines.map((line, i) => (
               <Line
