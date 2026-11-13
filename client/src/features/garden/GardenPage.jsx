@@ -327,9 +327,6 @@ export default function GardenPage() {
                 </span>
               )}
             </div>
-            <Button to="/checkin/game" state={{ cancelTo: '/' }} variant="secondary">
-              Play Pollen catch
-            </Button>
           </section>
         </>
       )}

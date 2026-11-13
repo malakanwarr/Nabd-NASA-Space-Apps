@@ -200,12 +200,6 @@
   font-size: var(--fs-12);
 }
 
-.greenhouse > a {
-  flex: 0 1 38%;
-  justify-content: center;
-  text-align: center;
-}
-
 /* A gentle note about the plant that needs care, and the crew tree when the crew is low. */
 .careNote { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); margin: var(--space-4) 0; padding: var(--space-3) var(--space-4); border-left: var(--space-1) solid var(--watch); border-radius: var(--radius-sm); background: var(--surface); font-size: var(--fs-14); }
 .careNote p { margin: 0; }
