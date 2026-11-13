@@ -18,17 +18,14 @@ router.get('/', async (req, res, next) => {
 
   try {
     const crewFile = JSON.parse(await readFile(path.join(dataDir, 'crew.json'), 'utf8'));
-    const member = crewFile.crew.find((crewMember) => crewMember.id === crewId);
-    if (!member) return res.status(404).json({ error: 'Crew member not found.' });
+    const memberExists = crewFile.crew.some((crewMember) => crewMember.id === crewId);
+    if (!memberExists) return res.status(404).json({ error: 'Crew member not found.' });
 
     const history = mongoose.connection.readyState === 1
       ? await ReactionTest.find({ crewId }).sort({ date: -1, _id: -1 }).limit(14).select('averageMs date').lean()
       : savedWithoutDb.filter((result) => result.crewId === crewId).slice(-14).reverse();
 
-    return res.json({
-      age: member.age ?? null,
-      history: history.map(({ averageMs, date }) => ({ averageMs, date })),
-    });
+    return res.json({ history: history.map(({ averageMs, date }) => ({ averageMs, date })) });
   } catch (error) {
     return next(error);
   }

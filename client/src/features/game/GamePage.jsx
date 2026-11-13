@@ -31,7 +31,6 @@ export default function GamePage() {
   const [pollen, setPollen] = useState(null);
   const [reactionTimes, setReactionTimes] = useState([]);
   const [misses, setMisses] = useState(0);
-  const [age, setAge] = useState(null);
   const [baselineMs, setBaselineMs] = useState(null);
   const [baselineLoading, setBaselineLoading] = useState(true);
   const [baselineError, setBaselineError] = useState('');
@@ -40,13 +39,11 @@ export default function GamePage() {
 
   useEffect(() => {
     let active = true;
-    const sampleRequests = crewId === 'sara'
-      ? [getSampleData('profile'), getSampleData('reaction-tests')]
-      : [Promise.resolve(null), Promise.resolve(null)];
+    const sampleRequest = crewId === 'sara' ? getSampleData('reaction-tests') : Promise.resolve(null);
     const historyUrl = `/api/game?crewId=${encodeURIComponent(crewId || '')}`;
 
-    Promise.all([Promise.all(sampleRequests), apiFetch(historyUrl)])
-      .then(([[profile, reactionData], ownHistory]) => {
+    Promise.all([sampleRequest, apiFetch(historyUrl)])
+      .then(([reactionData, ownHistory]) => {
         const memberHistory = [
           ...(Array.isArray(reactionData?.recent) ? reactionData.recent : []),
           ...(Array.isArray(ownHistory.history) ? ownHistory.history : []),
@@ -59,7 +56,6 @@ export default function GamePage() {
           ...memberHistory.map((entry) => entry.averageMs),
         ];
         if (active) {
-          setAge(profile?.age ?? ownHistory.age ?? null);
           setBaselineMs(
             baselineValues.length
               ? Math.round(baselineValues.reduce((total, value) => total + value, 0) / baselineValues.length)
@@ -191,9 +187,7 @@ export default function GamePage() {
     }
   }
 
-  const averageMs = reactionTimes.length
-    ? Math.round(reactionTimes.reduce((total, value) => total + value, 0) / reactionTimes.length)
-    : null;
+  const latestReactionMs = reactionTimes.length ? reactionTimes[reactionTimes.length - 1] : null;
 
   return (
     <main className={styles.game}>
@@ -210,13 +204,13 @@ export default function GamePage() {
           <span>Catches</span>
         </div>
         <div className={styles.stat}>
-          <strong>{averageMs == null ? '—' : `${averageMs} ms`}</strong>
+          <strong>{latestReactionMs == null ? '—' : `${latestReactionMs} ms`}</strong>
           <span>
             {baselineLoading
-              ? 'Loading your baseline…'
+              ? 'Loading baseline…'
               : baselineMs == null
-                ? `Age ${age ?? '—'} · building your baseline`
-                : `Age ${age ?? '—'} · baseline ${baselineMs} ms`}
+                ? 'Baseline unavailable'
+                : `Baseline ${baselineMs} ms`}
           </span>
         </div>
         <div className={styles.stat}>
