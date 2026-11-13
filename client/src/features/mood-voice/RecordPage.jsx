@@ -77,7 +77,7 @@ export default function RecordPage() {
           Cancel
         </Link>
         <div className={s.step}>
-          <StepProgress step={1} total={2} label="Face and voice" />
+          <StepProgress step={1} total={3} label="Face and voice" />
         </div>
       </header>
 

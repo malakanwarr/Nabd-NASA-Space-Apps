@@ -17,6 +17,7 @@ import ListRow from '../../shared/ListRow.jsx';
 import { useSession } from '../../shared/session.js';
 import { fillOf } from './MuscleFigure.jsx';
 import WorkoutTwin from './WorkoutTwin.jsx';
+import { recordWorkoutHeart } from '../health/workoutHeart.js';
 import FinishSummary from './FinishSummary.jsx';
 import { BreathingRing, NextUp, ProgressRing, SegmentBar, mainMusclesOf } from './WorkoutParts.jsx';
 import { countBeep, finishChime, unlockAudio } from './beeps.js';
@@ -178,6 +179,7 @@ export default function WorkoutPage() {
     releaseScreen();
     setConfirmEnd(false);
     setSummary(saveResult(e));
+    recordWorkoutHeart({ crewId, seconds: e.totalAcc, level: e.workout.level }); // heart rate response, by itself
     setPhase('done');
   }
 
