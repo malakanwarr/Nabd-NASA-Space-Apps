@@ -202,7 +202,7 @@ export default function GardenPage() {
                 Crew tree {greenhouse.crewTreePercent}% · harvest in {greenhouse.harvestInDays} days
               </span>
             </div>
-            <Button to="/checkin/game" variant="secondary">
+            <Button to="/checkin/game" state={{ cancelTo: '/' }} variant="secondary">
               Play Pollen catch
             </Button>
           </section>
