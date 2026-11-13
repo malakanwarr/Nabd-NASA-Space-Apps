@@ -45,6 +45,8 @@ export default function RecordPage() {
   const listening = status === 'running';
   const voiceFinished = status === 'done' || status === 'error' || status === 'blocked';
   const voiceNumbers = status === 'done' ? metrics : null;
+  // In face mode the face check must finish first: leaving the page stops the camera before the numbers arrive.
+  const faceReady = mode === 'voice' || faceStatus === 'done';
 
   // The camera says "carry on with voice only": drop the camera, keep the microphone.
   function voiceOnly() {
@@ -171,7 +173,7 @@ export default function RecordPage() {
             </Button>
           )}
 
-          {voiceFinished && (
+          {voiceFinished && faceReady && (
             <>
               <Button onClick={goToGame}>Next: Pollen catch</Button>
               {status !== 'done' && (
@@ -179,8 +181,20 @@ export default function RecordPage() {
                   We will carry on without the voice numbers. Your check-in still works.
                 </p>
               )}
-              {mode === 'face' && faceStatus === 'running' && (
-                <p className={s.muted}>The face check is still finishing. You can carry on.</p>
+            </>
+          )}
+
+          {voiceFinished && !faceReady && (
+            <>
+              <p className={s.muted} role="status">
+                {faceStatus === 'idle'
+                  ? 'Turn on the camera above to finish the face check.'
+                  : 'Finishing the face check…'}
+              </p>
+              {faceStatus === 'idle' && (
+                <Button variant="text" onClick={voiceOnly}>
+                  Continue with voice only
+                </Button>
               )}
             </>
           )}
