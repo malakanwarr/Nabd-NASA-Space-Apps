@@ -7,7 +7,9 @@ import { getSampleData } from '../../shared/sampleData.js';
 import styles from './styles.module.css';
 
 const isDemo = new URLSearchParams(window.location.search).get('demo') === '1';
-const durationMs = isDemo ? 30_000 : 180_000;
+const durationMs = isDemo ? 30_000 : 60_000;
+const pollenLifetimeMs = 2_000;
+const hitRadiusRatio = 0.1;
 
 function formatTime(milliseconds) {
   const totalSeconds = Math.ceil(milliseconds / 1000);
@@ -73,6 +75,16 @@ export default function GamePage() {
   }, [phase, pollen]);
 
   useEffect(() => {
+    if (phase !== 'playing' || !pollen) return undefined;
+    const remaining = Math.max(0, pollen.shownAt + pollenLifetimeMs - performance.now());
+    const timer = window.setTimeout(() => {
+      setPollen(null);
+      setMisses((count) => count + 1);
+    }, remaining);
+    return () => window.clearTimeout(timer);
+  }, [phase, pollen]);
+
+  useEffect(() => {
     if (phase !== 'saving') return undefined;
     let active = true;
     const averageMs = reactionTimes.length
@@ -97,9 +109,22 @@ export default function GamePage() {
     };
   }, [phase, reactionTimes, misses, navigate]);
 
-  function handleFieldTap() {
+  function handleFieldTap(event) {
     if (phase !== 'playing') return;
     if (!pollen) {
+      setMisses((count) => count + 1);
+      return;
+    }
+    if (performance.now() - pollen.shownAt >= pollenLifetimeMs) {
+      setPollen(null);
+      setMisses((count) => count + 1);
+      return;
+    }
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const pollenX = bounds.left + bounds.width * pollen.x / 100;
+    const pollenY = bounds.top + bounds.height * pollen.y / 100;
+    const distance = Math.hypot(event.clientX - pollenX, event.clientY - pollenY);
+    if (distance > Math.min(bounds.width, bounds.height) * hitRadiusRatio) {
       setMisses((count) => count + 1);
       return;
     }

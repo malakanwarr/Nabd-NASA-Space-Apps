@@ -1,1 +1,207 @@
 /* Styles for garden (owner: Salma). Use only the variables from shared/theme.css. */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.message {
+  display: grid;
+  gap: var(--space-3);
+  color: var(--muted);
+}
+
+.message h2,
+.message p {
+  margin: 0;
+}
+
+.message h2 {
+  color: var(--text);
+  font-size: var(--fs-16);
+}
+
+.domeWrap {
+  width: 100%;
+  margin-top: var(--space-1);
+}
+
+.dome {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.domeOutline {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.stars {
+  fill: var(--muted);
+}
+
+.stem,
+.trunk {
+  fill: none;
+  stroke: var(--stable);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.trunk {
+  stroke: var(--watch);
+  stroke-width: 4;
+}
+
+.leafPrimary {
+  fill: var(--primary);
+}
+
+.flower {
+  fill: var(--watch);
+}
+
+.flowerCenter {
+  fill: var(--text);
+}
+
+.canopy {
+  fill: var(--stable);
+}
+
+.soil {
+  fill: var(--raised);
+}
+
+.plantLabel {
+  fill: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-12);
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: var(--space-1) 0 var(--space-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.stat {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  color: var(--muted);
+  font-size: var(--fs-12);
+}
+
+.stat + .stat {
+  border-left: 1px solid var(--line);
+}
+
+.stat strong {
+  color: var(--text);
+  font-size: var(--fs-20);
+  line-height: 1;
+}
+
+.habits {
+  display: grid;
+}
+
+.habit {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.habitHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--fs-14);
+}
+
+.habitHeading > span:first-child {
+  min-width: 0;
+}
+
+.habitHeading > span:last-child {
+  flex: 0 0 auto;
+  font-size: var(--fs-12);
+}
+
+.lowStatus {
+  color: var(--watch);
+  font-weight: 700;
+}
+
+.growingStatus {
+  color: var(--muted);
+}
+
+.progress {
+  height: var(--space-1);
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--line);
+}
+
+.progressFill,
+.progressLow {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.progressFill {
+  background: var(--primary);
+}
+
+.progressLow {
+  background: var(--watch);
+}
+
+.greenhouse {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0 var(--space-4);
+}
+
+.greenhouseIcon {
+  flex: 0 0 auto;
+  color: var(--stable);
+  width: var(--space-6);
+  height: var(--space-6);
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
+.greenhouseCopy {
+  display: grid;
+  flex: 1 1 auto;
+  gap: var(--space-1);
+  font-size: var(--fs-14);
+}
+
+.greenhouseCopy span {
+  color: var(--muted);
+  font-size: var(--fs-12);
+}
+
+.greenhouse > a {
+  flex: 0 1 38%;
+  justify-content: center;
+  text-align: center;
+}
