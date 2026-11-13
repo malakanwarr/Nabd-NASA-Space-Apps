@@ -302,6 +302,32 @@ export default function ResultsPage() {
     window.scrollTo(0, 0);
   }
 
+  // A test person's first check-in is not scored: it only sets their normal.
+  if (label === FIRST_LABEL) {
+    return (
+      <main>
+        <ScreenHeader
+          backTo={mode === 'latest' ? '/' : undefined}
+          backLabel="Home"
+          eyebrow={eyebrow}
+          title={FIRST_LABEL}
+        />
+        <section className={s.block} aria-label="Your normal">
+          <StatusLabel status="stable" />
+          <p className={s.advice}>Later check-ins are compared with this one.</p>
+          {saveProblem && !viewingPast && (
+            <p className={s.problem} role="alert">
+              We could not save it: {saveProblem}
+            </p>
+          )}
+        </section>
+        <div className={s.actions}>
+          <Button to="/">Back to home</Button>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main>
       <ScreenHeader
