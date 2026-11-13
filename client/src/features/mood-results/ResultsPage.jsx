@@ -1,57 +1,100 @@
 // Results page, screen #11 "Check-in results" (owner: Malak).
 // Route: /checkin/results
 //
-// Puts together today's face numbers, voice numbers and Salma's reaction time, works out
-// the energy score against Sara's baseline, saves the check-in and shows the last 7 days.
+// Two ways in:
+//   1. Straight after a check-in. The pollen catch game navigates here with state, so we put
+//      together the face numbers, the voice numbers and Salma's reaction time, work out the
+//      energy score against the baseline, save it and show the last 7 days.
+//   2. Opened directly (from the check-in start page or Home), with no state. We load the
+//      latest saved check-in for today instead and save nothing.
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Button from '../../shared/Button.jsx';
+import Chip from '../../shared/Chip.jsx';
 import ListRow from '../../shared/ListRow.jsx';
+import ScreenHeader from '../../shared/ScreenHeader.jsx';
 import StatusLabel from '../../shared/StatusLabel.jsx';
 import { apiFetch } from '../../shared/api.js';
 import { getSampleData } from '../../shared/sampleData.js';
-import { readDraft } from '../mood-voice/checkinDraft.js';
+import { useSession } from '../../shared/session.js';
+import { clearDraft, readDraft } from '../mood-voice/checkinDraft.js';
 import { computeEnergyScore, describeChanges, labelWords } from './energyScore.js';
 import EnergyChart from './EnergyChart.jsx';
-import { NORMAL_SPREAD, advice, chartPoints, daysInARow, runLine } from './resultsText.js';
+import {
+  NORMAL_SPREAD,
+  advice,
+  chartPoints,
+  dayName,
+  daysInARow,
+  runLine,
+} from './resultsText.js';
 import s from './styles.module.css';
 
 // A check-in left behind by an abandoned attempt is not today's news.
 const DRAFT_GOES_STALE_AFTER = 30 * 60 * 1000;
 
-// Where today's numbers come from: the game page passes them on, and the draft in this tab
-// is the backup. Salma's reaction time arrives in the navigation state.
-function todaysNumbers(state) {
-  const fromState = state || {};
+// Where a fresh check-in's numbers come from: the game page passes Salma's reaction time on
+// in the navigation state, and the face and voice numbers come from the same state or, if the
+// game did not pass them on, from the draft the record page left in this tab.
+function freshNumbers(state) {
   const draft = readDraft();
-  const fresh = draft && Date.now() - (draft.at || 0) < DRAFT_GOES_STALE_AFTER ? draft : {};
+  const kept = draft && Date.now() - (draft.at || 0) < DRAFT_GOES_STALE_AFTER ? draft : {};
   return {
-    face: fromState.face ?? fresh.face ?? null,
-    voice: fromState.voice ?? fresh.voice ?? null,
-    reactionMs: fromState.reactionMs ?? fresh.reactionMs ?? null,
+    face: state.face ?? kept.face ?? null,
+    voice: state.voice ?? kept.voice ?? null,
+    reactionMs: state.reactionMs ?? kept.reactionMs ?? null,
+  };
+}
+
+// A saved check-in as the screen shows it.
+function shape(row) {
+  return {
+    missionDay: row.missionDay,
+    date: row.date,
+    energyScore: row.energyScore,
+    label: row.label,
+    face: row.face || null,
+    voice: row.voice || null,
+    reactionMs: row.reactionMs ?? null,
+    sleepHours: row.context ? row.context.sleepHours : undefined,
   };
 }
 
 export default function ResultsPage() {
   const location = useLocation();
+  const session = useSession();
+  const crewId = (session && session.id) || 'sara';
 
   const [phase, setPhase] = useState('loading'); // loading | ready | empty | error
+  const [mode, setMode] = useState('fresh'); // fresh = just checked in · latest = opened directly
   const [problem, setProblem] = useState(null);
   const [saveProblem, setSaveProblem] = useState(null);
   const [baseline, setBaseline] = useState(null);
   const [today, setToday] = useState(null);
-  const [result, setResult] = useState(null); // { energyScore, label, face, voice, reactionMs }
+  const [result, setResult] = useState(null); // today's check-in, see shape()
   const [history, setHistory] = useState([]);
-  const [missionDay, setMissionDay] = useState(null);
+  const [pickedDay, setPickedDay] = useState(null); // a past day chosen from the chips
 
-  // Save once, however often React re-runs the effect.
-  const savedAlready = useRef(false);
+  // Save once, however often React re-runs the effect: every run waits for the same save.
+  const saveRef = useRef(null);
 
   useEffect(() => {
     let alive = true;
 
+    // The last 7 days for the chart, oldest first.
+    async function loadHistory() {
+      const rows = await apiFetch(`/api/mood?crewId=${encodeURIComponent(crewId)}`);
+      return Array.isArray(rows) ? rows : [];
+    }
+
     async function run() {
-      const { face, voice, reactionMs } = todaysNumbers(location.state);
+      // The game navigates here with state. Opened any other way there is none.
+      const arrivedFromGame = location.state !== null && typeof location.state === 'object';
+      const numbers = arrivedFromGame ? freshNumbers(location.state) : null;
+      const measured = numbers && (numbers.face || numbers.voice);
+      setMode(measured ? 'fresh' : 'latest');
+      setPickedDay(null);
+
       try {
         const [baselineFile, todayFile] = await Promise.all([
           getSampleData('baseline'),
@@ -61,52 +104,73 @@ export default function ResultsPage() {
         setBaseline(baselineFile);
         setToday(todayFile);
 
-        // Nobody checked in: show the history and the way back to the check-in.
-        if (!face && !voice) {
-          const rows = await apiFetch('/api/mood').catch(() => []);
+        // ---- Opened directly: show the latest check-in saved today.
+        if (!measured) {
+          const rows = await loadHistory();
           if (!alive) return;
-          setHistory(Array.isArray(rows) ? rows : []);
-          setPhase('empty');
+          setHistory(rows);
+          const savedToday = rows.filter((row) => row.missionDay === todayFile.missionDay);
+          const latest = savedToday[savedToday.length - 1];
+          if (!latest) {
+            setPhase('empty');
+            return;
+          }
+          setResult(shape(latest));
+          setPhase('ready');
           return;
         }
 
+        // ---- Just checked in: score it, show it, save it.
+        const { face, voice, reactionMs } = numbers;
         const { energyScore, label } = computeEnergyScore(face, voice, baselineFile, reactionMs);
-        if (!alive) return;
         if (energyScore === null) {
           setProblem('We did not get enough from the camera or the microphone to work out a score.');
           setPhase('error');
           return;
         }
-        setResult({ energyScore, label, face, voice, reactionMs });
-        setMissionDay(todayFile.missionDay);
+        const now = {
+          missionDay: todayFile.missionDay,
+          date: todayFile.date,
+          energyScore,
+          label,
+          face,
+          voice,
+          reactionMs,
+          sleepHours: todayFile.sleepLastNightHours,
+        };
+        setResult(now);
         setPhase('ready');
 
-        // Save it, then read the last 7 days back for the chart.
-        let saved = null;
-        if (!savedAlready.current) {
-          savedAlready.current = true;
-          try {
-            saved = await apiFetch('/api/mood', {
-              method: 'POST',
-              body: {
-                face,
-                voice,
-                context: { sleepHours: todayFile.sleepLastNightHours },
-                energyScore,
-                label,
-                reactionMs,
-              },
-            });
-          } catch (err) {
-            if (alive) setSaveProblem(err.message);
+        if (!saveRef.current) {
+          saveRef.current = apiFetch('/api/mood', {
+            method: 'POST',
+            body: {
+              crewId,
+              face,
+              voice,
+              context: { sleepHours: todayFile.sleepLastNightHours },
+              energyScore,
+              label,
+              reactionMs,
+            },
+          })
+            .then((saved) => ({ saved }))
+            .catch((err) => ({ error: err.message }));
+        }
+        const outcome = await saveRef.current;
+        if (!alive) return;
+        if (outcome.error) setSaveProblem(outcome.error);
+        else {
+          // It is saved, so the half-finished draft has done its job.
+          clearDraft();
+          if (outcome.saved && outcome.saved.missionDay) {
+            setResult({ ...now, missionDay: outcome.saved.missionDay });
           }
         }
-        if (!alive) return;
-        if (saved && saved.missionDay) setMissionDay(saved.missionDay);
 
         try {
-          const rows = await apiFetch('/api/mood');
-          if (alive && Array.isArray(rows)) setHistory(rows);
+          const rows = await loadHistory();
+          if (alive) setHistory(rows);
         } catch {
           // The chart simply shows today only; the score is already on the screen.
           if (alive) setHistory([]);
@@ -123,7 +187,7 @@ export default function ResultsPage() {
     return () => {
       alive = false;
     };
-  }, [location.state]);
+  }, [location.state, crewId]);
 
   if (phase === 'loading') {
     return (
@@ -165,10 +229,7 @@ export default function ResultsPage() {
     const points = chartPoints(history, baselineScore);
     return (
       <main>
-        <header className={s.head}>
-          <p className={s.eyebrow}>Check-in</p>
-          <h1 className={s.title}>No check-in yet today</h1>
-        </header>
+        <ScreenHeader backTo="/" backLabel="Home" eyebrow="Check-in" title="No check-in yet today" />
         <p className={s.muted}>
           The check-in takes two minutes: read one sentence out loud, then catch some pollen.
         </p>
@@ -185,21 +246,49 @@ export default function ResultsPage() {
     );
   }
 
-  const { energyScore, label, face, voice, reactionMs } = result;
+  // The check-in the chart can be read against: the saved days, plus today's if the server
+  // did not give it back (saving failed or the list could not be read).
+  const known = history.some((row) => row.missionDay === result.missionDay)
+    ? history
+    : [...history, result].slice(-7);
+
+  // Today's, or a past day the person picked from the days under the chart.
+  const pickedRow = pickedDay === null ? null : known.find((row) => row.missionDay === pickedDay);
+  const viewingPast = Boolean(pickedRow) && pickedRow.missionDay !== result.missionDay;
+  const shown = viewingPast ? shape(pickedRow) : result;
+  const shownAt = known.findIndex((row) => row.missionDay === shown.missionDay);
+
+  const { energyScore, label, face, voice, reactionMs } = shown;
   const words = labelWords(label);
   const changes = describeChanges(face, voice, baseline, reactionMs);
-  const points = chartPoints(history.length ? history : [{ date: today.date, energyScore, label }], baselineScore);
-  const run = daysInARow(history);
+  const points = chartPoints(known, baselineScore);
+  const run = daysInARow(known.slice(0, shownAt + 1));
+
+  // The sleep behind the advice is that day's own sleep.
+  const adviceToday = viewingPast
+    ? { sleepLastNightHours: shown.sleepHours, sleepShortNightsInARow: 0 }
+    : today;
+
+  const eyebrow = viewingPast
+    ? `Check-in · Day ${shown.missionDay}`
+    : mode === 'latest'
+      ? `Latest check-in · Day ${shown.missionDay}`
+      : `${saveProblem ? 'Check-in not saved' : 'Check-in saved'} · Day ${shown.missionDay}`;
+
+  function pick(day) {
+    setPickedDay(day === result.missionDay ? null : day);
+    // The result is at the top, the days are under the chart.
+    window.scrollTo(0, 0);
+  }
 
   return (
     <main>
-      <header className={s.head}>
-        <p className={s.eyebrow}>
-          {saveProblem ? 'Check-in not saved' : 'Check-in saved'}
-          {missionDay ? ` · Day ${missionDay}` : ''}
-        </p>
-        <h1 className={s.title}>Today vs your normal</h1>
-      </header>
+      <ScreenHeader
+        backTo={mode === 'latest' ? '/' : undefined}
+        backLabel="Home"
+        eyebrow={eyebrow}
+        title={viewingPast ? `Day ${shown.missionDay} vs your normal` : 'Today vs your normal'}
+      />
 
       <section className={s.score} aria-label="Energy">
         <p className={s.big}>
@@ -213,7 +302,7 @@ export default function ResultsPage() {
         </div>
       </section>
 
-      {saveProblem && (
+      {saveProblem && !viewingPast && (
         <p className={s.problem} role="alert">
           We worked out your score but could not save it: {saveProblem}
         </p>
@@ -222,7 +311,7 @@ export default function ResultsPage() {
       <section className={s.block} aria-label="What changed">
         <h2 className={s.heading}>What changed</h2>
         {changes.length === 0 ? (
-          <p className={s.muted}>Nothing to compare today.</p>
+          <p className={s.muted}>Nothing to compare.</p>
         ) : (
           <div>
             {changes.map((row) => (
@@ -239,17 +328,33 @@ export default function ResultsPage() {
             ))}
           </div>
         )}
-        {!face && <p className={s.muted}>Voice only today, so the face numbers are missing.</p>}
-        {!voice && <p className={s.muted}>No voice numbers today, so only the face was compared.</p>}
+        {!face && <p className={s.muted}>Voice only, so the face numbers are missing.</p>}
+        {!voice && <p className={s.muted}>No voice numbers, so only the face was compared.</p>}
       </section>
 
       <section className={s.block} aria-label="Energy, last 7 days">
         <h2 className={s.heading}>Energy, last 7 days</h2>
         <EnergyChart points={points} normalFrom={normalFrom} normalTo={normalTo} />
+        {known.length > 1 && (
+          <>
+            <p className={s.muted}>Tap a day to see how it went.</p>
+            <div className={s.days}>
+              {known.map((row) => (
+                <Chip
+                  key={row.missionDay}
+                  selected={row.missionDay === shown.missionDay}
+                  onClick={() => pick(row.missionDay)}
+                >
+                  {dayName(row.date, row.missionDay === result.missionDay)}
+                </Chip>
+              ))}
+            </div>
+          </>
+        )}
       </section>
 
       <section className={s.block} aria-label="What to do">
-        <p className={s.advice}>{advice(label, today, baseline)}</p>
+        <p className={s.advice}>{advice(label, adviceToday, baseline)}</p>
         <p className={s.nasa}>
           Based on NASA research: on long missions, short and broken sleep is one of the main
           risks to how well a crew member works and feels.
