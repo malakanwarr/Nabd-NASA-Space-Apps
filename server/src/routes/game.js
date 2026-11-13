@@ -19,7 +19,12 @@ router.get('/', async (req, res, next) => {
   try {
     const crewFile = JSON.parse(await readFile(path.join(dataDir, 'crew.json'), 'utf8'));
     const memberExists = crewFile.crew.some((crewMember) => crewMember.id === crewId);
-    if (!memberExists) return res.status(404).json({ error: 'Crew member not found.' });
+    // Ids that are not in the crew list (test ids like exp-malak) have no history of their own here:
+    // they get the general usual reaction time from data/baseline.json instead of an error.
+    if (!memberExists) {
+      const baseline = JSON.parse(await readFile(path.join(dataDir, 'baseline.json'), 'utf8'));
+      return res.json({ history: [], usualMs: Number.isFinite(baseline.reactionTimeMs) ? baseline.reactionTimeMs : null });
+    }
 
     const history = mongoose.connection.readyState === 1
       ? await ReactionTest.find({ crewId }).sort({ date: -1, _id: -1 }).limit(14).select('averageMs date').lean()

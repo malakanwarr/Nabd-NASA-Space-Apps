@@ -69,6 +69,8 @@ export default function GamePage() {
           .slice(-7);
         const baselineValues = [
           ...(Number.isFinite(reactionData?.usualMs) ? [reactionData.usualMs] : []),
+          // Test ids (exp-...) get the general usual value from the server.
+          ...(Number.isFinite(ownHistory?.usualMs) ? [ownHistory.usualMs] : []),
           ...memberHistory.map((entry) => entry.averageMs),
         ];
         if (active) {
