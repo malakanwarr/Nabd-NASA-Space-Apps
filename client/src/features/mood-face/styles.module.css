@@ -1,2 +1,46 @@
 /* Styles for mood-face (owner: Habiba). Use only the variables from shared/theme.css. */
-.camera { border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--space-4); color: var(--muted); }
+
+/* ---------- Check-in start (board 7) ---------- */
+.lead { margin: 0 0 var(--space-4); color: var(--muted); font-size: var(--fs-16); }
+.stepIcon { display: flex; align-items: center; justify-content: center; flex: none; width: var(--space-6); height: var(--space-6); border-radius: var(--radius-full); background: var(--raised); color: var(--text); font-family: var(--font-mono); font-weight: 700; font-size: var(--fs-14); }
+.sectionTitle { margin: var(--space-5) 0 var(--space-2); font-size: var(--fs-20); font-weight: 700; }
+.tips { list-style: none; margin: 0; padding: 0; }
+.tip { display: flex; align-items: center; gap: var(--space-3); min-height: 44px; padding: var(--space-2) 0; border-bottom: 1px solid var(--line); font-size: var(--fs-16); }
+.tip svg { flex: none; color: var(--muted); }
+.why { margin: var(--space-4) 0 0; color: var(--muted); font-size: var(--fs-14); }
+.privacy { display: flex; align-items: flex-start; gap: var(--space-3); margin: var(--space-4) 0 0; color: var(--muted); font-size: var(--fs-14); }
+.privacy svg { flex: none; }
+.startActions { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-5); }
+
+/* ---------- Camera panel (board 8) ---------- */
+.panel { position: relative; aspect-ratio: 16 / 15; overflow: hidden; border-radius: var(--radius-md); background: var(--surface); }
+.panel[hidden] { display: none; }
+.video, .dots { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+.panelCenter { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: var(--space-4); }
+.panelMessage { margin: 0; color: var(--muted); font-size: var(--fs-14); }
+
+.bracketTL, .bracketTR, .bracketBL, .bracketBR { position: absolute; width: var(--space-5); height: var(--space-5); border: 0 solid var(--text); pointer-events: none; }
+.bracketTL { top: var(--space-5); left: var(--space-6); border-top-width: 2px; border-left-width: 2px; }
+.bracketTR { top: var(--space-5); right: var(--space-6); border-top-width: 2px; border-right-width: 2px; }
+.bracketBL { bottom: var(--space-6); left: var(--space-6); border-bottom-width: 2px; border-left-width: 2px; }
+.bracketBR { bottom: var(--space-6); right: var(--space-6); border-bottom-width: 2px; border-right-width: 2px; }
+
+.scan { position: absolute; left: var(--space-6); right: var(--space-6); top: 50%; height: 2px; background: linear-gradient(90deg, transparent, var(--primary), transparent); animation: scan 3.2s ease-in-out infinite alternate; pointer-events: none; }
+@keyframes scan { from { top: 20%; } to { top: 80%; } }
+
+.chip { position: absolute; display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); background: color-mix(in srgb, var(--bg) 75%, transparent); color: var(--text); font-size: var(--fs-14); font-weight: 600; }
+.chipTop { top: var(--space-3); left: var(--space-3); }
+.chipLeft { bottom: var(--space-3); left: var(--space-3); }
+.chipRight { bottom: var(--space-3); right: var(--space-3); }
+.recDot { width: var(--space-2); height: var(--space-2); border-radius: var(--radius-full); background: var(--act); }
+.num { font-family: var(--font-mono); }
+
+/* ---------- Error state (board 9) ---------- */
+.errorWrap { display: block; }
+.errorPanel { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); aspect-ratio: 16 / 15; border-radius: var(--radius-md); background: var(--surface); color: var(--watch); }
+.errorIcon { display: flex; }
+.errorLabel { margin: 0; font-size: var(--fs-14); font-weight: 600; }
+.errorTitle { margin: var(--space-4) 0 var(--space-2); font-size: var(--fs-20); font-weight: 700; }
+.errorBody { margin: 0; color: var(--muted); font-size: var(--fs-14); }
+.actions { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-5); }
+.note { margin: var(--space-3) 0 0; color: var(--muted); font-size: var(--fs-14); text-align: center; }

@@ -1,1 +1,10 @@
 /* Styles for profile (owner: Habiba). Use only the variables from shared/theme.css. */
+.identity { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-4); }
+.role { margin: 0; color: var(--muted); font-size: var(--fs-14); }
+.label { margin: var(--space-5) 0 var(--space-2); color: var(--muted); font-size: var(--fs-12); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.themes { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
+.hint { margin: var(--space-2) 0 0; color: var(--muted); font-size: var(--fs-14); }
+.right { max-width: 55%; color: var(--muted); font-size: var(--fs-14); text-align: right; }
+.chevron { color: var(--muted); font-size: var(--fs-20); }
+.account { margin-top: var(--space-5); }
+.account > button, .account > a:last-child { margin-top: var(--space-2); }
