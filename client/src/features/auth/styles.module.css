@@ -1,1 +1,305 @@
-/* Styles for auth (owner: Hana Sakr). Use only the variables from shared/theme.css. */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-height: 100%;
+  padding: var(--space-5) 0;
+  box-sizing: border-box;
+  color: var(--text);
+  font-family: var(--font);
+}
+
+/* ---------- Who's using NABD ---------- */
+.hero,
+.pinHero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--primary);
+}
+.logoMark {
+  width: var(--space-6);
+  height: var(--space-6);
+}
+.wordmark {
+  font-size: var(--fs-20);
+  font-weight: 700;
+}
+
+.heartbeat {
+  width: 100%;
+  max-width: calc(var(--space-6) * 8);
+  height: var(--space-6);
+}
+.heartbeatPath {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .heartbeatPath {
+    stroke-dashoffset: 1;
+    animation: draw 4s ease-in-out infinite;
+  }
+}
+@keyframes draw {
+  0% {
+    stroke-dashoffset: 1;
+  }
+  55%,
+  85% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -1;
+  }
+}
+
+.title {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-28);
+  font-weight: 700;
+}
+.subtitle {
+  margin: 0;
+  font-size: var(--fs-14);
+  color: var(--muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 48px;
+  padding: var(--space-4) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font);
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease;
+}
+.tile:hover {
+  border-color: var(--primary);
+}
+.tile:active {
+  background: var(--raised);
+}
+.tile:focus-visible,
+.key:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.tileName {
+  margin-top: var(--space-2);
+  font-size: var(--fs-16);
+  font-weight: 700;
+}
+.tileRole {
+  font-size: var(--fs-14);
+  color: var(--muted);
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--space-5) * 3);
+  height: calc(var(--space-5) * 3);
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--raised);
+  flex-shrink: 0;
+}
+.avatarLarge {
+  width: calc(var(--space-6) * 3);
+  height: calc(var(--space-6) * 3);
+}
+.avatarSvg {
+  width: 100%;
+  height: 100%;
+}
+.initials {
+  color: var(--text);
+  font-size: var(--fs-20);
+  font-weight: 700;
+}
+
+.skeleton {
+  min-height: calc(var(--space-6) * 5);
+  border-color: transparent;
+  background: linear-gradient(90deg, var(--surface), var(--raised), var(--surface));
+  background-size: 200% 100%;
+  cursor: default;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton {
+    animation: shimmer 2s ease-in-out infinite;
+  }
+}
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  text-align: center;
+}
+.noticeText {
+  margin: 0;
+  font-size: var(--fs-16);
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: auto;
+}
+.privacy {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-14);
+  color: var(--muted);
+}
+.icon {
+  width: var(--space-5);
+  height: var(--space-5);
+  flex-shrink: 0;
+}
+
+/* ---------- PIN ---------- */
+.dots {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+.dot {
+  width: var(--space-4);
+  height: var(--space-4);
+  box-sizing: border-box;
+  border: 2px solid var(--muted);
+  border-radius: var(--radius-full);
+  background: transparent;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease;
+}
+.dotFilled {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+.dotWrong {
+  border-color: var(--act);
+}
+.dotWrong.dotFilled {
+  background: var(--act);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .shake {
+    animation: shake 0.6s ease-in-out;
+  }
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(calc(var(--space-2) * -1));
+  }
+  40% {
+    transform: translateX(var(--space-2));
+  }
+  60% {
+    transform: translateX(calc(var(--space-1) * -1));
+  }
+  80% {
+    transform: translateX(var(--space-1));
+  }
+}
+
+.message {
+  min-height: var(--space-6);
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-14);
+}
+.messageWrong {
+  color: var(--act);
+}
+.messageServer {
+  color: var(--watch);
+}
+
+.pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  width: 100%;
+  max-width: calc(var(--space-6) * 10);
+  margin: auto auto 0;
+}
+.key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-20);
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.key:active:not(:disabled) {
+  background: var(--raised);
+}
+.key:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.keyDelete {
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
