@@ -25,6 +25,7 @@ import SendHugPage from './features/hugs/SendHugPage.jsx';
 import JoinPage from './features/family-app/JoinPage.jsx';
 import HomeWindowPage from './features/home-window/HomeWindowPage.jsx';
 import AvatarPage from './features/avatar/AvatarPage.jsx';
+import MusclesPage from './features/muscles/MusclesPage.jsx';
 import GardenPage from './features/garden/GardenPage.jsx';
 import AdminSignInPage from './features/admin/AdminSignInPage.jsx';
 import CrewOverviewPage from './features/admin/CrewOverviewPage.jsx';
@@ -90,6 +91,7 @@ export default function App() {
           <Route path="/body" element={<BodyPage />} />
           <Route path="/body/cycle" element={<CyclePage />} />
           <Route path="/body/cycle/log" element={<LogSymptomPage />} />
+          <Route path="/body/muscles" element={<MusclesPage />} />
           <Route path="/body/:system" element={<SystemDetailPage />} />
           <Route path="/measure" element={<MeasurePage />} />
           <Route path="/doctor" element={<DoctorPage />} />

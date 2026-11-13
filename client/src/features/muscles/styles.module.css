@@ -1,0 +1,396 @@
+/* Styles for muscles (owner: Layal). Use only the variables from shared/theme.css.
+   SVG sizes (stroke widths) are in viewBox units, not pixels. Hairline borders are 1px, like shared.module.css.
+   Tap targets: 44 px = calc(var(--space-6) + var(--space-3)). */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-bottom: var(--space-5);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.note {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.saved {
+  margin: 0;
+  color: var(--stable);
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+
+.error {
+  margin: 0;
+  color: var(--act);
+  font-size: var(--fs-14);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.single {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.dot {
+  flex: none;
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-full);
+}
+
+/* ---------- Figure (viewBox 320 x 400), astronaut style copied from the Body screen ---------- */
+.stage {
+  position: relative;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.figure {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* The body slides left when the card opens. */
+.body {
+  transition: transform 0.8s ease;
+}
+
+.suit {
+  fill: var(--raised);
+  stroke: var(--muted);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.suitDark {
+  fill: var(--line);
+  stroke: var(--muted);
+  stroke-width: 2;
+}
+
+/* Limbs: a --muted line under a --raised line gives the outline; round caps and joins. */
+.limbEdge,
+.limbFill {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.limbEdge {
+  stroke: var(--muted);
+}
+
+.limbFill {
+  stroke: var(--raised);
+}
+
+.helmet {
+  fill: var(--raised);
+  stroke: var(--muted);
+  stroke-width: 3;
+}
+
+.visor {
+  fill: var(--bg);
+}
+
+.shine {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.4;
+}
+
+/* Back of the helmet: a soft seam instead of the visor. */
+.helmetBack {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.muscle {
+  cursor: pointer;
+  outline: none;
+}
+
+/* Tap area: painted but invisible, so it catches taps; not scaled. */
+.hit {
+  fill: transparent;
+}
+
+.shape {
+  fill: var(--fill);
+  stroke: var(--bg);
+  stroke-width: 1.5;
+  transform: scale(var(--k));
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    transform 1.2s ease,
+    fill 1.2s ease;
+}
+
+.muscleOn .shape,
+.muscle:focus-visible .shape {
+  stroke: var(--primary);
+  stroke-width: 2.5;
+}
+
+/* Today's target muscles glow softly; a slow pulse, static with reduced motion. */
+.focus .shape {
+  filter: drop-shadow(0 0 calc(var(--space-1) * 0.75) var(--primary));
+  animation: glow 3.2s ease-in-out infinite;
+}
+
+@keyframes glow {
+  50% {
+    filter: drop-shadow(0 0 var(--space-2) var(--primary));
+  }
+}
+
+/* Labels, like the Body screen: thin --muted leader, name in --text, status word in its color.
+   The Body screen uses 12 px; 14 px here for the readable-text rule. Fade out while a card is open. */
+.labels {
+  font-family: var(--font);
+  font-size: var(--fs-14);
+  transition: opacity 0.5s ease;
+}
+
+.labelsHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.label {
+  cursor: pointer;
+}
+
+.leader {
+  stroke: var(--muted);
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+.labelName {
+  fill: var(--text);
+  font-weight: 600;
+}
+
+.labelStatus_strong,
+.labelStatus_watch,
+.labelStatus_weak {
+  font-weight: 600;
+}
+
+.labelStatus_strong {
+  fill: var(--stable);
+}
+
+.labelStatus_watch,
+.labelStatus_weak {
+  fill: var(--watch);
+}
+
+.callout {
+  animation: fadeIn 0.5s ease 0.3s both;
+}
+
+.callout line {
+  stroke: var(--primary);
+  stroke-width: 1.5;
+}
+
+.callout circle {
+  fill: var(--primary);
+}
+
+/* ---------- Callout card: from x = 170 to 316 of the 320-wide figure ---------- */
+.card {
+  position: absolute;
+  left: calc(100% * 170 / 320);
+  right: calc(100% * 4 / 320);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-md);
+  background: var(--raised);
+  color: var(--text);
+  animation: fadeIn 0.5s ease 0.3s both;
+}
+
+.close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--space-6) + var(--space-3));
+  height: calc(var(--space-6) + var(--space-3));
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--fs-20);
+  cursor: pointer;
+}
+
+.close:focus-visible,
+.exercise:focus-visible {
+  outline: calc(var(--space-1) / 2) solid var(--primary);
+  outline-offset: calc(var(--space-1) / -2);
+}
+
+.cardTitle {
+  margin: 0;
+  padding-right: var(--space-6);
+  font-size: var(--fs-20);
+  font-weight: 700;
+  outline: none;
+}
+
+.cardStrength {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.exercises {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.exercise {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  min-height: calc(var(--space-6) + var(--space-3));
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.exerciseOn {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.exName {
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+
+.exSets {
+  font-size: var(--fs-14);
+  opacity: 0.8;
+}
+
+/* ---------- Today's workout card ---------- */
+.workout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.workoutTitle {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--fs-20);
+  font-weight: 700;
+}
+
+/* Why chips: plain tags, not buttons (the shared Chip is a tappable choice). */
+.reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reason {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-full);
+  background: var(--raised);
+  color: var(--text);
+  font-size: var(--fs-14);
+}
+
+.minutes {
+  flex: none;
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.total {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shape,
+  .body,
+  .labels {
+    transition: none;
+  }
+  .card,
+  .callout,
+  .focus .shape {
+    animation: none;
+  }
+}
