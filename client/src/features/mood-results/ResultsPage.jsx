@@ -26,6 +26,7 @@ import {
   isExperimentId,
   labelWords,
 } from './energyScore.js';
+import CycleContext from './CycleContext.jsx';
 import EnergyChart from './EnergyChart.jsx';
 import {
   NORMAL_SPREAD,
@@ -378,6 +379,8 @@ export default function ResultsPage() {
         {!face && <p className={s.muted}>Voice only, so the face numbers are missing.</p>}
         {!voice && <p className={s.muted}>No voice numbers, so only the face was compared.</p>}
       </section>
+
+      <CycleContext />
 
       <section className={s.block} aria-label="Energy, last 7 days">
         <h2 className={s.heading}>Energy, last 7 days</h2>
