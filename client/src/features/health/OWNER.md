@@ -1,5 +1,5 @@
 # health
 
-Owner: Habiba
-Health profile (/health), Sleep and recovery (/health/sleep), Cardiovascular and fluid health (/health/cardio).
-All simulated demo data lives in simulatedData.js and is always labelled "Simulated demo data".
+Owner: Shared team
+Role: Final version
+Access: All project members may edit this area without ownership restrictions.
