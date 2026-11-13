@@ -5,14 +5,8 @@
 .time { font-family: var(--font-mono); font-size: var(--fs-20); font-weight: 500; }
 .place { color: var(--muted); font-size: var(--fs-14); }
 
-.window { width: 78%; aspect-ratio: 1; margin: var(--space-4) auto var(--space-5); border: var(--space-2) solid var(--line); border-radius: var(--radius-full); overflow: hidden; background: var(--bg); box-shadow: 0 0 var(--space-6) color-mix(in srgb, var(--watch) 30%, transparent); }
-.earth { display: block; width: 100%; height: 100%; object-fit: cover; animation: drift 14s ease-in-out infinite alternate; }
-@keyframes drift { from { transform: scale(1); } to { transform: scale(1.05); } }
 
-.headline { margin: 0; font-size: var(--fs-28); font-weight: 700; text-align: center; }
-.lead { margin: var(--space-2) 0 var(--space-5); color: var(--muted); font-size: var(--fs-16); text-align: center; }
 
-.initials { display: flex; align-items: center; justify-content: center; flex: none; min-width: var(--space-6); height: var(--space-6); padding: 0 var(--space-2); border-radius: var(--radius-full); background: var(--raised); color: var(--text); font-size: var(--fs-14); font-weight: 700; letter-spacing: 0.04em; }
 .chevron { color: var(--muted); font-size: var(--fs-20); }
 .section { margin: var(--space-5) 0 var(--space-1); font-size: var(--fs-20); font-weight: 700; }
 .kind { display: flex; color: var(--primary); }
@@ -34,3 +28,61 @@
 .sentIcon { display: flex; flex: none; color: var(--stable); }
 .sentIcon svg { width: var(--space-6); height: var(--space-6); }
 .problem { margin: 0; color: var(--watch); font-size: var(--fs-14); }
+
+/* The living-room scene. The night sky stays dark in light mode too, so the window always shows night. */
+.scene {
+  --sky: var(--bg);
+  --sky-ink: var(--text);
+  position: relative;
+  width: 100%;
+  aspect-ratio: 360 / 270;
+  margin: var(--space-4) 0 var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface);
+}
+:global(:root[data-theme='light']) .scene {
+  --sky: var(--text);
+  --sky-ink: var(--bg);
+}
+.layer { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.wall { fill: var(--surface); }
+.floor { fill: var(--raised); }
+.baseboard { fill: var(--line); }
+.rug { fill: var(--line); opacity: 0.6; }
+.sky { fill: var(--sky); }
+.star { fill: var(--sky-ink); opacity: 0.85; }
+.moon { fill: var(--sky-ink); }
+.moonShade { fill: var(--sky); }
+.heart { fill: var(--phase-period); }
+.frame { fill: none; stroke: var(--line); stroke-width: 4; }
+.sill { fill: var(--line); }
+.glow { fill: var(--watch); opacity: 0.1; }
+.lampPole { stroke: var(--muted); stroke-width: 3; stroke-linecap: round; }
+.lampBase { fill: var(--muted); }
+.lampShade { fill: var(--watch); }
+.sofaBack { fill: var(--line); }
+.sofaSeat { fill: var(--phase-luteal); }
+.sofaArm { fill: var(--phase-luteal); stroke: var(--line); stroke-width: 1.5; }
+.sofaLeg { fill: var(--muted); }
+.seam { fill: none; stroke: var(--line); stroke-width: 1.5; opacity: 0.8; }
+
+.seated { position: absolute; }
+.fill { display: block; width: 100%; height: auto; }
+
+.porthole { position: absolute; aspect-ratio: 1; border: var(--space-1) solid var(--line); border-radius: var(--radius-full); overflow: hidden; background: var(--sky); }
+.youFigure { display: block; width: 150%; height: auto; margin: -20% 0 0 -25%; }
+.suitEdge { stroke: var(--line); stroke-width: 2; }
+.youLabel { position: absolute; margin: 0; color: var(--text); font-size: var(--fs-14); font-weight: 600; text-align: center; white-space: nowrap; }
+
+/* Below the scene. */
+.homeCard { margin: var(--space-5) 0 var(--space-4); padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface); }
+.homeCard h2 { margin: 0; font-size: var(--fs-20); font-weight: 700; }
+.homeCard p { margin: var(--space-2) 0 0; color: var(--muted); font-size: var(--fs-16); }
+
+/* The family's heads in a row, in place of the initials. */
+.heads { display: flex; flex: none; }
+.head { flex: none; width: var(--space-6); height: var(--space-6); margin-left: calc(var(--space-2) * -1); border: 2px solid var(--bg); border-radius: var(--radius-full); overflow: hidden; background: var(--raised); }
+.head:first-child { margin-left: 0; }
+.headFigure { display: block; width: 160%; height: auto; margin: -23% 0 0 -30%; }
