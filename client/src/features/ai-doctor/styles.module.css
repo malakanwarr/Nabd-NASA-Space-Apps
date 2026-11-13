@@ -207,7 +207,6 @@
   font-weight: 600;
 }
 
-
 /* NASA sources under a doctor reply: a divider, then one link per page, each 44 px tall to tap. */
 .sources {
   display: flex;
@@ -237,9 +236,6 @@
 .sourceLink:focus-visible {
   text-decoration: underline;
 }
-
-
-
 
 .srOnly {
   position: absolute;
@@ -316,6 +312,20 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+}
+
+/* "Send to Earth" under each answer: a divider, then the button or the progress line. */
+.earthRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--line);
+}
+
+.linkBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .linkBtn {
@@ -508,4 +518,14 @@
 .iconBtn:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+/* Team rule: animations stop when the phone asks for reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .liveDot,
+  .dots span,
+  .lineTodo,
+  .ping {
+    animation: none;
+  }
 }
