@@ -1,0 +1,65 @@
+{
+  "_about": "The 8 body systems on the Body screen. status: stable | watch | act.",
+  "systems": [
+    {
+      "id": "bones",
+      "name": "Bones and muscles",
+      "status": "watch",
+      "riskScore": 49,
+      "headline": "Could reach Act in 6 weeks",
+      "detail": "Linked to kidneys",
+      "hipBoneLossSinceLaunchPct": 6.5,
+      "legMuscleLossSinceLaunchPct": 8.0
+    },
+    {
+      "id": "mind",
+      "name": "Mind and sleep",
+      "status": "watch",
+      "headline": "5.4 h sleep",
+      "detail": "Down 5 nights · reaction test due today"
+    },
+    {
+      "id": "kidneys",
+      "name": "Kidneys",
+      "status": "watch",
+      "headline": "1.6 L fluids a day",
+      "detail": "Aim for 2.5 L · stone risk rises with bone loss (father had kidney stones)"
+    },
+    {
+      "id": "heart",
+      "name": "Heart",
+      "status": "stable",
+      "headline": "118/76 · 64 bpm",
+      "detail": "Next ECG on day 145",
+      "aerobicFitnessChangePct": -12
+    },
+    {
+      "id": "eyes",
+      "name": "Eyes",
+      "status": "stable",
+      "headline": "Clear vision grid",
+      "detail": "Eye scan due on day 150"
+    },
+    {
+      "id": "immune",
+      "name": "Immune and skin",
+      "status": "stable",
+      "headline": "36.8 °C · no symptoms",
+      "detail": "Weekly skin photo due Friday"
+    },
+    {
+      "id": "cycle",
+      "name": "Cycle and reproductive",
+      "status": "stable",
+      "headline": "Day 9 of 28",
+      "detail": "Private · only you can see this"
+    },
+    {
+      "id": "radiation",
+      "name": "Radiation",
+      "status": "stable",
+      "headline": "212 of 600 mSv",
+      "detail": "Solar storm likely in 6 h"
+    }
+  ]
+}

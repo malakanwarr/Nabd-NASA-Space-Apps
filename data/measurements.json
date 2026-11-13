@@ -1,0 +1,82 @@
+{
+  "_about": "Guided measurements. Sara checks blood sugar every 3 days. Ranges are general adult ranges for the prototype; the flight surgeon would set each crew member's own. Swap in NASA ranges if the Resources tab has them.",
+  "astronautId": "sara",
+  "bloodSugar": {
+    "unit": "mg/dL",
+    "everyDays": 3,
+    "nextDue": "2026-11-13",
+    "usualRange": {
+      "low": 88,
+      "high": 96,
+      "note": "Sara's own range before meals"
+    },
+    "ranges": {
+      "beforeMeal": {
+        "low": 70,
+        "normalHigh": 99,
+        "watchHigh": 125
+      },
+      "afterMeal": {
+        "low": 70,
+        "normalHigh": 139,
+        "watchHigh": 199
+      }
+    },
+    "whenToGetHelp": "Below 70 with shaking, sweating or confusion: take 15 g of fast sugar from the kit and tell Mei now. Two readings above 125 before meals: the flight surgeon is told.",
+    "readings": [
+      {
+        "date": "2026-10-29",
+        "missionDay": 127,
+        "value": 90,
+        "beforeMeal": true,
+        "status": "stable"
+      },
+      {
+        "date": "2026-11-01",
+        "missionDay": 130,
+        "value": 93,
+        "beforeMeal": true,
+        "status": "stable"
+      },
+      {
+        "date": "2026-11-04",
+        "missionDay": 133,
+        "value": 88,
+        "beforeMeal": true,
+        "status": "stable"
+      },
+      {
+        "date": "2026-11-07",
+        "missionDay": 136,
+        "value": 96,
+        "beforeMeal": true,
+        "status": "stable"
+      },
+      {
+        "date": "2026-11-10",
+        "missionDay": 139,
+        "value": 94,
+        "beforeMeal": true,
+        "status": "stable"
+      }
+    ]
+  },
+  "bloodPressure": {
+    "unit": "mmHg",
+    "note": "Reuse the same screen later: only texts, ranges and unit change.",
+    "usual": {
+      "systolic": 116,
+      "diastolic": 75
+    },
+    "ranges": {
+      "normal": {
+        "systolicHigh": 129,
+        "diastolicHigh": 84
+      },
+      "watch": {
+        "systolicHigh": 139,
+        "diastolicHigh": 89
+      }
+    }
+  }
+}

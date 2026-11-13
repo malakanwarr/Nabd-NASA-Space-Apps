@@ -1,0 +1,77 @@
+{
+  "_about": "Snapshot for the Home screen and the AI doctor on mission day 142.",
+  "missionDay": 142,
+  "date": "2026-11-13",
+  "readiness": {
+    "score": 74,
+    "label": "Ready with caution",
+    "reason": "Short sleep is lowering your readiness"
+  },
+  "vitals": {
+    "bloodPressure": {
+      "systolic": 118,
+      "diastolic": 76
+    },
+    "heartRateBpm": 64,
+    "temperatureC": 36.8,
+    "spo2Pct": 98,
+    "bloodSugarMgDl": 92
+  },
+  "sleepLastNightHours": 5.4,
+  "sleepShortNightsInARow": 5,
+  "sleepAverage5NightsHours": 5.4,
+  "waterTodayLiters": 1.6,
+  "waterTargetLiters": 2.5,
+  "workoutsThisWeek": {
+    "hoursDone": 9.5,
+    "hoursPlanned": 14,
+    "percent": 68
+  },
+  "vitaminDThisWeek": {
+    "taken": 5,
+    "planned": 7
+  },
+  "routine": [
+    {
+      "task": "Blood pressure",
+      "done": true
+    },
+    {
+      "task": "Reaction test",
+      "done": false,
+      "minutes": 3
+    },
+    {
+      "task": "Bone-loading workout",
+      "done": false,
+      "minutes": 45
+    },
+    {
+      "task": "Vitamin D",
+      "done": false,
+      "note": "1 tablet"
+    }
+  ],
+  "radiation": {
+    "careerDoseMSv": 212,
+    "careerLimitMSv": 600,
+    "todayMSv": 1.5,
+    "forecast": {
+      "alert": "Storm watch",
+      "text": "Solar storm likely in 6 h",
+      "shelterFrom": "15:00",
+      "shelterTo": "21:00"
+    }
+  },
+  "earlyWarnings": [
+    {
+      "text": "Bone risk reaches Act in about 6 weeks",
+      "detail": "Workouts at 68% of your plan"
+    },
+    {
+      "text": "Sleep shorter 5 nights in a row",
+      "detail": "5.4 h average vs 7.1 h baseline"
+    }
+  ],
+  "symptomsReportedToday": []
+}

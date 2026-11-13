@@ -1,0 +1,25 @@
+{
+  "_about": "Sara's normal values measured before launch. Everything is compared with these.",
+  "restingHeartRateBpm": 62,
+  "bloodPressure": {
+    "systolic": 116,
+    "diastolic": 74
+  },
+  "temperatureC": 36.7,
+  "spo2Pct": 98,
+  "bloodSugarMgDl": 90,
+  "sleepHours": 7.1,
+  "weightKg": 62.0,
+  "reactionTimeMs": 255,
+  "waterLitersTarget": 2.5,
+  "vitaminDDosesPerWeek": 7,
+  "mood": {
+    "blinksPerMin": 15,
+    "eyeOpenness": 0.92,
+    "smileRate": 0.3,
+    "pitchRangeHz": 95,
+    "pauseRatio": 0.22,
+    "paceSegmentsPerSec": 3.9,
+    "energyScore": 84
+  }
+}

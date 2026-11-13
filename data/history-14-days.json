@@ -1,0 +1,229 @@
+{
+  "_about": "Daily readings for the last 14 mission days (129–142), oldest first. Use for charts and trends. Today's reaction test is not done yet (null).",
+  "days": [
+    {
+      "missionDay": 129,
+      "date": "2026-10-31",
+      "restingHeartRateBpm": 63,
+      "bloodPressure": {
+        "systolic": 116,
+        "diastolic": 74
+      },
+      "temperatureC": 36.7,
+      "sleepHours": 7.2,
+      "waterLiters": 2.4,
+      "workoutMinutes": 120,
+      "vitaminDTaken": true,
+      "reactionTimeMs": 252,
+      "weightKg": 60.4
+    },
+    {
+      "missionDay": 130,
+      "date": "2026-11-01",
+      "restingHeartRateBpm": 62,
+      "bloodPressure": {
+        "systolic": 117,
+        "diastolic": 75
+      },
+      "temperatureC": 36.6,
+      "sleepHours": 7.0,
+      "waterLiters": 2.3,
+      "workoutMinutes": 0,
+      "vitaminDTaken": true,
+      "reactionTimeMs": 254,
+      "weightKg": 60.4
+    },
+    {
+      "missionDay": 131,
+      "date": "2026-11-02",
+      "restingHeartRateBpm": 62,
+      "bloodPressure": {
+        "systolic": 115,
+        "diastolic": 74
+      },
+      "temperatureC": 36.7,
+      "sleepHours": 6.9,
+      "waterLiters": 2.2,
+      "workoutMinutes": 120,
+      "vitaminDTaken": true,
+      "reactionTimeMs": 250,
+      "weightKg": 60.3
+    },
+    {
+      "missionDay": 132,
+      "date": "2026-11-03",
+      "restingHeartRateBpm": 63,
+      "bloodPressure": {
+        "systolic": 118,
+        "diastolic": 76
+      },
+      "temperatureC": 36.7,
+      "sleepHours": 7.3,
+      "waterLiters": 2.0,
+      "workoutMinutes": 90,
+      "vitaminDTaken": true,
+      "reactionTimeMs": 256,
+      "weightKg": 60.3
+    },
+    {
+      "missionDay": 133,
+      "date": "2026-11-04",
+      "restingHeartRateBpm": 62,
+      "bloodPressure": {
+        "systolic": 116,
+        "diastolic": 74
+      },
+      "temperatureC": 36.6,
+      "sleepHours": 7.1,
+      "waterLiters": 2.1,
+      "workoutMinutes": 120,
+      "vitaminDTaken": true,
+      "reactionTimeMs": 253,
+      "weightKg": 60.2
+    },
+    {
+      "missionDay": 134,
+      "date": "2026-11-05",
+      "restingHeartRateBpm": 62,
+      "bloodPressure": {
+        "systolic": 117,
+        "diastolic": 75
+      },
+      "temperatureC": 36.7,
+      "sleepHours": 6.8,
+      "waterLiters": 1.9,
+      "workoutMinutes": 0,
+      "vitaminDTaken": false,
+      "reactionTimeMs": 257,
+      "weightKg": 60.2
+    },
+    {
+      "missionDay": 135,
+      "date": "2026-11-06",
+      "restingHeartRateBpm": 63,
+      "bloodPressure": {
+        "systolic": 116,
+        "diastolic": 74
+      },
+      "temperatureC": 36.8,
+      "sleepHours": 7.0,
+      "waterLiters": 1.8,
+      "workoutMinutes": 110,
+      "vitaminDTaken": true,
+      "reactionTimeMs": 255,
+      "weightKg": 60.2
+    },
+    {
+      "missionDay": 136,
+      "date": "2026-11-07",
+      "restingHeartRateBpm": 62,
+      "bloodPressure": {
+        "systolic": 115,
+        "diastolic": 73
+      },
+      "temperatureC": 36.7,
+      "sleepHours": 7.2,
+      "waterLiters": 1.9,
+      "workoutMinutes": 90,
+      "vitaminDTaken": true,
+      "reactionTimeMs": 254,
+      "weightKg": 60.1
+    },
+    {
+      "missionDay": 137,
+      "date": "2026-11-08",
+      "restingHeartRateBpm": 62,
+      "bloodPressure": {
+        "systolic": 117,
+        "diastolic": 75
+      },
+      "temperatureC": 36.6,
+      "sleepHours": 6.9,
+      "waterLiters": 1.7,
+      "workoutMinutes": 0,
+      "vitaminDTaken": true,
+      "reactionTimeMs": 256,
+      "weightKg": 60.1
+    },
+    {
+      "missionDay": 138,
+      "date": "2026-11-09",
+      "restingHeartRateBpm": 64,
+      "bloodPressure": {
+        "systolic": 118,
+        "diastolic": 76
+      },
+      "temperatureC": 36.6,
+      "sleepHours": 6.1,
+      "waterLiters": 1.7,
+      "workoutMinutes": 60,
+      "vitaminDTaken": true,
+      "reactionTimeMs": 261,
+      "weightKg": 60.0
+    },
+    {
+      "missionDay": 139,
+      "date": "2026-11-10",
+      "restingHeartRateBpm": 63,
+      "bloodPressure": {
+        "systolic": 119,
+        "diastolic": 77
+      },
+      "temperatureC": 36.7,
+      "sleepHours": 5.8,
+      "waterLiters": 1.6,
+      "workoutMinutes": 45,
+      "vitaminDTaken": false,
+      "reactionTimeMs": 264,
+      "weightKg": 60.0
+    },
+    {
+      "missionDay": 140,
+      "date": "2026-11-11",
+      "restingHeartRateBpm": 63,
+      "bloodPressure": {
+        "systolic": 118,
+        "diastolic": 76
+      },
+      "temperatureC": 36.7,
+      "sleepHours": 5.6,
+      "waterLiters": 1.5,
+      "workoutMinutes": 0,
+      "vitaminDTaken": true,
+      "reactionTimeMs": 266,
+      "weightKg": 59.9
+    },
+    {
+      "missionDay": 141,
+      "date": "2026-11-12",
+      "restingHeartRateBpm": 64,
+      "bloodPressure": {
+        "systolic": 118,
+        "diastolic": 76
+      },
+      "temperatureC": 36.8,
+      "sleepHours": 5.5,
+      "waterLiters": 1.6,
+      "workoutMinutes": 60,
+      "vitaminDTaken": false,
+      "reactionTimeMs": 267,
+      "weightKg": 59.9
+    },
+    {
+      "missionDay": 142,
+      "date": "2026-11-13",
+      "restingHeartRateBpm": 63,
+      "bloodPressure": {
+        "systolic": 118,
+        "diastolic": 76
+      },
+      "temperatureC": 36.8,
+      "sleepHours": 5.4,
+      "waterLiters": 1.6,
+      "workoutMinutes": 0,
+      "vitaminDTaken": false,
+      "reactionTimeMs": null,
+      "weightKg": 59.8
+    }
+  ]
+}

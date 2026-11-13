@@ -1,0 +1,70 @@
+{
+  "_about": "What is on the ship. The AI doctor may ONLY suggest items from this list, at the label dose, and must check allergies. Fictional, simplified.",
+  "medicines": [
+    {
+      "name": "Paracetamol (acetaminophen) 500 mg",
+      "use": "Pain, fever",
+      "labelDose": "1–2 tablets every 4–6 h, max 8 tablets (4 g) in 24 h",
+      "left": 40
+    },
+    {
+      "name": "Ibuprofen 200 mg",
+      "use": "Pain, cramps, inflammation",
+      "labelDose": "1–2 tablets every 6–8 h with food, max 6 tablets (1.2 g) in 24 h without a doctor",
+      "left": 36,
+      "caution": "Avoid if dehydrated or kidney problems suspected; take with water"
+    },
+    {
+      "name": "Oral rehydration salts",
+      "use": "Dehydration",
+      "labelDose": "1 sachet in 200 mL water, after each loose stool or as needed",
+      "left": 20
+    },
+    {
+      "name": "Promethazine 25 mg",
+      "use": "Space motion sickness, nausea",
+      "labelDose": "Only after talking to the crew medical officer (causes drowsiness)",
+      "left": 12
+    },
+    {
+      "name": "Melatonin 3 mg",
+      "use": "Sleep timing",
+      "labelDose": "1 tablet 30–60 min before planned sleep",
+      "left": 30
+    },
+    {
+      "name": "Loratadine 10 mg",
+      "use": "Allergy, itchy skin",
+      "labelDose": "1 tablet once a day",
+      "left": 20
+    },
+    {
+      "name": "Vitamin D3 1000 IU",
+      "use": "Bone health supplement",
+      "labelDose": "1 tablet daily",
+      "left": 60
+    },
+    {
+      "name": "Azithromycin 250 mg",
+      "use": "Antibiotic (penicillin-allergy friendly)",
+      "labelDose": "Only on instruction from the crew medical officer or flight surgeon",
+      "left": 12
+    }
+  ],
+  "tests": [
+    "Urine dipstick (blood, protein, infection signs)",
+    "Blood pressure cuff",
+    "Pulse oximeter",
+    "Thermometer",
+    "Glucose meter",
+    "Ultrasound (with remote guidance)",
+    "Pregnancy test"
+  ],
+  "procedures": [
+    "Kidney stone checklist",
+    "Dehydration checklist",
+    "Solar storm shelter procedure",
+    "Eye problem checklist",
+    "Head injury checklist"
+  ]
+}

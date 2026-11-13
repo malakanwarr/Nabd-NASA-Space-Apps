@@ -1,0 +1,68 @@
+{
+  "_about": "Who Sara is. Fictional astronaut. Used by every screen and by the AI doctor.",
+  "astronautId": "sara",
+  "name": "Sara Haddad",
+  "preferredName": "Sara",
+  "initials": "SH",
+  "age": 38,
+  "sex": "female",
+  "heightCm": 165,
+  "preflightWeightKg": 62.0,
+  "bloodType": "O+",
+  "hometown": "Cairo, Egypt",
+  "timezoneHome": "Africa/Cairo",
+  "languages": [
+    "Arabic",
+    "English"
+  ],
+  "role": "Flight engineer",
+  "avatar": {
+    "skin": "#C68B59",
+    "hair": "hijab",
+    "scarfColor": "#1E3A6E",
+    "suitStripe": "#FC3D21"
+  },
+  "allergies": [
+    "Penicillin (rash)"
+  ],
+  "conditions": [],
+  "familyHistory": [
+    {
+      "relative": "Mother",
+      "condition": "Breast cancer, diagnosed at 52, treated"
+    },
+    {
+      "relative": "Father",
+      "condition": "Kidney stones"
+    },
+    {
+      "relative": "Grandfather (father's side)",
+      "condition": "Type 2 diabetes"
+    }
+  ],
+  "family": [
+    {
+      "name": "Omar",
+      "relation": "Husband"
+    },
+    {
+      "name": "Laila",
+      "relation": "Daughter",
+      "age": 7
+    },
+    {
+      "name": "Mona",
+      "relation": "Mother"
+    }
+  ],
+  "privacy": {
+    "shareWithFamily": [
+      "heartbeat",
+      "mood"
+    ],
+    "cycleDataVisibleTo": [
+      "sara"
+    ],
+    "shareWithFlightSurgeon": "by choice"
+  }
+}

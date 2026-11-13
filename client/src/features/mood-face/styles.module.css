@@ -1,0 +1,2 @@
+/* Styles for mood-face (owner: Habiba). Use only the variables from shared/theme.css. */
+.camera { border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--space-4); color: var(--muted); }

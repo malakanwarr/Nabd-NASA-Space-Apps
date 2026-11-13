@@ -1,0 +1,29 @@
+{
+  "_about": "For the flight surgeon dashboard (stretch). Notes the AI doctor sends to Earth; each arrives 18 min 24 s later. Cycle info appears only because Sara chose to share it with her flight surgeon.",
+  "flightSurgeon": "Dr. Nadia Fahmy",
+  "delayText": "18 min 24 s",
+  "needsReview": [
+    "sara",
+    "lucas"
+  ],
+  "notes": [
+    {
+      "astronautId": "sara",
+      "sentShipTime": "2026-11-13T09:12",
+      "arrivedEarthTime": "2026-11-13T09:30",
+      "energyScore": 66,
+      "text": "Tired for 3 days, energy score 66. Advised a 20-minute nap before the 15:00 shelter period and 0.9 L more water today."
+    },
+    {
+      "astronautId": "sara",
+      "sentShipTime": "2026-11-12T21:40",
+      "arrivedEarthTime": "2026-11-12T21:58",
+      "text": "Mild headache, no red flags. Suggested water and rest; paracetamol from the ship kit at label dose if it continues."
+    }
+  ],
+  "sharedWithConsent": {
+    "astronautId": "sara",
+    "cycleSummary": "Day 9 of 28 · cycle tracking · no concerns logged"
+  },
+  "draftReply": "Agree with the nap plan. Let's also move tomorrow's workout after the shelter period."
+}

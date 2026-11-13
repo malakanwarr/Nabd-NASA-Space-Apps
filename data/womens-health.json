@@ -1,0 +1,172 @@
+{
+  "_about": "PRIVATE: only Sara sees this. Never shown to family; shared with the flight surgeon only if she chooses. Two modes for the demo: cycle tracking (active) and period suppression (alternative screen).",
+  "activeMode": "cycle",
+  "cycleTracking": {
+    "averageCycleLengthDays": 28,
+    "todayCycleDay": 9,
+    "phaseToday": "follicular",
+    "phases": {
+      "period": "days 1–5",
+      "follicular": "days 6–13",
+      "ovulation": "around day 14",
+      "luteal": "days 15–28"
+    },
+    "nextPeriodExpected": {
+      "missionDay": 162,
+      "inDays": 20
+    },
+    "cycles": [
+      {
+        "startMissionDay": 78,
+        "startDate": "2026-09-10",
+        "lengthDays": 28,
+        "periodDays": 5,
+        "flow": [
+          "medium",
+          "heavy",
+          "medium",
+          "light",
+          "light"
+        ],
+        "symptoms": [
+          "cramps (mild)",
+          "tiredness"
+        ]
+      },
+      {
+        "startMissionDay": 106,
+        "startDate": "2026-10-08",
+        "lengthDays": 28,
+        "periodDays": 5,
+        "flow": [
+          "medium",
+          "heavy",
+          "medium",
+          "light",
+          "light"
+        ],
+        "symptoms": [
+          "cramps (mild)",
+          "headache (day 1)"
+        ]
+      },
+      {
+        "startMissionDay": 134,
+        "startDate": "2026-11-05",
+        "lengthDays": null,
+        "periodDays": 4,
+        "flow": [
+          "medium",
+          "medium",
+          "light",
+          "light"
+        ],
+        "symptoms": [
+          "cramps (mild)"
+        ]
+      }
+    ],
+    "spottingThisMonthDays": 0,
+    "hygieneSupplies": {
+      "left": 42,
+      "enoughForDaysToMars": 68
+    },
+    "phaseAdjustments": [
+      {
+        "name": "Temperature after ovulation",
+        "value": "+0.3 °C ok"
+      },
+      {
+        "name": "Resting heart rate, 2nd half",
+        "value": "+2–4 bpm ok"
+      },
+      {
+        "name": "Sleep and mood",
+        "value": "phase-aware"
+      }
+    ],
+    "watch": [
+      {
+        "name": "Irregular or missed periods",
+        "state": "Regular"
+      },
+      {
+        "name": "Heavy bleeding with tiredness",
+        "state": "None"
+      },
+      {
+        "name": "Iron and fatigue",
+        "state": "OK"
+      },
+      {
+        "name": "Severe pain",
+        "state": "None"
+      }
+    ]
+  },
+  "periodSuppression": {
+    "method": "Continuous combined oral contraceptive pill (skips periods)",
+    "doseTime": "08:00",
+    "last30Days": {
+      "taken": 29,
+      "late": 1
+    },
+    "pillsLeft": 96,
+    "pillsNeededToMars": 68,
+    "spare": 28,
+    "batchExpiresMissionDay": 400,
+    "breakthroughSpottingThisMonthDays": 1,
+    "watch": [
+      {
+        "name": "Blood pressure (the pill can raise it)",
+        "state": "OK"
+      },
+      {
+        "name": "Blood clot warning signs",
+        "state": "None"
+      },
+      {
+        "name": "Missed or late pills",
+        "state": "1 late"
+      },
+      {
+        "name": "Breakthrough bleeding",
+        "state": "1 day"
+      }
+    ]
+  },
+  "urgentSymptoms": [
+    "Severe cramps",
+    "Heavy bleeding",
+    "Burning when peeing",
+    "Swelling in one leg or arm",
+    "Sudden severe headache"
+  ],
+  "longTerm": {
+    "radiationCareerMSv": 212,
+    "breastSelfExamDueInDays": 4,
+    "familyHistoryNote": "Mother had breast cancer: radiation risk weighted higher, screening starts earlier after landing",
+    "afterLanding": [
+      {
+        "when": "Landing day",
+        "what": "Standing check: fainting is more common in women"
+      },
+      {
+        "when": "Months 1–3",
+        "what": "Periods should return after stopping the pill"
+      },
+      {
+        "when": "Month 6",
+        "what": "Bone scan and muscle strength"
+      },
+      {
+        "when": "Year 1",
+        "what": "Egg reserve test (AMH), breast and thyroid screening"
+      },
+      {
+        "when": "Every year",
+        "what": "Screening and menopause timing"
+      }
+    ]
+  }
+}

@@ -1,0 +1,83 @@
+/* Theme variables and base styles (Malak only). Use ONLY these variables for color, spacing, corners and font size. */
+:root {
+  --bg: #0b1230;
+  --surface: #151e42;
+  --raised: #1e2a57;
+  --line: #2a3868;
+  --tabbar: #0f1838;
+  --text: #f3f5fa;
+  --muted: #aeb9d6;
+  --primary: #7cc4ff;
+  --on-primary: #04213d;
+  --stable: #6ee0a8;
+  --watch: #ffc857;
+  --act: #ff6b5b;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-full: 999px;
+
+  --fs-12: 12px;
+  --fs-14: 14px;
+  --fs-16: 16px;
+  --fs-20: 20px;
+  --fs-28: 28px;
+
+  --font: 'Barlow', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+:root[data-theme='light'] {
+  --bg: #f5f7fc;
+  --surface: #ffffff;
+  --raised: #e8eef8;
+  --line: #d5ddec;
+  --tabbar: #ffffff;
+  --text: #0b1230;
+  --muted: #4a5578;
+  --primary: #1f6fd1;
+  --on-primary: #ffffff;
+  --stable: #17855a;
+  --watch: #9a6700;
+  --act: #c9372c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-16);
+}
+
+/* Phone pages: 480 px wide, centred, room for the tab bar and the iPhone notch. */
+.phone {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: env(safe-area-inset-top) var(--space-4) calc(96px + env(safe-area-inset-bottom));
+}
+
+/* Laptop pages (Mission Control, flight surgeon): full width. */
+.laptop {
+  width: 100%;
+  min-height: 100vh;
+  padding: var(--space-5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+  }
+}

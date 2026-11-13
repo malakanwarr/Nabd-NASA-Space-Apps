@@ -1,0 +1,146 @@
+{
+  "_about": "Pollen catch game = daily reaction test (based on NASA's Psychomotor Vigilance Test). Usual = preflight 255 ms.",
+  "usualMs": 255,
+  "recent": [
+    {
+      "missionDay": 129,
+      "date": "2026-10-31",
+      "averageMs": 252,
+      "catches": 30,
+      "lapses": 0
+    },
+    {
+      "missionDay": 130,
+      "date": "2026-11-01",
+      "averageMs": 254,
+      "catches": 31,
+      "lapses": 0
+    },
+    {
+      "missionDay": 131,
+      "date": "2026-11-02",
+      "averageMs": 250,
+      "catches": 32,
+      "lapses": 0
+    },
+    {
+      "missionDay": 132,
+      "date": "2026-11-03",
+      "averageMs": 256,
+      "catches": 30,
+      "lapses": 1
+    },
+    {
+      "missionDay": 133,
+      "date": "2026-11-04",
+      "averageMs": 253,
+      "catches": 31,
+      "lapses": 0
+    },
+    {
+      "missionDay": 134,
+      "date": "2026-11-05",
+      "averageMs": 257,
+      "catches": 29,
+      "lapses": 1
+    },
+    {
+      "missionDay": 135,
+      "date": "2026-11-06",
+      "averageMs": 255,
+      "catches": 31,
+      "lapses": 0
+    },
+    {
+      "missionDay": 136,
+      "date": "2026-11-07",
+      "averageMs": 254,
+      "catches": 30,
+      "lapses": 0
+    },
+    {
+      "missionDay": 137,
+      "date": "2026-11-08",
+      "averageMs": 256,
+      "catches": 31,
+      "lapses": 0
+    },
+    {
+      "missionDay": 138,
+      "date": "2026-11-09",
+      "averageMs": 261,
+      "catches": 30,
+      "lapses": 1
+    },
+    {
+      "missionDay": 139,
+      "date": "2026-11-10",
+      "averageMs": 264,
+      "catches": 29,
+      "lapses": 1
+    },
+    {
+      "missionDay": 140,
+      "date": "2026-11-11",
+      "averageMs": 266,
+      "catches": 28,
+      "lapses": 2
+    },
+    {
+      "missionDay": 141,
+      "date": "2026-11-12",
+      "averageMs": 267,
+      "catches": 29,
+      "lapses": 2
+    },
+    {
+      "missionDay": 142,
+      "date": "2026-11-13",
+      "averageMs": null,
+      "catches": null,
+      "lapses": null
+    }
+  ],
+  "todayExampleAfterPlaying": {
+    "averageMs": 268,
+    "catches": 31,
+    "lapses": 2,
+    "message": "A little slower than usual after a short night."
+  },
+  "crewGreenhouse": {
+    "crewTreePercent": 82,
+    "harvestInDays": 3,
+    "myGarden": {
+      "streakDays": 12,
+      "points": 340,
+      "grownPercent": 72
+    },
+    "plants": [
+      {
+        "name": "Sleep",
+        "detail": "5.4 of 7 h",
+        "percent": 45
+      },
+      {
+        "name": "Water",
+        "detail": "1.6 of 2.5 L",
+        "percent": 64
+      },
+      {
+        "name": "Exercise",
+        "detail": "9.5 of 14 h",
+        "percent": 68
+      },
+      {
+        "name": "Vitamin D",
+        "detail": "5 of 7 doses",
+        "percent": 71
+      },
+      {
+        "name": "Mood",
+        "detail": "check-ins done",
+        "percent": 90
+      }
+    ]
+  }
+}

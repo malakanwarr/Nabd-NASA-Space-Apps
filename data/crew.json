@@ -1,0 +1,228 @@
+{
+  "_about": "The four crew members for crew sign-in and Mission Control. Fictional. Demo PINs are for the prototype only; sign-in is simulated. Mission Control may only show the summary fields here, never cycle, face, voice or AI doctor details.",
+  "mission": {
+    "name": "Mars transit (fictional)",
+    "missionDay": 142,
+    "date": "2026-11-13",
+    "flightSurgeon": "Dr. Nadia Fahmy",
+    "crewMedicalOfficer": "mei"
+  },
+  "familyCircle": {
+    "astronautId": "sara",
+    "joinCode": "482913",
+    "members": [
+      "Omar",
+      "Laila",
+      "Mona"
+    ],
+    "familySees": "Hugs, messages and a simple status. Never medical details."
+  },
+  "crew": [
+    {
+      "id": "sara",
+      "name": "Sara Haddad",
+      "initials": "SH",
+      "role": "Flight engineer",
+      "age": 38,
+      "demoPin": "1404",
+      "avatar": {
+        "skin": "#C68B59",
+        "hair": "hijab",
+        "hairColor": null,
+        "suit": "#E6EAF2",
+        "accent": "#3B5BA9"
+      },
+      "status": "watch",
+      "readiness": 74,
+      "readinessLast7Days": [
+        82,
+        80,
+        81,
+        77,
+        76,
+        75,
+        74
+      ],
+      "lastCheckIn": {
+        "date": "2026-11-13",
+        "time": "08:10",
+        "missed": false
+      },
+      "checkInsThisWeek": 7,
+      "sleepAvg7DaysHours": 5.4,
+      "alerts": [
+        {
+          "text": "Sleep below her usual for 5 nights",
+          "day": 142
+        },
+        {
+          "text": "Fluids low: 1.6 of 2.5 L",
+          "day": 142
+        }
+      ],
+      "bodySystems": {
+        "bonesAndMuscles": "watch",
+        "mindAndSleep": "watch",
+        "kidneys": "watch",
+        "heart": "stable",
+        "eyes": "stable",
+        "immuneAndSkin": "stable",
+        "radiation": "stable",
+        "cycleAndReproductive": "private"
+      },
+      "allergies": [
+        "Penicillin"
+      ]
+    },
+    {
+      "id": "adam",
+      "name": "Adam Kareem",
+      "initials": "AK",
+      "role": "Commander",
+      "age": 45,
+      "demoPin": "2201",
+      "avatar": {
+        "skin": "#8D5524",
+        "hair": "short",
+        "hairColor": "#1B120B",
+        "suit": "#E6EAF2",
+        "accent": "#7CC4FF"
+      },
+      "status": "stable",
+      "readiness": 86,
+      "readinessLast7Days": [
+        85,
+        87,
+        86,
+        84,
+        86,
+        87,
+        86
+      ],
+      "lastCheckIn": {
+        "date": "2026-11-13",
+        "time": "07:45",
+        "missed": false
+      },
+      "checkInsThisWeek": 7,
+      "sleepAvg7DaysHours": 6.9,
+      "alerts": [],
+      "bodySystems": {
+        "bonesAndMuscles": "stable",
+        "mindAndSleep": "stable",
+        "kidneys": "stable",
+        "heart": "stable",
+        "eyes": "watch",
+        "immuneAndSkin": "stable",
+        "radiation": "stable"
+      },
+      "allergies": []
+    },
+    {
+      "id": "mei",
+      "name": "Mei Chen",
+      "initials": "MC",
+      "role": "Crew medical officer",
+      "age": 41,
+      "demoPin": "3302",
+      "avatar": {
+        "skin": "#F1C9A5",
+        "hair": "long",
+        "hairColor": "#1B120B",
+        "suit": "#E6EAF2",
+        "accent": "#6EE0A8"
+      },
+      "status": "stable",
+      "readiness": 81,
+      "readinessLast7Days": [
+        80,
+        82,
+        79,
+        81,
+        83,
+        80,
+        81
+      ],
+      "lastCheckIn": {
+        "date": "2026-11-13",
+        "time": "08:30",
+        "missed": false
+      },
+      "checkInsThisWeek": 7,
+      "sleepAvg7DaysHours": 7.0,
+      "alerts": [],
+      "bodySystems": {
+        "bonesAndMuscles": "stable",
+        "mindAndSleep": "stable",
+        "kidneys": "stable",
+        "heart": "stable",
+        "eyes": "stable",
+        "immuneAndSkin": "stable",
+        "radiation": "stable",
+        "cycleAndReproductive": "private"
+      },
+      "allergies": [
+        "Sulfa drugs"
+      ]
+    },
+    {
+      "id": "lucas",
+      "name": "Lucas Martin",
+      "initials": "LM",
+      "role": "Mission specialist",
+      "age": 34,
+      "demoPin": "4403",
+      "avatar": {
+        "skin": "#E8B98F",
+        "hair": "short",
+        "hairColor": "#7A4A2A",
+        "suit": "#E6EAF2",
+        "accent": "#FFC857"
+      },
+      "status": "watch",
+      "readiness": 69,
+      "readinessLast7Days": [
+        78,
+        76,
+        75,
+        73,
+        72,
+        70,
+        69
+      ],
+      "lastCheckIn": {
+        "date": "2026-11-12",
+        "time": "09:05",
+        "missed": true
+      },
+      "checkInsThisWeek": 5,
+      "sleepAvg7DaysHours": 6.1,
+      "alerts": [
+        {
+          "text": "Check-in missed today",
+          "day": 142
+        },
+        {
+          "text": "Readiness down 9 points this week",
+          "day": 142
+        }
+      ],
+      "bodySystems": {
+        "bonesAndMuscles": "stable",
+        "mindAndSleep": "watch",
+        "kidneys": "stable",
+        "heart": "stable",
+        "eyes": "stable",
+        "immuneAndSkin": "stable",
+        "radiation": "stable"
+      },
+      "allergies": []
+    }
+  ],
+  "summaryForMissionControl": {
+    "crewCount": 4,
+    "onWatch": 2,
+    "needAction": 0,
+    "checkedInToday": 3
+  }
+}

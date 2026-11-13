@@ -1,0 +1,140 @@
+{
+  "_about": "6 days of sample mood check-ins (same as server/src/seed.js). Today's check-in is done LIVE in the demo.",
+  "checkins": [
+    {
+      "missionDay": 136,
+      "date": "2026-11-07",
+      "face": {
+        "blinksPerMin": 15,
+        "eyeOpenness": 0.92,
+        "smileRate": 0.3
+      },
+      "voice": {
+        "pitchRangeHz": 95,
+        "loudness": 0.06,
+        "pauseRatio": 0.22,
+        "paceSegmentsPerSec": 3.9
+      },
+      "context": {
+        "sleepHours": 7.0
+      },
+      "energyScore": 84,
+      "label": "ok"
+    },
+    {
+      "missionDay": 137,
+      "date": "2026-11-08",
+      "face": {
+        "blinksPerMin": 14,
+        "eyeOpenness": 0.93,
+        "smileRate": 0.28
+      },
+      "voice": {
+        "pitchRangeHz": 92,
+        "loudness": 0.058,
+        "pauseRatio": 0.23,
+        "paceSegmentsPerSec": 3.8
+      },
+      "context": {
+        "sleepHours": 6.9
+      },
+      "energyScore": 82,
+      "label": "ok"
+    },
+    {
+      "missionDay": 138,
+      "date": "2026-11-09",
+      "face": {
+        "blinksPerMin": 16,
+        "eyeOpenness": 0.91,
+        "smileRate": 0.31
+      },
+      "voice": {
+        "pitchRangeHz": 96,
+        "loudness": 0.061,
+        "pauseRatio": 0.21,
+        "paceSegmentsPerSec": 4.0
+      },
+      "context": {
+        "sleepHours": 7.1
+      },
+      "energyScore": 83,
+      "label": "ok"
+    },
+    {
+      "missionDay": 139,
+      "date": "2026-11-10",
+      "face": {
+        "blinksPerMin": 18,
+        "eyeOpenness": 0.85,
+        "smileRate": 0.22
+      },
+      "voice": {
+        "pitchRangeHz": 86,
+        "loudness": 0.052,
+        "pauseRatio": 0.27,
+        "paceSegmentsPerSec": 3.6
+      },
+      "context": {
+        "sleepHours": 5.8
+      },
+      "energyScore": 74,
+      "label": "tired"
+    },
+    {
+      "missionDay": 140,
+      "date": "2026-11-11",
+      "face": {
+        "blinksPerMin": 20,
+        "eyeOpenness": 0.82,
+        "smileRate": 0.2
+      },
+      "voice": {
+        "pitchRangeHz": 82,
+        "loudness": 0.05,
+        "pauseRatio": 0.29,
+        "paceSegmentsPerSec": 3.5
+      },
+      "context": {
+        "sleepHours": 5.5
+      },
+      "energyScore": 70,
+      "label": "tired"
+    },
+    {
+      "missionDay": 141,
+      "date": "2026-11-12",
+      "face": {
+        "blinksPerMin": 21,
+        "eyeOpenness": 0.8,
+        "smileRate": 0.18
+      },
+      "voice": {
+        "pitchRangeHz": 79,
+        "loudness": 0.047,
+        "pauseRatio": 0.31,
+        "paceSegmentsPerSec": 3.4
+      },
+      "context": {
+        "sleepHours": 5.4
+      },
+      "energyScore": 66,
+      "label": "tired"
+    }
+  ],
+  "exampleTodayIfTired": {
+    "face": {
+      "blinksPerMin": 22,
+      "eyeOpenness": 0.78,
+      "smileRate": 0.15
+    },
+    "voice": {
+      "pitchRangeHz": 72,
+      "loudness": 0.045,
+      "pauseRatio": 0.33,
+      "paceSegmentsPerSec": 3.3
+    },
+    "energyScore": 55,
+    "label": "tired"
+  }
+}

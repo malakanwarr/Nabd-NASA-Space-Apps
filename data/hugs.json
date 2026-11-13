@@ -1,0 +1,63 @@
+{
+  "_about": "Heartbeat link sample: hugs from family this week (9: Laila 5, Omar 3, Mom 1). Delays are 18 min 24 s each way.",
+  "thisWeek": [
+    {
+      "from": "Laila",
+      "to": "sara",
+      "missionDay": 136,
+      "delivered": true
+    },
+    {
+      "from": "Omar",
+      "to": "sara",
+      "missionDay": 136,
+      "delivered": true
+    },
+    {
+      "from": "Laila",
+      "to": "sara",
+      "missionDay": 137,
+      "delivered": true
+    },
+    {
+      "from": "Laila",
+      "to": "sara",
+      "missionDay": 138,
+      "delivered": true
+    },
+    {
+      "from": "Omar",
+      "to": "sara",
+      "missionDay": 138,
+      "delivered": true
+    },
+    {
+      "from": "Mona",
+      "to": "sara",
+      "missionDay": 138,
+      "delivered": true
+    },
+    {
+      "from": "Laila",
+      "to": "sara",
+      "missionDay": 140,
+      "delivered": true
+    },
+    {
+      "from": "Omar",
+      "to": "sara",
+      "missionDay": 141,
+      "delivered": true
+    },
+    {
+      "from": "Laila",
+      "to": "sara",
+      "missionDay": 142,
+      "delivered": true
+    }
+  ],
+  "sharedWithFamilyNow": {
+    "heartRateBpm": 64,
+    "mood": "Calm"
+  }
+}

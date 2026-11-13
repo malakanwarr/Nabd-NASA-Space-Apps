@@ -1,0 +1,47 @@
+{
+  "_about": "The mission and crew. Mission day 142 is 'today' (13 Nov 2026, hackathon day).",
+  "name": "Mars transit (fictional)",
+  "launchDate": "2026-06-25",
+  "today": {
+    "missionDay": 142,
+    "date": "2026-11-13"
+  },
+  "marsArrivalMissionDay": 210,
+  "daysToMars": 68,
+  "earthDelayOneWay": {
+    "minutes": 18,
+    "seconds": 24,
+    "text": "18 min 24 s"
+  },
+  "distanceFromEarthKm": 331000000,
+  "crew": [
+    {
+      "name": "Sara Haddad",
+      "role": "Flight engineer",
+      "initials": "SH"
+    },
+    {
+      "name": "Adam Kareem",
+      "role": "Commander",
+      "initials": "AK"
+    },
+    {
+      "name": "Mei Chen",
+      "role": "Crew medical officer",
+      "initials": "MC"
+    },
+    {
+      "name": "Lucas Martin",
+      "role": "Mission specialist",
+      "initials": "LM"
+    }
+  ],
+  "crewMedicalOfficer": "Mei Chen",
+  "flightSurgeonOnEarth": "Dr. Nadia Fahmy",
+  "schedule": {
+    "wake": "07:00",
+    "windDown": "21:30",
+    "sleep": "23:00",
+    "workoutPlanHoursPerWeek": 14
+  }
+}
