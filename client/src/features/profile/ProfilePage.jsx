@@ -221,7 +221,6 @@ export default function ProfilePage() {
 
       <div className={s.account}>
         <ListRow title="Switch crew member" to="/signin" right={<Chevron />} />
-        <ListRow title="Change PIN" to="/signin" right={<Chevron />} />
         <Button variant="text" onClick={leave}>Sign out</Button>
       </div>
     </main>
