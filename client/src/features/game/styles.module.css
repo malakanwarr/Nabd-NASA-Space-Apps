@@ -1,1 +1,169 @@
-/* Styles for game (owner: Salma). Use only the variables from shared/theme.css. */
+.game {
+  display: flex;
+  min-height: calc(100vh - var(--space-6) - var(--space-6) - var(--space-6));
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-bottom: var(--space-5);
+}
+
+.topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.topRow > div {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+}
+
+.cancel {
+  display: inline-flex;
+  min-height: calc(var(--space-6) + var(--space-3));
+  align-items: center;
+  color: var(--primary);
+  font-size: var(--fs-14);
+  text-decoration: none;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-20);
+  line-height: 1.2;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.stat {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.stat strong {
+  font-size: var(--fs-20);
+  font-weight: 600;
+}
+
+.stat span {
+  color: var(--muted);
+  font-size: var(--fs-14);
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  color: var(--watch);
+  font-size: var(--fs-14);
+}
+
+.field {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 0;
+  height: 45vh;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.garden {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.dome {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.plants {
+  fill: none;
+  stroke: var(--stable);
+  stroke-linecap: round;
+  stroke-width: 3;
+}
+
+.dots {
+  fill: var(--muted);
+  opacity: 0.6;
+}
+
+.soil {
+  fill: var(--raised);
+}
+
+.pollen {
+  position: absolute;
+  width: 12%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: var(--space-1) solid var(--primary);
+  border-radius: var(--radius-full);
+  background: var(--text);
+  box-shadow: 0 0 var(--space-5) var(--primary);
+  animation: glow 1.8s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  color: var(--text);
+  font-size: var(--fs-20);
+  font-weight: 700;
+}
+
+.pause {
+  margin-top: auto;
+}
+
+.pause > * {
+  width: 100%;
+}
+
+.error {
+  color: var(--act);
+  font-size: var(--fs-14);
+}
+
+.error p {
+  margin: 0 0 var(--space-2);
+}
+
+.misses {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-14);
+  text-align: center;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 var(--space-3) var(--primary);
+  }
+  to {
+    box-shadow: 0 0 var(--space-5) var(--primary);
+  }
+}

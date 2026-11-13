@@ -1,19 +1,235 @@
-// Pollen catch page (owner: Salma). Placeholder: replace with the real screen.
-import ScreenHeader from '../../shared/ScreenHeader.jsx';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { apiFetch } from '../../shared/api.js';
+import Button from '../../shared/Button.jsx';
+import StepProgress from '../../shared/StepProgress.jsx';
+import { getSampleData } from '../../shared/sampleData.js';
+import styles from './styles.module.css';
 
-// TODO:
-//  - Pollen catch game
-//  - At the end POST /api/game, then navigate('/checkin/results', { state: { reactionMs } })
+const isDemo = new URLSearchParams(window.location.search).get('demo') === '1';
+const durationMs = isDemo ? 30_000 : 180_000;
+
+function formatTime(milliseconds) {
+  const totalSeconds = Math.ceil(milliseconds / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = String(totalSeconds % 60).padStart(2, '0');
+  return `${minutes}:${seconds}`;
+}
+
 export default function GamePage() {
+  const navigate = useNavigate();
+  const endAtRef = useRef(0);
+  const remainingMsRef = useRef(durationMs);
+  const [phase, setPhase] = useState('playing');
+  const [remainingMs, setRemainingMs] = useState(durationMs);
+  const [pollen, setPollen] = useState(null);
+  const [reactionTimes, setReactionTimes] = useState([]);
+  const [misses, setMisses] = useState(0);
+  const [usualMs, setUsualMs] = useState(null);
+  const [usualLoading, setUsualLoading] = useState(true);
+  const [usualError, setUsualError] = useState('');
+  const [saveError, setSaveError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    getSampleData('reaction-tests')
+      .then((data) => {
+        if (active) setUsualMs(Number.isFinite(data.usualMs) ? data.usualMs : null);
+      })
+      .catch((error) => {
+        if (active) setUsualError(error.message);
+      })
+      .finally(() => {
+        if (active) setUsualLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (phase !== 'playing') return undefined;
+    endAtRef.current = Date.now() + remainingMsRef.current;
+    const timer = window.setInterval(() => {
+      const next = Math.max(0, endAtRef.current - Date.now());
+      remainingMsRef.current = next;
+      setRemainingMs(next);
+      if (next === 0) setPhase('saving');
+    }, 100);
+    return () => window.clearInterval(timer);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== 'playing' || pollen) return undefined;
+    const wait = 700 + Math.random() * 1800;
+    const timer = window.setTimeout(() => {
+      setPollen({
+        x: 18 + Math.random() * 64,
+        y: 18 + Math.random() * 58,
+        shownAt: performance.now(),
+      });
+    }, wait);
+    return () => window.clearTimeout(timer);
+  }, [phase, pollen]);
+
+  useEffect(() => {
+    if (phase !== 'saving') return undefined;
+    let active = true;
+    const averageMs = reactionTimes.length
+      ? Math.round(reactionTimes.reduce((total, value) => total + value, 0) / reactionTimes.length)
+      : null;
+
+    apiFetch('/api/game', {
+      method: 'POST',
+      body: { averageMs, catches: reactionTimes.length, misses },
+    })
+      .then(() => {
+        if (active) navigate('/checkin/results', { state: { reactionMs: averageMs } });
+      })
+      .catch((error) => {
+        if (active) {
+          setSaveError(error.message);
+          setPhase('error');
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [phase, reactionTimes, misses, navigate]);
+
+  function handleFieldTap() {
+    if (phase !== 'playing') return;
+    if (!pollen) {
+      setMisses((count) => count + 1);
+      return;
+    }
+    setReactionTimes((times) => [...times, Math.round(performance.now() - pollen.shownAt)]);
+    setPollen(null);
+  }
+
+  function togglePause() {
+    if (phase === 'playing') {
+      const next = Math.max(0, endAtRef.current - Date.now());
+      remainingMsRef.current = next;
+      setRemainingMs(next);
+      setPollen(null);
+      setPhase('paused');
+    } else if (phase === 'paused') {
+      setPhase('playing');
+    }
+  }
+
+  const averageMs = reactionTimes.length
+    ? Math.round(reactionTimes.reduce((total, value) => total + value, 0) / reactionTimes.length)
+    : null;
+
   return (
-    <main>
-      <ScreenHeader eyebrow="Salma" title="Pollen catch" />
-      <p>Pollen catch is a placeholder. Owner: Salma.</p>
-      <p>TODO:</p>
-      <ul>
-        <li>Pollen catch game</li>
-        <li>At the end POST /api/game, then navigate('/checkin/results', {'{'} state: {'{'} reactionMs {'}'} {'}'})</li>
-      </ul>
+    <main className={styles.game}>
+      <div className={styles.topRow}>
+        <Link className={styles.cancel} to="/checkin/record">Cancel</Link>
+        <StepProgress step={2} total={2} label="Pollen catch" />
+      </div>
+
+      <h1 className={styles.title}>Tap the pollen the moment it glows</h1>
+
+      <section className={styles.stats} aria-label="Game stats">
+        <div className={styles.stat}>
+          <strong>{reactionTimes.length}</strong>
+          <span>Catches</span>
+        </div>
+        <div className={styles.stat}>
+          <strong>{averageMs == null ? '—' : `${averageMs} ms`}</strong>
+          <span>
+            Average · usual {usualLoading ? '…' : usualMs == null ? '—' : `${usualMs} ms`}
+          </span>
+        </div>
+        <div className={styles.stat}>
+          <strong>{formatTime(remainingMs)}</strong>
+          <span>Left</span>
+        </div>
+      </section>
+
+      {usualError && (
+        <div className={styles.notice} role="status">
+          Could not load Sara’s usual reaction time. {usualError}
+          <Button
+            variant="text"
+            onClick={() => {
+              setUsualError('');
+              setUsualLoading(true);
+              getSampleData('reaction-tests')
+                .then((data) => setUsualMs(Number.isFinite(data.usualMs) ? data.usualMs : null))
+                .catch((error) => setUsualError(error.message))
+                .finally(() => setUsualLoading(false));
+            }}
+          >
+            Try again
+          </Button>
+        </div>
+      )}
+
+      <button
+        className={styles.field}
+        type="button"
+        onClick={handleFieldTap}
+        disabled={phase === 'saving' || phase === 'error'}
+        aria-label={pollen ? 'Tap to catch the glowing pollen' : 'Wait for the pollen to glow'}
+      >
+        <svg className={styles.garden} viewBox="0 0 360 400" aria-hidden="true">
+          <path className={styles.dome} d="M15 360 C22 150 82 40 180 38 C278 40 338 150 345 360" />
+          <g className={styles.plants}>
+            <path d="M78 360V286m0 22c-16-5-22-15-24-25m24 13c14-4 20-12 23-22" />
+            <path d="M180 360V240m0 50c-20-6-27-17-30-29m30 18c18-5 25-15 28-28" />
+            <path d="M282 360v-65m0 24c-13-4-18-12-20-21m20 13c12-4 17-11 19-20" />
+          </g>
+          <g className={styles.dots}>
+            <circle cx="115" cy="145" r="4" />
+            <circle cx="238" cy="177" r="4" />
+            <circle cx="80" cy="285" r="5" />
+            <circle cx="180" cy="240" r="6" />
+            <circle cx="282" cy="295" r="5" />
+          </g>
+          <path className={styles.soil} d="M0 360h360v40H0z" />
+        </svg>
+        {pollen && phase === 'playing' && (
+          <span
+            className={styles.pollen}
+            style={{ left: `${pollen.x}%`, top: `${pollen.y}%` }}
+            aria-hidden="true"
+          />
+        )}
+        {phase === 'paused' && <span className={styles.overlay}>Paused</span>}
+        {phase === 'saving' && <span className={styles.overlay}>Saving results…</span>}
+      </button>
+
+      {phase === 'error' && (
+        <div className={styles.error} role="alert">
+          <p>Could not save your game. {saveError}</p>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setSaveError('');
+              setPhase('saving');
+            }}
+          >
+            Try saving again
+          </Button>
+        </div>
+      )}
+
+      <div className={styles.pause}>
+        <Button
+          variant="secondary"
+          onClick={togglePause}
+          disabled={phase !== 'playing' && phase !== 'paused'}
+        >
+          {phase === 'paused' ? 'Resume' : phase === 'playing' ? 'Pause' : 'Game complete'}
+        </Button>
+      </div>
+      <p className={styles.misses} aria-live="polite">
+        {misses} {misses === 1 ? 'miss' : 'misses'}
+        {isDemo && <span> · Demo mode</span>}
+      </p>
     </main>
   );
 }

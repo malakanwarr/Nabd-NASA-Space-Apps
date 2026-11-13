@@ -1,1 +1,29 @@
 /* Styles for home-window (owner: Habiba). Use only the variables from shared/theme.css. */
+.status { color: var(--muted); font-size: var(--fs-14); }
+
+.clock { display: flex; flex-direction: column; align-items: flex-end; margin-top: calc(var(--space-6) * -1); }
+.time { font-family: var(--font-mono); font-size: var(--fs-20); font-weight: 700; }
+.place { color: var(--muted); font-size: var(--fs-14); }
+
+.window { width: 78%; aspect-ratio: 1; margin: var(--space-4) auto var(--space-5); border: var(--space-2) solid var(--line); border-radius: var(--radius-full); overflow: hidden; background: var(--bg); box-shadow: 0 0 var(--space-6) color-mix(in srgb, var(--watch) 30%, transparent); }
+.earth { display: block; width: 100%; height: 100%; object-fit: cover; animation: drift 14s ease-in-out infinite alternate; }
+@keyframes drift { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+.headline { margin: 0; font-size: var(--fs-28); font-weight: 700; text-align: center; }
+.lead { margin: var(--space-2) 0 var(--space-5); color: var(--muted); font-size: var(--fs-16); text-align: center; }
+
+.initials { display: flex; align-items: center; justify-content: center; flex: none; min-width: var(--space-6); height: var(--space-6); padding: 0 var(--space-2); border-radius: var(--radius-full); background: var(--raised); color: var(--text); font-size: var(--fs-14); font-weight: 700; letter-spacing: 0.04em; }
+.chevron { color: var(--muted); font-size: var(--fs-20); }
+.section { margin: var(--space-5) 0 var(--space-1); font-size: var(--fs-20); font-weight: 700; }
+.kind { display: flex; color: var(--primary); }
+.empty { margin: var(--space-3) 0 0; color: var(--muted); font-size: var(--fs-14); }
+
+.record { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-5); }
+.note { margin: 0; color: var(--muted); font-size: var(--fs-14); text-align: center; }
+.recording { display: flex; align-items: center; justify-content: center; gap: var(--space-2); margin: 0; font-size: var(--fs-16); }
+.recDot { width: var(--space-2); height: var(--space-2); border-radius: var(--radius-full); background: var(--act); }
+.num { font-family: var(--font-mono); }
+.sent { display: flex; align-items: center; gap: var(--space-3); margin: 0; color: var(--text); font-size: var(--fs-16); }
+.sentIcon { display: flex; flex: none; color: var(--stable); }
+.sentIcon svg { width: var(--space-6); height: var(--space-6); }
+.problem { margin: 0; color: var(--watch); font-size: var(--fs-14); }
