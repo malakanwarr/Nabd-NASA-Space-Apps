@@ -40,16 +40,9 @@ export function buildAttentionRows({ systems = [], today, baseline }) {
     }));
 }
 
-export function buildForYouRows({ garden, hugs, profile }) {
-  const thisWeek = hugs?.thisWeek ?? [];
-  // latest = highest mission day; the last one wins on a tie
-  const latest = thisWeek.reduce(
-    (best, h) => (!best || h.missionDay >= best.missionDay ? h : best),
-    null,
-  );
-  const city = (profile?.hometown || 'Cairo').split(',')[0];
-
-  const rows = [
+export function buildForYouRows({ garden }) {
+  // Hugs and the Home window live in the Family tab, so they are not repeated here.
+  return [
     { id: 'sugar', title: 'Blood sugar check due', subtitle: '2 min', to: '/measure' },
     {
       id: 'garden',
@@ -57,15 +50,5 @@ export function buildForYouRows({ garden, hugs, profile }) {
       subtitle: `${garden.grownPercent}% grown`,
       to: '/garden',
     },
-    { id: 'window', title: 'Home window', subtitle: `7:40 pm in ${city}`, to: '/family' },
   ];
-  if (latest) {
-    rows.push({
-      id: 'hug',
-      title: `${latest.from} sent you a hug`,
-      subtitle: '2 h ago',
-      to: '/family',
-    });
-  }
-  return rows;
 }
