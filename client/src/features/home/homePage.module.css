@@ -32,6 +32,7 @@
   padding-right: 56px;
 }
 .avatarLink {
+  text-decoration: none;
   position: absolute;
   top: 0;
   right: 0;
@@ -206,15 +207,15 @@
   flex-direction: column;
   gap: var(--space-2);
 }
-.results {
-  display: flex;
-  justify-content: center;
-}
 .streak {
   text-align: center;
   font-size: var(--fs-14);
   color: var(--muted);
   margin: 0;
+}
+/* Takes the line's space without showing it, while we find out if she checked in. */
+.reserved {
+  visibility: hidden;
 }
 
 /* readiness */
