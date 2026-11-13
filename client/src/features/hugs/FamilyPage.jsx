@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ScreenHeader from '../../shared/ScreenHeader.jsx';
 import Button from '../../shared/Button.jsx';
-import ListRow from '../../shared/ListRow.jsx';
 import { getSampleData } from '../../shared/sampleData.js';
 import { useNewHugs } from './useNewHugs.js';
 import { buzzThreeTimes } from './buzz.js';
@@ -41,23 +40,6 @@ function LockIcon() {
   );
 }
 
-function WindowIcon() {
-  return (
-    <svg
-      className={s.rowIcon}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <rect x="4" y="4" width="16" height="16" rx="2" />
-      <path d="M12 4v16M4 12h16" />
-    </svg>
-  );
-}
-
 function CheckIcon() {
   return (
     <svg
@@ -74,7 +56,9 @@ function CheckIcon() {
   );
 }
 
-export default function FamilyPage() {
+// One Family page: `top` (Home window scene) and `bottom` (record a message, messages from home) are passed in
+// by features/home-window so /family is the only page; with no slots it is just the hugs page.
+export default function FamilyPage({ top = null, bottom = null }) {
   const [data, setData] = useState(null);
   const [loadError, setLoadError] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -128,6 +112,7 @@ export default function FamilyPage() {
     return (
       <main className={s.page}>
         <ScreenHeader title="Family" />
+        {top}
         <div className={s.stateBox} role="alert">
           <p className={s.stateText}>
             Couldn't load your family. Check the connection and try again.
@@ -136,6 +121,7 @@ export default function FamilyPage() {
             Try again
           </Button>
         </div>
+        {bottom}
       </main>
     );
   }
@@ -144,14 +130,16 @@ export default function FamilyPage() {
     return (
       <main className={s.page}>
         <ScreenHeader title="Family" />
+        {top}
         <p className={s.stateText} role="status">
           Loading your family…
         </p>
+        {bottom}
       </main>
     );
   }
 
-  const { hugs, profile, mission } = data;
+  const { hugs, mission } = data;
   const total = rows.reduce((sum, r) => sum + r.count, 0);
   const max = Math.max(1, ...rows.map((r) => r.count));
   const latestLive = liveHugs[liveHugs.length - 1];
@@ -164,7 +152,6 @@ export default function FamilyPage() {
     : latestSample
       ? { from: latestSample.from, text: `${SAMPLE_ARRIVED} · your phone buzzed` }
       : null;
-  const homeCity = String(profile.hometown ?? '').split(',')[0] || 'home';
   const shared = hugs.sharedWithFamilyNow;
 
   return (
@@ -178,6 +165,7 @@ export default function FamilyPage() {
         )}
       </div>
       <ScreenHeader title="Family" />
+      {top}
       <p className={s.lead}>Hugs take {mission.earthDelayOneWay.text} to travel between you</p>
 
       {offline && (
@@ -229,13 +217,6 @@ export default function FamilyPage() {
         </ul>
       </section>
 
-      <ListRow
-        icon={<WindowIcon />}
-        title="Home window"
-        subtitle={`See ${homeCity} right now · new voice message`}
-        to="/family/window"
-      />
-
       <section aria-labelledby="sees-title">
         <div className={s.sectionHead}>
           <h2 id="sees-title" className={s.sectionTitle}>
@@ -271,6 +252,8 @@ export default function FamilyPage() {
           Send a hug home
         </Button>
       </div>
+
+      {bottom}
     </main>
   );
 }
