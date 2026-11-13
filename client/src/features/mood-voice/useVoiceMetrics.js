@@ -17,26 +17,46 @@ import { PitchDetector } from 'pitchy';
 // Same length as DURATION_MS in mood-face/useFaceMetrics.js.
 export const DURATION_MS = 30000;
 
-// 2048 samples is about 43 ms: long enough to hear a 60 Hz voice, short enough to follow speech.
-const BUFFER_SIZE = 2048;
+// Meyda hands over one frame of this many samples, about 21 ms at 48 kHz. Short frames
+// follow the start and end of each word closely, which is what the pace and the pauses need.
+const FRAME_SAMPLES = 1024;
+
+// Pitch needs a longer look than one frame: 2048 samples is about 43 ms, enough for two
+// periods of a 60 Hz voice. So the last two frames are kept and the pitch is read off both.
+const PITCH_SAMPLES = 2048;
 
 // Pitchy only believes a pitch this clear, and only a human speaking range.
 const MIN_CLARITY = 0.8;
 const MIN_PITCH_HZ = 60;
 const MAX_PITCH_HZ = 500;
 
-// Anything below this is silence, whatever the room noise is doing.
-const SILENCE_RMS = 0.004;
+// Pitchy ignores a frame quieter than this. Low, so a soft voice is still heard: the ends of
+// phrases are the quietest and the lowest, and losing them flattens the pitch range.
+const MIN_VOLUME_DB = -60;
+
+// Anything below this is silence, whatever the room noise is doing. It is deliberately
+// very low: a quiet voice close to a phone can sit at an rms of 0.008, and a line of 0.004
+// then cut the softer half of every word away, which read as 70% pauses.
+const SILENCE_RMS = 0.0005;
 
 // How far above the quiet floor a frame has to be to count as speaking.
 const SPEAKING_ABOVE_FLOOR = 0.15;
 
-// Two quiet frames (about 85 ms) end a speaking burst.
-const GAP_FRAMES = 2;
+// Once she is speaking, it takes a drop this far back down towards the quiet floor to count
+// as a pause, so the soft edges of a word are not chopped into little silences. It never goes
+// below the floor itself, or room noise alone would hold the speech open.
+const KEEP_SPEAKING_AT = 0.6;
 
-// We need this much speech before the numbers mean anything.
-const MIN_SPEAKING_FRAMES = 20;
-const MIN_VOICED_FRAMES = 10;
+// Speech has to stand this much above the quiet floor for a recording to count at all.
+// Room noise on its own has a peak barely above its own floor.
+const SPEECH_ABOVE_NOISE = 2.5;
+
+// A quiet moment this long ends a speaking burst, which is how the pace is counted.
+const GAP_MS = 45;
+
+// We need this much speech, and this much of it voiced, before the numbers mean anything.
+const MIN_SPEAKING_MS = 850;
+const MIN_VOICED_MS = 450;
 
 const EMPTY = { pitchRangeHz: null, loudness: null, pauseRatio: null, paceSegmentsPerSec: null };
 
@@ -51,10 +71,14 @@ function percentile(sorted, share) {
 
 /**
  * Turns the measured frames into the four numbers.
- * frames: [{ rms, pitch }] one every ~43 ms, pitch is null when it was not clear enough.
+ * frames: [{ rms, pitch }] one every ~21 ms, pitch is null when it was not clear enough.
+ * frameMs: how long one frame lasts, so the lengths below stay in real time.
  */
 export function metricsFromFrames(frames, frameMs) {
-  if (frames.length < MIN_SPEAKING_FRAMES) return null;
+  const minSpeakingFrames = Math.max(2, Math.round(MIN_SPEAKING_MS / frameMs));
+  const minVoicedFrames = Math.max(2, Math.round(MIN_VOICED_MS / frameMs));
+  const gapFrames = Math.max(1, Math.round(GAP_MS / frameMs));
+  if (frames.length < minSpeakingFrames) return null;
 
   // Where is the line between quiet and speaking? Take it from this recording, so a noisy
   // module and a quiet one both work.
@@ -63,18 +87,29 @@ export function metricsFromFrames(frames, frameMs) {
   const peak = percentile(loudnesses, 0.95);
   const threshold = Math.max(SILENCE_RMS, floor + (peak - floor) * SPEAKING_ABOVE_FLOOR);
 
-  const speaking = frames.map((f) => f.rms >= threshold || f.pitch !== null);
+  // Was anybody speaking? A room humming to itself is not.
+  if (peak < floor * SPEECH_ABOVE_NOISE || peak < SILENCE_RMS * 2) return null;
+
+  // A frame with a clear pitch is always speech. Otherwise it takes `threshold` to start
+  // speaking and a drop below `quieter` to stop (the same idea as a thermostat).
+  const quieter = floor + (threshold - floor) * KEEP_SPEAKING_AT;
+  let onNow = false;
+  const speaking = frames.map((f) => {
+    if (f.pitch !== null) onNow = true;
+    else onNow = f.rms >= (onNow ? quieter : threshold);
+    return onNow;
+  });
 
   // Measure only between the first and the last word: silence before and after is ignored.
   const first = speaking.indexOf(true);
   const last = speaking.lastIndexOf(true);
-  if (first < 0 || last - first < MIN_SPEAKING_FRAMES) return null;
+  if (first < 0 || last - first < minSpeakingFrames) return null;
 
   const window = frames.slice(first, last + 1);
   const windowSpeaking = speaking.slice(first, last + 1);
 
   const spokenFrames = window.filter((f, i) => windowSpeaking[i]);
-  if (spokenFrames.length < MIN_SPEAKING_FRAMES) return null;
+  if (spokenFrames.length < minSpeakingFrames) return null;
 
   // Loudness: the average while she is actually speaking.
   const loudness = spokenFrames.reduce((sum, f) => sum + f.rms, 0) / spokenFrames.length;
@@ -89,16 +124,16 @@ export function metricsFromFrames(frames, frameMs) {
     .map((f) => f.pitch)
     .sort((a, b) => a - b);
   const pitchRangeHz =
-    pitches.length >= MIN_VOICED_FRAMES
+    pitches.length >= minVoicedFrames
       ? Math.max(0, percentile(pitches, 0.9) - percentile(pitches, 0.1))
       : null;
 
-  // Pace: how many separate bursts of speech per second. A burst ends after two quiet frames.
+  // Pace: how many separate bursts of speech per second. A short quiet moment ends a burst.
   let bursts = 0;
-  let quietRun = GAP_FRAMES; // so the first speaking frame starts a burst
+  let quietRun = gapFrames; // so the first speaking frame starts a burst
   windowSpeaking.forEach((is) => {
     if (is) {
-      if (quietRun >= GAP_FRAMES) bursts += 1;
+      if (quietRun >= gapFrames) bursts += 1;
       quietRun = 0;
     } else {
       quietRun += 1;
@@ -162,7 +197,7 @@ export default function useVoiceMetrics() {
   const finish = useCallback(() => {
     if (!liveRef.current) return;
     const context = contextRef.current;
-    const frameMs = context ? (BUFFER_SIZE / context.sampleRate) * 1000 : 43;
+    const frameMs = context ? (FRAME_SAMPLES / context.sampleRate) * 1000 : 21;
     const frames = framesRef.current;
     letGo();
     const result = metricsFromFrames(frames, frameMs);
@@ -209,8 +244,11 @@ export default function useVoiceMetrics() {
       const context = new AudioContextClass();
       await context.resume(); // iPhone needs this inside the tap
       const source = context.createMediaStreamSource(stream);
-      const detector = PitchDetector.forFloat32Array(BUFFER_SIZE);
-      detector.minVolumeDecibels = -45;
+      const detector = PitchDetector.forFloat32Array(PITCH_SAMPLES);
+      detector.minVolumeDecibels = MIN_VOLUME_DB;
+      // The last PITCH_SAMPLES samples, oldest first, refilled frame by frame.
+      const pitchWindow = new Float32Array(PITCH_SAMPLES);
+      let framesSeen = 0;
 
       streamRef.current = stream;
       contextRef.current = context;
@@ -221,15 +259,26 @@ export default function useVoiceMetrics() {
       const analyzer = Meyda.createMeydaAnalyzer({
         audioContext: context,
         source,
-        bufferSize: BUFFER_SIZE,
+        bufferSize: FRAME_SAMPLES,
+        // 'rect' means "leave the sound alone". Meyda's usual hanning window fades each frame
+        // in and out, which quietens the loudness it reports and stops pitchy recognising a
+        // pitch at all in about half the frames.
+        windowingFunction: 'rect',
         featureExtractors: ['rms', 'buffer'],
         callback: (features) => {
           if (!liveRef.current || !features) return;
           const rms = features.rms || 0;
           let pitch = null;
-          if (features.buffer) {
-            const [hz, clarity] = detector.findPitch(features.buffer, context.sampleRate);
-            if (clarity > MIN_CLARITY && hz >= MIN_PITCH_HZ && hz <= MAX_PITCH_HZ) pitch = hz;
+          if (features.buffer && features.buffer.length) {
+            // Slide the frame into the pitch window and read the pitch off the whole window.
+            const take = Math.min(features.buffer.length, PITCH_SAMPLES);
+            pitchWindow.copyWithin(0, take);
+            pitchWindow.set(features.buffer, PITCH_SAMPLES - take);
+            framesSeen += 1;
+            if (framesSeen >= PITCH_SAMPLES / take) {
+              const [hz, clarity] = detector.findPitch(pitchWindow, context.sampleRate);
+              if (clarity > MIN_CLARITY && hz >= MIN_PITCH_HZ && hz <= MAX_PITCH_HZ) pitch = hz;
+            }
           }
           // Only these two numbers per frame are kept; the sound itself is dropped here.
           framesRef.current.push({ rms, pitch });

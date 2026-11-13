@@ -1,6 +1,7 @@
 /* Styles for mood-results (owner: Malak). Use only the variables from shared/theme.css. */
 
 .head {
+  /* .phone in theme.css already clears the status bar; this is the design gap on top of it. */
   padding: var(--space-5) 0 0;
 }
 
