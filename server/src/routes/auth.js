@@ -24,6 +24,22 @@ async function findMember(crewId) {
 
 router.get('/', (req, res) => res.json({ ok: true, feature: 'auth' }));
 
+router.post('/admin', (req, res) => {
+  const { ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
+  if (!ADMIN_EMAIL || !ADMIN_PASSWORD)
+    return res.status(503).json({ error: 'Admin sign-in is not configured' });
+
+  const email = req.body?.email;
+  const password = req.body?.password;
+  if (typeof email !== 'string' || typeof password !== 'string' || !email || !password)
+    return res.status(400).json({ error: 'email and password are required' });
+
+  if (email.toLowerCase() !== ADMIN_EMAIL.toLowerCase() || password !== ADMIN_PASSWORD)
+    return res.status(401).json({ error: 'Invalid email or password' });
+
+  return res.json({ id: 'admin', name: 'Mission Control admin', role: 'admin' });
+});
+
 router.post('/crew', async (req, res) => {
   const crewId = String(req.body?.crewId ?? '');
   const pin = String(req.body?.pin ?? '');

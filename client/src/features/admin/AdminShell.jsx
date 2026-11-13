@@ -23,7 +23,7 @@ export default function AdminShell({ children }) {
           <NavLink to="/admin" end className={({ isActive }) => `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`}>
             Crew
           </NavLink>
-          <Link to="/admin#alerts" className={styles.navLink}>Alerts</Link>
+          <Link to="/surgeon" className={styles.navLink}>Alerts</Link>
         </nav>
         <div className={styles.account}>
           <p className={styles.accountName}>{session?.name || 'Mission Control admin'}</p>
