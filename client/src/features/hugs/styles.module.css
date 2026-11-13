@@ -58,7 +58,7 @@
 }
 .noticeSlot {
   position: sticky;
-  top: var(--space-3);
+  top: calc(var(--space-3) + env(safe-area-inset-top)); /* below the iPhone clock and battery */
   z-index: 2;
   height: 0;
   margin-bottom: calc(var(--space-4) * -1); /* cancels the flex gap this slot adds */
