@@ -4,6 +4,7 @@ import Button from '../../shared/Button.jsx';
 import ScreenHeader from '../../shared/ScreenHeader.jsx';
 import StatusLabel from '../../shared/StatusLabel.jsx';
 import { getSampleData } from '../../shared/sampleData.js';
+import AdminShell from '../admin/AdminShell.jsx';
 import styles from './styles.module.css';
 
 const EMPTY_CREW = [];
@@ -314,10 +315,11 @@ export default function SurgeonPage() {
   }
 
   return (
-    <main className={styles.dashboard}>
+    <AdminShell>
+      <main className={styles.dashboard}>
       <aside className={styles.sidebar} aria-label="Crew navigation">
         <div className={styles.brand}>
-          <strong className={styles.brandName}>NABD</strong>
+          <strong className={styles.crewTitle}>Crew</strong>
           <span className={styles.brandRole}>Flight surgeon</span>
           <span className={styles.brandNameSmall}>{surgeonName}</span>
         </div>
@@ -460,6 +462,7 @@ export default function SurgeonPage() {
           <p className={styles.stateMessage}>Choose a crew member to review their details.</p>
         )}
       </section>
-    </main>
+      </main>
+    </AdminShell>
   );
 }

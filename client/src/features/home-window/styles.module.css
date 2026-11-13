@@ -1,8 +1,8 @@
-/* Styles for home-window (owner: Habiba). Use only the variables from shared/theme.css. */
+/* Styles for the Home window. Use only the variables from shared/theme.css. */
 .status { color: var(--muted); font-size: var(--fs-14); }
 
 .clock { display: flex; flex-direction: column; align-items: flex-end; margin-top: calc(var(--space-6) * -1); }
-.time { font-family: var(--font-mono); font-size: var(--fs-20); font-weight: 700; }
+.time { font-family: var(--font-mono); font-size: var(--fs-20); font-weight: 500; }
 .place { color: var(--muted); font-size: var(--fs-14); }
 
 .window { width: 78%; aspect-ratio: 1; margin: var(--space-4) auto var(--space-5); border: var(--space-2) solid var(--line); border-radius: var(--radius-full); overflow: hidden; background: var(--bg); box-shadow: 0 0 var(--space-6) color-mix(in srgb, var(--watch) 30%, transparent); }
@@ -17,9 +17,16 @@
 .section { margin: var(--space-5) 0 var(--space-1); font-size: var(--fs-20); font-weight: 700; }
 .kind { display: flex; color: var(--primary); }
 .empty { margin: var(--space-3) 0 0; color: var(--muted); font-size: var(--fs-14); }
+.historyAudio { display: block; width: 100%; margin: var(--space-2) 0 var(--space-3); }
+.historyPhoto { display: block; width: 100%; aspect-ratio: 16 / 9; margin: var(--space-2) 0 var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--raised); object-fit: contain; }
+.emptyMedia { margin: 0 0 var(--space-3); color: var(--muted); font-size: var(--fs-14); }
 
 .record { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-5); }
 .note { margin: 0; color: var(--muted); font-size: var(--fs-14); text-align: center; }
+.preview { display: flex; flex-direction: column; gap: var(--space-2); }
+.previewTitle { margin: 0; font-size: var(--fs-14); font-weight: 600; }
+.previewAudio { display: block; width: 100%; }
+.previewActions { display: flex; flex-direction: column; gap: var(--space-2); }
 .recording { display: flex; align-items: center; justify-content: center; gap: var(--space-2); margin: 0; font-size: var(--fs-16); }
 .recDot { width: var(--space-2); height: var(--space-2); border-radius: var(--radius-full); background: var(--act); }
 .num { font-family: var(--font-mono); }

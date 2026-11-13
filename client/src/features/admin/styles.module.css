@@ -2,8 +2,6 @@
   display: grid;
   grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr);
   gap: var(--space-6);
-  max-width: 100rem;
-  margin: 0 auto;
 }
 
 .rectangularControls :global(button),

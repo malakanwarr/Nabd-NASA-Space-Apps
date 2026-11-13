@@ -9,3 +9,12 @@
 .chevron { color: var(--muted); font-size: var(--fs-20); }
 .account { margin-top: var(--space-5); }
 .account > button, .account > a:last-child { margin-top: var(--space-2); }
+
+.switchHit { display: flex; align-items: center; justify-content: center; min-width: 48px; min-height: 48px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.track { position: relative; width: calc(var(--space-6) + var(--space-5)); height: var(--space-6); border-radius: var(--radius-full); background: var(--line); transition: background-color 0.3s ease; }
+.trackOn { background: var(--primary); }
+.knob { position: absolute; top: var(--space-1); left: var(--space-1); width: var(--space-5); height: var(--space-5); border-radius: var(--radius-full); background: var(--muted); transition: left 0.3s ease, background-color 0.3s ease; }
+.knobOn { left: calc(100% - var(--space-5) - var(--space-1)); background: var(--on-primary); }
+.exportRow { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-3); }
+.problem { margin: 0; color: var(--watch); font-size: var(--fs-14); }
+@media (prefers-reduced-motion: reduce) { .track, .knob { transition: none; } }

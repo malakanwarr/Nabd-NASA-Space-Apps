@@ -18,15 +18,21 @@ import { apiFetch } from '../../shared/api.js';
 import { getSampleData } from '../../shared/sampleData.js';
 import { useSession } from '../../shared/session.js';
 import { clearDraft, readDraft } from '../mood-voice/checkinDraft.js';
-import { computeEnergyScore, describeChanges, labelWords } from './energyScore.js';
+import {
+  FIRST_LABEL,
+  baselineFromCheckin,
+  computeEnergyScore,
+  describeChanges,
+  isExperimentId,
+} from './energyScore.js';
+import HealthScores from '../health/HealthScores.jsx';
+import CycleContext from './CycleContext.jsx';
 import EnergyChart from './EnergyChart.jsx';
 import {
   NORMAL_SPREAD,
   advice,
   chartPoints,
   dayName,
-  daysInARow,
-  runLine,
 } from './resultsText.js';
 import s from './styles.module.css';
 
@@ -101,7 +107,14 @@ export default function ResultsPage() {
           getSampleData('today'),
         ]);
         if (!alive) return;
-        setBaseline(baselineFile);
+        // Test people (exp- ids) are compared with their own first check-in, not with Sara.
+        // Sara and the demo crew keep data/baseline.json.
+        const own = isExperimentId(crewId)
+          ? baselineFromCheckin(await apiFetch(`/api/mood/baseline?crewId=${encodeURIComponent(crewId)}`))
+          : null;
+        if (!alive) return;
+        const baselineToUse = own || baselineFile;
+        setBaseline(baselineToUse);
         setToday(todayFile);
 
         // ---- Opened directly: show the latest check-in saved today.
@@ -122,7 +135,10 @@ export default function ResultsPage() {
 
         // ---- Just checked in: score it, show it, save it.
         const { face, voice, reactionMs } = numbers;
-        const { energyScore, label } = computeEnergyScore(face, voice, baselineFile, reactionMs);
+        // No saved first check-in yet: this one is their normal, so it gets the "set" label.
+        const scored = computeEnergyScore(face, voice, baselineToUse, reactionMs);
+        const energyScore = scored.energyScore;
+        const label = isExperimentId(crewId) && !own && energyScore !== null ? FIRST_LABEL : scored.label;
         if (energyScore === null) {
           setProblem('We did not get enough from the camera or the microphone to work out a score.');
           setPhase('error');
@@ -235,7 +251,7 @@ export default function ResultsPage() {
       <main>
         <ScreenHeader backTo="/" backLabel="Home" eyebrow="Check-in" title="No check-in yet today" />
         <p className={s.muted}>
-          The check-in takes two minutes: read one sentence out loud, then catch some pollen.
+          The check-in takes two minutes: read one sentence out loud twice, then catch some pollen.
         </p>
         {points.length > 0 && (
           <section className={s.block} aria-label="Energy, last days">
@@ -260,13 +276,9 @@ export default function ResultsPage() {
   const pickedRow = pickedDay === null ? null : known.find((row) => row.missionDay === pickedDay);
   const viewingPast = Boolean(pickedRow) && pickedRow.missionDay !== result.missionDay;
   const shown = viewingPast ? shape(pickedRow) : result;
-  const shownAt = known.findIndex((row) => row.missionDay === shown.missionDay);
 
-  const { energyScore, label, face, voice, reactionMs } = shown;
-  const words = labelWords(label);
+  const { label, face, voice, reactionMs } = shown;
   const changes = describeChanges(face, voice, baseline, reactionMs);
-  const points = chartPoints(known, baselineScore);
-  const run = daysInARow(known.slice(0, shownAt + 1));
 
   // The sleep behind the advice is that day's own sleep.
   const adviceToday = viewingPast
@@ -285,6 +297,32 @@ export default function ResultsPage() {
     window.scrollTo(0, 0);
   }
 
+  // A test person's first check-in is not scored: it only sets their normal.
+  if (label === FIRST_LABEL) {
+    return (
+      <main>
+        <ScreenHeader
+          backTo={mode === 'latest' ? '/' : undefined}
+          backLabel="Home"
+          eyebrow={eyebrow}
+          title={FIRST_LABEL}
+        />
+        <section className={s.block} aria-label="Your normal">
+          <StatusLabel status="stable" />
+          <p className={s.advice}>Later check-ins are compared with this one.</p>
+          {saveProblem && !viewingPast && (
+            <p className={s.problem} role="alert">
+              We could not save it: {saveProblem}
+            </p>
+          )}
+        </section>
+        <div className={s.actions}>
+          <Button to="/">Back to home</Button>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main>
       <ScreenHeader
@@ -294,17 +332,8 @@ export default function ResultsPage() {
         title={viewingPast ? `Day ${shown.missionDay} vs your normal` : 'Today vs your normal'}
       />
 
-      <section className={s.score} aria-label="Energy">
-        <p className={s.big}>
-          <strong className={`${s.number} ${s[words.status]}`}>{energyScore}</strong>
-          <span className={s.outOf}>/100</span>
-        </p>
-        <div className={s.scoreWords}>
-          <p className={`${s.scoreTitle} ${s[words.status]}`}>{words.title}</p>
-          <StatusLabel status={words.status} />
-          <p className={s.muted}>{runLine(label, run)}</p>
-        </div>
-      </section>
+      {/* Four scores instead of one energy score. The energy score is still worked out and saved for the 7-day history. */}
+      <HealthScores shown={shown} known={known} today={today} baseline={baseline} crewId={crewId} />
 
       {saveProblem && !viewingPast && (
         <p className={s.problem} role="alert">
@@ -336,26 +365,25 @@ export default function ResultsPage() {
         {!voice && <p className={s.muted}>No voice numbers, so only the face was compared.</p>}
       </section>
 
-      <section className={s.block} aria-label="Energy, last 7 days">
-        <h2 className={s.heading}>Energy, last 7 days</h2>
-        <EnergyChart points={points} normalFrom={normalFrom} normalTo={normalTo} />
-        {known.length > 1 && (
-          <>
-            <p className={s.muted}>Tap a day to see how it went.</p>
-            <div className={s.days}>
-              {known.map((row) => (
-                <Chip
-                  key={row.missionDay}
-                  selected={row.missionDay === shown.missionDay}
-                  onClick={() => pick(row.missionDay)}
-                >
-                  {dayName(row.date, row.missionDay === result.missionDay)}
-                </Chip>
-              ))}
-            </div>
-          </>
-        )}
-      </section>
+      <CycleContext />
+
+      {known.length > 1 && (
+        <section className={s.block} aria-label="Other days">
+          <h2 className={s.heading}>Look at another day</h2>
+          <p className={s.muted}>Tap a day to see how it went.</p>
+          <div className={s.days}>
+            {known.map((row) => (
+              <Chip
+                key={row.missionDay}
+                selected={row.missionDay === shown.missionDay}
+                onClick={() => pick(row.missionDay)}
+              >
+                {dayName(row.date, row.missionDay === result.missionDay)}
+              </Chip>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className={s.block} aria-label="What to do">
         <p className={s.advice}>{advice(label, adviceToday, baseline)}</p>
@@ -364,7 +392,11 @@ export default function ResultsPage() {
           risks to how well a crew member works and feels.
         </p>
         <div className={s.actions}>
-          <Button to="/doctor">Plan tonight's sleep with the AI doctor</Button>
+          {/* The exercise for today lives on the Bones and muscles page (/body/bones). One main button per area. */}
+          <Button to="/body/bones">Adjust my workout</Button>
+          <Button variant="secondary" to="/doctor">
+            Plan tonight's sleep with the AI doctor
+          </Button>
           <Button variant="text" to="/family">
             Ask family for a hug
           </Button>

@@ -115,6 +115,38 @@ function toNote(doc, now = Date.now()) {
   };
 }
 
+function crewSample(crewId) {
+  const crew = readData('crew')?.crew || [];
+  return crew.find((member) => String(member.id) === String(crewId)) || null;
+}
+
+function toCrewDetail({ crewId, member, notes, sharedWithConsent, draftReply, database, flightSurgeon, delayText }) {
+  const today = readData('today') || {};
+  return {
+    crewId,
+    flightSurgeon,
+    delayText,
+    database,
+    vitals: today.vitals || {},
+    sleepLastNightHours: today.sleepLastNightHours ?? null,
+    allergies: Array.isArray(member?.allergies) ? member.allergies : [],
+    notes: notes.map((note) => ({
+      id: note.id || note._id || null,
+      text: note.text || note.summary || note.content || '',
+      summary: note.summary || note.text || note.content || '',
+      sentShipTime: note.sentShipTime || (note.sentAt ? new Date(note.sentAt).toISOString().slice(0, 16) : null),
+      arrivedEarthTime: note.arrivedEarthTime || (note.arrivesAt ? new Date(note.arrivesAt).toISOString().slice(0, 16) : null),
+      sentAt: note.sentAt || null,
+      arrivesAt: note.arrivesAt || null,
+      arrived: note.arrived ?? (note.arrivesAt ? new Date(note.arrivesAt).getTime() <= Date.now() : false),
+      energyScore: note.energyScore ?? null,
+      sample: Boolean(note.sample),
+    })),
+    sharedWithConsent: sharedWithConsent && sharedWithConsent.astronautId === crewId ? sharedWithConsent : null,
+    draftReply: draftReply || '',
+  };
+}
+
 // ---------------------------------------------------------------- routes
 
 router.get('/', (req, res) => res.json({ ok: true, feature: 'surgeon', database: dbReady() }));
@@ -173,26 +205,98 @@ router.post('/:crewId/notes', async (req, res) => {
 
 router.get('/:crewId', async (req, res) => {
   const { crewId } = req.params;
+  const member = crewSample(crewId);
+  if (!member) {
+    return res.status(404).json({ error: 'Crew member not found.' });
+  }
+
   const delay = earthDelay();
-  const flightSurgeon = readData('mission')?.flightSurgeonOnEarth || 'Flight surgeon';
-  const base = { crewId, flightSurgeon, delayText: delay.text };
+  const flightSurgeon = readData('mission')?.flightSurgeonOnEarth || readData('crew')?.mission?.flightSurgeon || 'Flight surgeon';
+  const sample = readData('surgeon-notes');
 
   if (!dbReady()) {
-    // Demo fallback: the sample notes from data/surgeon-notes.json, marked as samples.
-    const sample = readData('surgeon-notes');
     const notes = (sample?.notes || [])
-      .filter((n) => n.astronautId === crewId)
-      .map((n) => ({ summary: n.text, sentAt: n.sentShipTime, arrivesAt: n.arrivedEarthTime, arrived: true, sample: true }));
-    return res.json({ ...base, notes, database: false });
+      .filter((n) => String(n.astronautId) === String(crewId))
+      .map((n) => ({
+        id: n.id || null,
+        summary: n.text,
+        text: n.text,
+        sentAt: n.sentShipTime,
+        arrivesAt: n.arrivedEarthTime,
+        sentShipTime: n.sentShipTime,
+        arrivedEarthTime: n.arrivedEarthTime,
+        arrived: true,
+        energyScore: n.energyScore ?? null,
+        sample: true,
+      }));
+
+    return res.json(toCrewDetail({
+      crewId,
+      member,
+      notes,
+      sharedWithConsent: sample?.sharedWithConsent?.astronautId === crewId ? sample.sharedWithConsent : null,
+      draftReply: sample?.draftReply || '',
+      database: false,
+      flightSurgeon,
+      delayText: delay.text,
+    }));
   }
 
   try {
     const notes = await SurgeonNote.find({ crewId }).sort({ sentAt: -1 }).limit(50).lean();
+    const latest = await SurgeonNote.findOne({ crewId }).sort({ sentAt: -1 }).lean();
     const now = Date.now();
-    res.json({ ...base, notes: notes.map((n) => toNote(n, now)), database: true });
+    const transformed = notes.map((n) => ({
+      id: n._id ? String(n._id) : null,
+      summary: n.summary,
+      text: n.summary,
+      sentAt: n.sentAt,
+      arrivesAt: n.arrivesAt,
+      sentShipTime: n.sentAt ? new Date(n.sentAt).toISOString().slice(0, 16) : null,
+      arrivedEarthTime: n.arrivesAt ? new Date(n.arrivesAt).toISOString().slice(0, 16) : null,
+      arrived: n.arrivesAt ? new Date(n.arrivesAt).getTime() <= now : false,
+      energyScore: null,
+      sample: false,
+    }));
+
+    res.json(toCrewDetail({
+      crewId,
+      member,
+      notes: transformed,
+      sharedWithConsent: sample?.sharedWithConsent?.astronautId === crewId ? sample.sharedWithConsent : null,
+      draftReply: latest?.surgeonReply?.text || sample?.draftReply || '',
+      database: true,
+      flightSurgeon,
+      delayText: delay.text,
+    }));
   } catch (err) {
     console.warn('[surgeon] could not load the crew data:', err.message);
     res.status(500).json({ error: 'Could not load this crew member.' });
+  }
+});
+
+router.post('/:crewId/reply', async (req, res) => {
+  const { crewId } = req.params;
+  const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
+  if (!message) {
+    return res.status(400).json({ error: 'Write a message before sending it to the crew member.' });
+  }
+
+  const sentAt = new Date();
+  try {
+    if (!dbReady()) {
+      return res.json({ ok: true, sent: false, deliveredAt: new Date(sentAt.getTime() + earthDelay().ms) });
+    }
+
+    const latest = await SurgeonNote.findOne({ crewId }).sort({ sentAt: -1 }).lean();
+    if (latest) {
+      await SurgeonNote.updateOne({ _id: latest._id }, { surgeonReply: { text: message, repliedAt: sentAt } });
+    }
+
+    res.json({ ok: true, sent: true, deliveredAt: new Date(sentAt.getTime() + earthDelay().ms) });
+  } catch (err) {
+    console.warn('[surgeon] could not send the reply:', err.message);
+    res.status(500).json({ error: 'The reply could not be sent.' });
   }
 });
 

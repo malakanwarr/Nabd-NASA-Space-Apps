@@ -37,6 +37,7 @@ export function daysInARow(history) {
 
 // The line under the score: how long this has been going on.
 export function runLine(label, run) {
+  if (label === 'Your normal is set') return 'Later check-ins are compared with this one';
   if (run > 1) return `Energy lower than your normal ${run} days in a row`;
   if (label === 'tired') return 'Energy lower than your normal today';
   return 'In your normal range';
@@ -44,6 +45,7 @@ export function runLine(label, run) {
 
 // One line of advice, built from Sara's own numbers. It never diagnoses anything.
 export function advice(label, today, baseline) {
+  if (label === 'Your normal is set') return 'This check-in is now your own normal. Do the next one at a different time and it will be compared with this one.';
   const sleep = today && today.sleepLastNightHours;
   const nights = (today && today.sleepShortNightsInARow) || 0;
   const normalSleep = baseline && baseline.sleepHours;

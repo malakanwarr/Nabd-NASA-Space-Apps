@@ -1,10 +1,9 @@
-// All routes live here (Malak only), so nobody needs to edit this file later.
 import { useEffect, useState } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { useSession } from './shared/session.js';
 import { getSampleData } from './shared/sampleData.js';
 import TabBar from './shared/TabBar.jsx';
-
+import DesktopLoadingPage from './features/admin/DesktopLoadingPage.jsx';
 import Opening from './features/home/Opening.jsx';
 import HomePage from './features/home/HomePage.jsx';
 import CrewSignInPage from './features/auth/CrewSignInPage.jsx';
@@ -24,7 +23,13 @@ import FamilyPage from './features/hugs/FamilyPage.jsx';
 import SendHugPage from './features/hugs/SendHugPage.jsx';
 import JoinPage from './features/family-app/JoinPage.jsx';
 import HomeWindowPage from './features/home-window/HomeWindowPage.jsx';
+import HealthPage from './features/health/HealthPage.jsx';
+import SleepPage from './features/health/SleepPage.jsx';
+import CardioPage from './features/health/CardioPage.jsx';
+import CheckinSleepPage from './features/health/CheckinSleepPage.jsx';
 import AvatarPage from './features/avatar/AvatarPage.jsx';
+import MusclesPage from './features/muscles/MusclesPage.jsx';
+import WorkoutPage from './features/muscles/WorkoutPage.jsx';
 import GardenPage from './features/garden/GardenPage.jsx';
 import AdminSignInPage from './features/admin/AdminSignInPage.jsx';
 import CrewOverviewPage from './features/admin/CrewOverviewPage.jsx';
@@ -33,7 +38,7 @@ import CrewMemberPage from './features/admin/CrewMemberPage.jsx';
 import SurgeonPage from './features/surgeon/SurgeonPage.jsx';
 
 // Phone screens without the tab bar.
-const NO_TABBAR = ['/signin', '/send', '/join', '/checkin/record', '/checkin/game', '/body/cycle/log'];
+const NO_TABBAR = ['/signin', '/send', '/join', '/checkin/record', '/checkin/game', '/checkin/sleep', '/body/cycle/log', '/body/muscles/workout'];
 
 function isLaptop(pathname) {
   return pathname === '/surgeon' || pathname === '/admin' || pathname.startsWith('/admin/');
@@ -71,7 +76,13 @@ export default function App() {
     Promise.all([minimum, load]).then(() => setReady(true));
   }, []);
 
-  if (!ready) return <Opening />;
+  if (!ready) {
+  const isDesktop =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(min-width: 58rem)').matches;
+
+  return isDesktop ? <DesktopLoadingPage /> : <Opening />;
+}
 
   return (
     <Routes>
@@ -90,6 +101,12 @@ export default function App() {
           <Route path="/body" element={<BodyPage />} />
           <Route path="/body/cycle" element={<CyclePage />} />
           <Route path="/body/cycle/log" element={<LogSymptomPage />} />
+          <Route path="/body/muscles" element={<MusclesPage />} />
+          <Route path="/checkin/sleep" element={<CheckinSleepPage />} />
+          <Route path="/health" element={<HealthPage />} />
+          <Route path="/health/sleep" element={<SleepPage />} />
+          <Route path="/health/cardio" element={<CardioPage />} />
+          <Route path="/body/muscles/workout" element={<WorkoutPage />} />
           <Route path="/body/:system" element={<SystemDetailPage />} />
           <Route path="/measure" element={<MeasurePage />} />
           <Route path="/doctor" element={<DoctorPage />} />

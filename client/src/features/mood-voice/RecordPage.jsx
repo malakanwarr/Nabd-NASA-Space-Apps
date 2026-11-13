@@ -13,9 +13,8 @@ import useVoiceMetrics, { DURATION_MS } from './useVoiceMetrics.js';
 import { clearDraft, saveDraft } from './checkinDraft.js';
 import s from './styles.module.css';
 
-// The same sentence every day, so only the voice changes (docs/plan-role2.md).
-const SENTENCE =
-  'Day by day, our crew grows stronger as we travel together toward the red planet.';
+// The same sentence every day, so only the voice changes.
+const SENTENCE = 'Every heartbeat carries us closer to Mars, one calm morning at a time.';
 
 // While the camera is in one of these states, Habiba's component shows its own
 // "We can't see your face" screen, so the rest of this page steps out of the way.
@@ -45,6 +44,8 @@ export default function RecordPage() {
   const listening = status === 'running';
   const voiceFinished = status === 'done' || status === 'error' || status === 'blocked';
   const voiceNumbers = status === 'done' ? metrics : null;
+  // In face mode the face check must finish first: leaving the page stops the camera before the numbers arrive.
+  const faceReady = mode === 'voice' || faceStatus === 'done';
 
   // The camera says "carry on with voice only": drop the camera, keep the microphone.
   function voiceOnly() {
@@ -76,7 +77,7 @@ export default function RecordPage() {
           Cancel
         </Link>
         <div className={s.step}>
-          <StepProgress step={1} total={2} label="Face and voice" />
+          <StepProgress step={1} total={3} label="Face and voice" />
         </div>
       </header>
 
@@ -106,7 +107,7 @@ export default function RecordPage() {
       {!faceTrouble && (
         <>
           <section className={s.sentence} aria-label="Read out loud">
-            <p className={s.eyebrow}>Read this out loud</p>
+            <p className={s.eyebrow}>Read this out loud twice, at a calm pace.</p>
             <p className={s.words}>“{SENTENCE}”</p>
           </section>
 
@@ -115,7 +116,7 @@ export default function RecordPage() {
             aria-label="Microphone"
           >
             {status === 'idle' && (
-              <p className={s.muted}>Tap the button, then read the sentence out loud.</p>
+              <p className={s.muted}>Tap the button, then read the sentence out loud twice.</p>
             )}
 
             {status === 'loading' && <p className={s.muted}>Opening the microphone…</p>}
@@ -171,7 +172,7 @@ export default function RecordPage() {
             </Button>
           )}
 
-          {voiceFinished && (
+          {voiceFinished && faceReady && (
             <>
               <Button onClick={goToGame}>Next: Pollen catch</Button>
               {status !== 'done' && (
@@ -179,8 +180,20 @@ export default function RecordPage() {
                   We will carry on without the voice numbers. Your check-in still works.
                 </p>
               )}
-              {mode === 'face' && faceStatus === 'running' && (
-                <p className={s.muted}>The face check is still finishing. You can carry on.</p>
+            </>
+          )}
+
+          {voiceFinished && !faceReady && (
+            <>
+              <p className={s.muted} role="status">
+                {faceStatus === 'idle'
+                  ? 'Turn on the camera above to finish the face check.'
+                  : 'Finishing the face check…'}
+              </p>
+              {faceStatus === 'idle' && (
+                <Button variant="text" onClick={voiceOnly}>
+                  Continue with voice only
+                </Button>
               )}
             </>
           )}

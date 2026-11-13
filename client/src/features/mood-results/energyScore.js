@@ -101,8 +101,22 @@ export function computeEnergyScore(face, voice, baseline, reactionMs) {
   return { energyScore, label: energyScore < TIRED_BELOW ? 'tired' : 'ok' };
 }
 
+// Fatigue experiment (exp- test ids): a person's first check-in is not scored, it becomes their own normal.
+export const FIRST_LABEL = 'Your normal is set';
+export const isExperimentId = (id) => typeof id === 'string' && id.startsWith('exp-');
+
+// A test person's saved first check-in (from GET /api/mood/baseline) in the shape computeEnergyScore reads.
+export function baselineFromCheckin(first) {
+  if (!first) return null;
+  return {
+    mood: { ...(first.face || {}), ...(first.voice || {}), energyScore: BASE_SCORE },
+    reactionTimeMs: first.reactionMs ?? undefined,
+  };
+}
+
 // The words and the status colour that go with a label.
 export function labelWords(label) {
+  if (label === FIRST_LABEL) return { title: FIRST_LABEL, status: 'stable' };
   if (label === 'tired') return { title: 'Tired, not low mood', status: 'watch' };
   if (label === 'ok') return { title: 'Steady energy', status: 'stable' };
   return { title: 'No score yet', status: 'watch' };
