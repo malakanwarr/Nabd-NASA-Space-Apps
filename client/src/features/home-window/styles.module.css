@@ -1,9 +1,8 @@
 /* Styles for the Home window. Use only the variables from shared/theme.css. */
 .status { color: var(--muted); font-size: var(--fs-14); }
 
-.clock { display: flex; flex-direction: column; align-items: flex-end; margin-top: calc(var(--space-6) * -1); }
-.time { font-family: var(--font-mono); font-size: var(--fs-20); font-weight: 500; }
-.place { color: var(--muted); font-size: var(--fs-14); }
+.clock { color: var(--muted); font-size: var(--fs-14); white-space: nowrap; }
+.time { color: var(--text); font-family: var(--font-mono); font-size: var(--fs-16); font-weight: 500; }
 
 
 
@@ -12,10 +11,8 @@
 .kind { display: flex; color: var(--primary); }
 .empty { margin: var(--space-3) 0 0; color: var(--muted); font-size: var(--fs-14); }
 .historyAudio { display: block; width: 100%; margin: var(--space-2) 0 var(--space-3); }
-.historyPhoto { display: block; width: 100%; aspect-ratio: 16 / 9; margin: var(--space-2) 0 var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--raised); object-fit: contain; }
-.emptyMedia { margin: 0 0 var(--space-3); color: var(--muted); font-size: var(--fs-14); }
 
-.record { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-5); }
+.record { display: flex; flex-direction: column; gap: var(--space-3); }
 .note { margin: 0; color: var(--muted); font-size: var(--fs-14); text-align: center; }
 .preview { display: flex; flex-direction: column; gap: var(--space-2); }
 .previewTitle { margin: 0; font-size: var(--fs-14); font-weight: 600; }
@@ -36,7 +33,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 360 / 270;
-  margin: var(--space-4) 0 var(--space-5);
+  margin: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   overflow: hidden;
@@ -71,18 +68,36 @@
 .seated { position: absolute; }
 .fill { display: block; width: 100%; height: auto; }
 
-.porthole { position: absolute; aspect-ratio: 1; border: var(--space-1) solid var(--line); border-radius: var(--radius-full); overflow: hidden; background: var(--sky); }
+.porthole { position: absolute; border: var(--space-1) solid var(--line); border-radius: var(--radius-full); overflow: hidden; background: var(--sky); }
 .youFigure { display: block; width: 150%; height: auto; margin: -20% 0 0 -25%; }
 .suitEdge { stroke: var(--line); stroke-width: 2; }
-.youLabel { position: absolute; margin: 0; color: var(--text); font-size: var(--fs-14); font-weight: 600; text-align: center; white-space: nowrap; }
+.youLabel { position: absolute; z-index: 1; margin: 0; line-height: 1.2; color: var(--text); font-size: var(--fs-14); font-weight: 600; text-align: center; white-space: nowrap; }
 
 /* Below the scene. */
-.homeCard { margin: var(--space-5) 0 var(--space-4); padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface); }
-.homeCard h2 { margin: 0; font-size: var(--fs-20); font-weight: 700; }
-.homeCard p { margin: var(--space-2) 0 0; color: var(--muted); font-size: var(--fs-16); }
 
 /* The family's heads in a row, in place of the initials. */
 .heads { display: flex; flex: none; }
 .head { flex: none; width: var(--space-6); height: var(--space-6); margin-left: calc(var(--space-2) * -1); border: 2px solid var(--bg); border-radius: var(--radius-full); overflow: hidden; background: var(--raised); }
 .head:first-child { margin-left: 0; }
 .headFigure { display: block; width: 160%; height: auto; margin: -23% 0 0 -30%; }
+
+/* Laila's crayon drawing on paper. The paper stays light in dark mode, the pencil and crayons stay readable on it. */
+.paper {
+  --paper: color-mix(in srgb, var(--watch) 14%, var(--text));
+  --crayon-blue: var(--primary);
+  --crayon-pink: var(--phase-period);
+  --crayon-purple: var(--phase-ovulation);
+  --crayon-yellow: var(--watch);
+  --crayon-orange: var(--phase-period);
+  max-width: calc(var(--space-6) * 7);
+  margin: var(--space-2) 0 var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+}
+:global(:root[data-theme='light']) .paper {
+  --paper: color-mix(in srgb, var(--watch) 12%, var(--surface));
+  border: 1px solid var(--line);
+}
+.paper svg { display: block; width: 100%; height: auto; }
+.historyPhoto { display: block; width: 100%; margin: var(--space-2) 0 var(--space-3); border-radius: var(--radius-md); }

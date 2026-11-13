@@ -58,7 +58,7 @@ function CheckIcon() {
 
 // One Family page: `top` (Home window scene) and `bottom` (record a message, messages from home) are passed in
 // by features/home-window so /family is the only page; with no slots it is just the hugs page.
-export default function FamilyPage({ top = null, bottom = null }) {
+export default function FamilyPage({ top = null, bottom = null, headerRight = null, afterActions = null }) {
   const [data, setData] = useState(null);
   const [loadError, setLoadError] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -111,7 +111,7 @@ export default function FamilyPage({ top = null, bottom = null }) {
   if (loadError) {
     return (
       <main className={s.page}>
-        <ScreenHeader title="Family" />
+        <ScreenHeader title="Family" right={headerRight} />
         {top}
         <div className={s.stateBox} role="alert">
           <p className={s.stateText}>
@@ -129,7 +129,7 @@ export default function FamilyPage({ top = null, bottom = null }) {
   if (!data) {
     return (
       <main className={s.page}>
-        <ScreenHeader title="Family" />
+        <ScreenHeader title="Family" right={headerRight} />
         {top}
         <p className={s.stateText} role="status">
           Loading your family…
@@ -164,7 +164,7 @@ export default function FamilyPage({ top = null, bottom = null }) {
           </p>
         )}
       </div>
-      <ScreenHeader title="Family" />
+      <ScreenHeader title="Family" right={headerRight} />
       {top}
       <p className={s.lead}>Hugs take {mission.earthDelayOneWay.text} to travel between you</p>
 
@@ -222,9 +222,6 @@ export default function FamilyPage({ top = null, bottom = null }) {
           <h2 id="sees-title" className={s.sectionTitle}>
             What your family sees
           </h2>
-          <Button variant="text" onClick={() => showNote('Sharing is fixed in this demo')}>
-            Change
-          </Button>
         </div>
         <dl className={s.facts}>
           <div className={s.factRow}>
@@ -251,6 +248,7 @@ export default function FamilyPage({ top = null, bottom = null }) {
         <Button variant="primary" onClick={() => showNote('Hug sent home')}>
           Send a hug home
         </Button>
+        {afterActions}
       </div>
 
       {bottom}

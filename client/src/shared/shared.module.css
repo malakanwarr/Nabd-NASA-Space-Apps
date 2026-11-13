@@ -5,6 +5,8 @@
 .tabActive { color: var(--primary); }
 .checkin { display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: var(--radius-full); background: var(--raised); color: var(--primary); }
 .header { padding: var(--space-4) 0; }
+.headerTight { padding-bottom: 0; }
+.titleRow { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
 .back { display: inline-flex; align-items: center; min-height: 44px; color: var(--primary); text-decoration: none; font-size: var(--fs-14); }
 .eyebrow { margin: 0; color: var(--muted); font-size: var(--fs-12); text-transform: uppercase; letter-spacing: 0.08em; }
 .title { margin: var(--space-1) 0 0; font-size: var(--fs-28); font-weight: 700; }
