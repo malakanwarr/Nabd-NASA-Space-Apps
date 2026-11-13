@@ -56,17 +56,46 @@
   border-left: var(--space-1) solid var(--watch);
   font-size: var(--fs-14);
 }
-
-.toast {
+.noticeSlot {
   position: sticky;
-  bottom: var(--space-4);
-  align-self: center;
+  top: var(--space-3);
+  z-index: 2;
+  height: 0;
+  margin-bottom: calc(var(--space-4) * -1); /* cancels the flex gap this slot adds */
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
   margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-full);
-  background: var(--raised);
-  border: 1px solid var(--line);
-  font-size: var(--fs-14);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: var(--fs-16);
+  font-weight: 700;
+  box-shadow: 0 var(--space-2) var(--space-4) var(--bg);
+  animation: noticeIn 0.25s ease-out;
+}
+
+.noticeIcon {
+  flex: none;
+  width: var(--space-4);
+  height: var(--space-4);
+}
+
+@keyframes noticeIn {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--space-4) * -1));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Hero card */

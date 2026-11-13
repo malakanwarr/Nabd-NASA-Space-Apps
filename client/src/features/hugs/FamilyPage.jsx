@@ -58,6 +58,22 @@ function WindowIcon() {
   );
 }
 
+function CheckIcon() {
+  return (
+    <svg
+      className={s.noticeIcon}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M5 12.5l4.5 4.5L19 7.5" />
+    </svg>
+  );
+}
+
 export default function FamilyPage() {
   const [data, setData] = useState(null);
   const [loadError, setLoadError] = useState(false);
@@ -153,6 +169,14 @@ export default function FamilyPage() {
 
   return (
     <main className={s.page}>
+      <div className={s.noticeSlot}>
+        {note && (
+          <p className={s.notice} role="status">
+            <CheckIcon />
+            {note}
+          </p>
+        )}
+      </div>
       <ScreenHeader title="Family" />
       <p className={s.lead}>Hugs take {mission.earthDelayOneWay.text} to travel between you</p>
 
@@ -247,12 +271,6 @@ export default function FamilyPage() {
           Send a hug home
         </Button>
       </div>
-
-      {note && (
-        <p className={s.toast} role="status">
-          {note}
-        </p>
-      )}
     </main>
   );
 }
