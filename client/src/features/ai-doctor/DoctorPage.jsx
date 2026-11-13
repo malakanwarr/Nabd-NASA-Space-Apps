@@ -1,7 +1,9 @@
 // AI doctor chat (owner: Hana Haytham). Layout follows Doctor.dc.html in the design canvas.
 // Sends her question to POST /api/doctor/chat. The server checks for emergencies first,
 // then asks the AI with her data, and falls back to a saved answer if the AI is down.
-// Under each answer it lists the NASA pages the answer cites ([1], [2]...), linked to nasa.gov.
+// Under each answer it lists the NASA pages the answer cites ([1], [2]...), linked to nasa.gov,
+// and a "Send to Earth" button so she chooses which answers go to the flight surgeon (EarthSummary.jsx).
+// Her earlier chat is loaded from the server (GET /api/doctor/history/:crewId), so a reload loses nothing.
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Chip from '../../shared/Chip.jsx';
@@ -126,7 +128,8 @@ export default function DoctorPage() {
   const [params] = useSearchParams();
   const [mission, setMission] = useState(null);
   const [missionState, setMissionState] = useState('loading'); // loading | ready | error
-  const [messages, setMessages] = useState([]); // { role: 'user' | 'doctor', text, source?, redFlag?, sources? }
+  const [messages, setMessages] = useState([]); // { role: 'user' | 'doctor', text, id?, question?, source?, redFlag?, redFlagReason?, sources?, sentToEarth? }
+  const [historyState, setHistoryState] = useState('loading'); // loading | ready (an error just shows an empty chat)
   const [draft, setDraft] = useState(() => (params.get('ask') || '').slice(0, MAX_LENGTH));
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState(null); // { message, text } so "Try again" can resend
@@ -151,6 +154,42 @@ export default function DoctorPage() {
   }
 
   useEffect(fetchMission, []);
+
+  // Her saved chat, oldest first. Kept in front of anything she types while it loads.
+  const crewId = session?.id;
+  useEffect(() => {
+    if (!crewId) {
+      setHistoryState('ready');
+      return undefined;
+    }
+    let cancelled = false;
+    apiFetch(`/api/doctor/history/${encodeURIComponent(crewId)}?limit=50`)
+      .then((data) => {
+        if (cancelled || !data?.messages?.length) return;
+        const restored = data.messages.flatMap((m) => [
+          { role: 'user', text: m.question },
+          {
+            role: 'doctor',
+            id: m.id,
+            question: m.question,
+            text: m.reply,
+            source: m.source,
+            redFlag: m.redFlag,
+            redFlagReason: m.redFlagReason,
+            sources: Array.isArray(m.sources) ? m.sources : [],
+            sentToEarth: m.sentToEarth || null,
+          },
+        ]);
+        setMessages((current) => [...restored, ...current]);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setHistoryState('ready');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [crewId]);
   useEffect(() => () => recognitionRef.current?.abort(), []);
 
   // Keep the newest message in view.
@@ -179,7 +218,16 @@ export default function DoctorPage() {
       if (data.redFlag) setEmergency(data.redFlagReason || 'Danger sign');
       setMessages((m) => [
         ...m,
-        { role: 'doctor', text: data.reply, source: data.source, redFlag: data.redFlag, sources: Array.isArray(data.sources) ? data.sources : [] },
+        {
+          role: 'doctor',
+          id: data.id, // the saved answer, so "Send to Earth" survives a reload
+          question, // kept so this answer can be sent to Earth on its own
+          text: data.reply,
+          source: data.source,
+          redFlag: data.redFlag,
+          redFlagReason: data.redFlagReason,
+          sources: Array.isArray(data.sources) ? data.sources : [],
+        },
       ]);
     } catch (err) {
       // Take her question back out so "Try again" doesn't show it twice.
@@ -281,7 +329,13 @@ export default function DoctorPage() {
       )}
 
       <section className={s.chat} aria-label="Conversation" aria-live="polite">
-        {messages.length === 0 && !sending && (
+        {historyState === 'loading' && messages.length === 0 && (
+          <p className={s.muted} role="status">
+            Loading your earlier chat…
+          </p>
+        )}
+
+        {historyState === 'ready' && messages.length === 0 && !sending && (
           <div className={s.empty}>
             <p className={s.emptyTitle}>How are you feeling, {session?.name?.split(' ')[0] || 'today'}?</p>
             <p className={s.muted}>
@@ -293,15 +347,16 @@ export default function DoctorPage() {
 
         {messages.map((m, i) =>
           m.role === 'user' ? (
-            <p key={i} className={s.userMsg}>
+            <p key={messages[i + 1]?.id ? `q-${messages[i + 1].id}` : i} className={s.userMsg}>
               {m.text}
             </p>
           ) : (
-            <div key={i} className={s.doctorMsg}>
+            <div key={m.id || i} className={s.doctorMsg}>
               <span className={s.srOnly}>AI doctor:</span>
               <FormattedReply text={m.text} />
               {m.source === 'demo' && <p className={s.note}>Saved answer, AI offline</p>}
               {m.sources?.length > 0 && <NasaSources sources={m.sources} />}
+              <EarthSummary mission={mission} crewId={session?.id} exchange={m} />
             </div>
           ),
         )}
@@ -329,8 +384,6 @@ export default function DoctorPage() {
         {doctorReplies > 0 && <span className={s.small}>Not a diagnosis · based on your own data and the ship's medical kit</span>}
         <div ref={endRef} />
       </section>
-
-      {doctorReplies > 0 && <EarthSummary mission={mission} />}
 
       <div className={s.composer}>
         <div className={s.chips}>

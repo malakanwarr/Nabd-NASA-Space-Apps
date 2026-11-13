@@ -4,7 +4,14 @@
 // Order: red-flag check first (no AI needed) -> find matching NASA passages (retrieve.js)
 //        -> Gemini with a 15 s timeout -> saved demo answer if that fails.
 // `sources` lists only the NASA pages the answer actually cites ([1], [2]...); empty for demo answers.
+// Every answer is also saved to MongoDB (models/DoctorMessage.js) when the database is connected.
+//   GET /api/doctor/history/:crewId?limit=20  answer: { messages: [...oldest first], database: true | false }
+//   Each saved answer has an `id`, and `sentToEarth: { sentAt, arrivesAt }` once she sent it to the flight surgeon,
+//   so the chat page can rebuild the chat and the "sent" animations after a reload.
 import { Router } from 'express';
+import mongoose from 'mongoose';
+import DoctorMessage from '../models/DoctorMessage.js';
+import SurgeonNote from '../models/SurgeonNote.js';
 import { GoogleGenAI } from '@google/genai';
 import { buildSystemPrompt, getCrewMedicalOfficer } from '../doctor/buildContext.js';
 import { checkRedFlags } from '../doctor/redFlags.js';
@@ -48,6 +55,7 @@ async function askGemini({ systemPrompt, history, message }) {
       contents: [...history, { role: 'user', parts: [{ text: message }] }],
       config: {
         systemInstruction: systemPrompt,
+        temperature: 0.3, // calm, consistent answers (prompt.md, section 3)
         // Room for the model's own thinking plus a ~150-word answer.
         maxOutputTokens: 1024,
         abortSignal: controller.signal,
@@ -63,11 +71,49 @@ async function askGemini({ systemPrompt, history, message }) {
 
 // Keeps the NASA pages whose numbers appear in the answer, so the chat never shows a source Gemini didn't use.
 function citedSources(reply, chunks) {
-  const cited = new Set([...reply.matchAll(/\[(\d+)\]/g)].map((m) => Number(m[1])));
+  // Accepts [1], [1][2] and [1, 2]
+  const cited = new Set([...reply.matchAll(/\[(\d+(?:\s*,\s*\d+)*)\]/g)].flatMap((m) => m[1].split(',').map((x) => Number(x.trim()))));
   return toSourceList(chunks)
     .filter((s) => s.n.some((n) => cited.has(n)))
     .map((s) => ({ n: s.n.filter((n) => cited.has(n)), title: s.title, url: s.url }));
 }
+
+// True when MongoDB is connected. Without it the doctor still answers; it just doesn't save.
+const dbReady = () => mongoose.connection.readyState === 1;
+
+// Saves one question and answer. Never throws and never delays the reply.
+function saveMessage(doc) {
+  if (!dbReady()) return;
+  DoctorMessage.create(doc).catch((err) => console.warn('[doctor] could not save the chat:', err.message));
+}
+
+// Her saved chat, oldest first, so the chat page or the flight surgeon can show it in order.
+router.get('/history/:crewId', async (req, res) => {
+  if (!dbReady()) return res.json({ messages: [], database: false });
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
+  try {
+    const docs = await DoctorMessage.find({ crewId: req.params.crewId }).sort({ createdAt: -1 }).limit(limit).lean();
+    // Which of these answers she already sent to Earth, and when.
+    const ids = docs.map((d) => String(d._id));
+    const notes = await SurgeonNote.find({ crewId: req.params.crewId, messageId: { $in: ids } }).lean();
+    const sent = new Map(notes.map((n) => [n.messageId, { sentAt: n.sentAt, arrivesAt: n.arrivesAt }]));
+    const messages = docs.reverse().map(({ _id, question, reply, source, redFlag, redFlagReason, sources, createdAt }) => ({
+      id: String(_id),
+      question,
+      reply,
+      source,
+      redFlag,
+      redFlagReason,
+      sources,
+      createdAt,
+      sentToEarth: sent.get(String(_id)) || null,
+    }));
+    res.json({ messages, database: true });
+  } catch (err) {
+    console.warn('[doctor] could not read the chat history:', err.message);
+    res.status(500).json({ error: 'Could not load the chat history.' });
+  }
+});
 
 router.post('/chat', async (req, res) => {
   const { message, history, crewId = 'sara' } = req.body || {};
@@ -100,8 +146,15 @@ router.post('/chat', async (req, res) => {
     source = 'demo';
   }
 
-  console.log(`[doctor] ${source} answer, NASA search: ${method}, ${chunks.length} passages found, ${sources.length} pages cited`);
-  res.json({ reply, redFlag: Boolean(flag), redFlagReason: flag ? flag.reason : null, source, sources });
+  // The id is made here, so the app gets it at once and can send this answer to Earth later, even after a reload.
+  const id = dbReady() ? new mongoose.Types.ObjectId() : null;
+  const answer = { id: id ? String(id) : null, reply, redFlag: Boolean(flag), redFlagReason: flag ? flag.reason : null, source, sources };
+  if (id) {
+    const { id: _ignored, ...fields } = answer;
+    saveMessage({ _id: id, crewId, question: clean, ...fields, searchMethod: method });
+  }
+  console.log(`[doctor] ${source} answer, NASA search: ${method}, ${chunks.length} passages found, ${sources.length} pages cited${dbReady() ? ', saved' : ''}`);
+  res.json(answer);
 });
 
 export default router;
