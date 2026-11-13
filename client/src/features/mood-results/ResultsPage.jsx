@@ -364,7 +364,11 @@ export default function ResultsPage() {
           risks to how well a crew member works and feels.
         </p>
         <div className={s.actions}>
-          <Button to="/doctor">Plan tonight's sleep with the AI doctor</Button>
+          {/* The exercise for today lives on the Bones and muscles page (/body/bones). One main button per area. */}
+          <Button to="/body/bones">Adjust my workout</Button>
+          <Button variant="secondary" to="/doctor">
+            Plan tonight's sleep with the AI doctor
+          </Button>
           <Button variant="text" to="/family">
             Ask family for a hug
           </Button>
