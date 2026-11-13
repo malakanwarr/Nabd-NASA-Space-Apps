@@ -12,6 +12,8 @@
 /* A 9:16 stage, centred; the planets and the route share its coordinates. */
 .stage {
   position: relative;
+  container-type: size;
+  overflow: hidden;
   aspect-ratio: 9 / 16;
   height: 100vh;
   height: 100svh;
@@ -41,12 +43,54 @@
   }
 }
 
-.route {
+.routeGuide {
   fill: none;
   stroke: var(--muted);
   stroke-width: 1.5;
   stroke-linecap: round;
-  stroke-dasharray: 1 6;
+  stroke-dasharray: 2 7;
+}
+
+/* The blue line draws in with the rocket (70% of the 7 s loop), then waits while the rocket fades at Mars. */
+.routeLine {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: route 7s ease-in-out infinite;
+}
+
+@keyframes route {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  70%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.rocketStill {
+  display: none;
+}
+
+/* The art keeps the 390 x 844 design shape and covers the stage (like a cover photo), so the planets and the
+   route stay lined up on any phone. The title and the loading bar stay in the stage itself. */
+.art {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100cqw, 100cqh * 390 / 844);
+  height: max(100cqh, 100cqw * 844 / 390);
+  transform: translate(-50%, -50%);
+}
+
+.planetBox {
+  position: absolute;
+  aspect-ratio: 1;
+  line-height: 0;
 }
 
 .body {
@@ -173,5 +217,15 @@
   }
   .ecgSweep {
     stroke-dasharray: none;
+  }
+  .routeLine {
+    animation: none;
+    stroke-dashoffset: 34;
+  }
+  .rocketMoving {
+    display: none;
+  }
+  .rocketStill {
+    display: inline;
   }
 }
