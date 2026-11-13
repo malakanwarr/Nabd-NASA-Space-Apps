@@ -2,6 +2,7 @@
 // role is 'crew', 'admin' or 'family'.
 import { useSyncExternalStore } from 'react';
 import { clearSavedApi } from './api.js';
+import { getSampleData } from './sampleData.js';
 
 const KEY = 'nabd-session';
 const listeners = new Set();
@@ -56,10 +57,22 @@ export function useSession() {
 }
 
 // Developer shortcut (only in `npm run dev`, never in the deployed build):
-//   ?as=sara -> crew Sara, ?as=admin -> admin, ?as=out -> signed out
+//   ?as=sara, ?as=adam, ?as=mei, ?as=lucas -> that crew member (any id in data/crew.json)
+//   ?as=admin -> Mission Control, ?as=out -> signed out
+function signInAsCrewMember(id) {
+  getSampleData('crew')
+    .then((file) => {
+      const member = (file.crew || []).find((c) => c.id === id);
+      if (member) signIn({ role: 'crew', id: member.id, name: member.name });
+      else console.warn(`[dev] ?as=${id}: there is no crew member with that id in data/crew.json`);
+    })
+    .catch(() => console.warn(`[dev] ?as=${id}: could not load data/crew.json. Is the server running?`));
+}
+
 if (import.meta.env.DEV) {
-  const as = new URLSearchParams(window.location.search).get('as');
-  if (as === 'sara') signIn({ role: 'crew', id: 'sara', name: 'Sara Haddad' });
+  const as = (new URLSearchParams(window.location.search).get('as') || '').toLowerCase();
+  if (as === 'sara') signIn({ role: 'crew', id: 'sara', name: 'Sara Haddad' }); // no waiting needed
   else if (as === 'admin') signIn({ role: 'admin', id: 'admin', name: 'Mission Control' });
   else if (as === 'out') signOut();
+  else if (as) signInAsCrewMember(as); // adam, mei, lucas: the name comes from data/crew.json
 }

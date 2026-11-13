@@ -39,7 +39,8 @@ function Skeleton() {
 export default function HomePage() {
   const session = useSession();
   const [state, setState] = useState({ status: 'loading', data: null });
-  const [checkedInToday, setCheckedInToday] = useState(false);
+  // Has she checked in today? 'checking' until the answer is back, then 'done' or 'not-done'.
+  const [checkin, setCheckin] = useState('checking');
 
   const load = useCallback(() => {
     let cancelled = false;
@@ -62,25 +63,30 @@ export default function HomePage() {
 
   useEffect(() => load(), [load]);
 
-  // Optional: is today's check-in already saved? If the request fails, Home just shows no link.
+  // Is today's check-in already saved? GET /api/mood lists her last 7 check-ins, oldest first,
+  // so today's is the last entry if it exists. If the request fails, Home just offers the check-in.
   const crewId = session?.id;
   const missionDay = state.data?.today?.missionDay;
   useEffect(() => {
-    if (!crewId || missionDay === undefined) return undefined;
+    if (missionDay === undefined || !crewId) return undefined; // still loading, or no one signed in
     let cancelled = false;
     apiFetch(`/api/mood?crewId=${encodeURIComponent(crewId)}`)
       .then((res) => {
         if (cancelled) return;
         const list = Array.isArray(res) ? res : (res?.entries ?? res?.moods ?? res?.data ?? []);
-        setCheckedInToday(list.some((e) => Number(e.missionDay) === Number(missionDay)));
+        const last = list[list.length - 1];
+        setCheckin(last && Number(last.missionDay) === Number(missionDay) ? 'done' : 'not-done');
       })
       .catch(() => {
-        if (!cancelled) setCheckedInToday(false);
+        if (!cancelled) setCheckin('not-done');
       });
     return () => {
       cancelled = true;
     };
   }, [crewId, missionDay]);
+
+  // With no one signed in there is nothing to wait for.
+  const checkinNow = crewId ? checkin : 'not-done';
 
   if (state.status === 'loading') return <Skeleton />;
 
@@ -137,17 +143,33 @@ export default function HomePage() {
       </dl>
       <p className={s.source}>Distance and delay: NASA data, illustrative for this demo.</p>
 
-      <section className={s.cta}>
-        <Button variant="primary" to="/checkin">
-          Start today’s check-in · 4 min
-        </Button>
-        <p className={s.streak}>{garden.streakDays}-day streak · keep it going</p>
-        {checkedInToday && (
-          <div className={s.results}>
-            <Button variant="text" to="/checkin/results">
+      <section className={s.cta} aria-busy={checkinNow === 'checking'}>
+        {checkinNow === 'checking' && (
+          <>
+            {/* Same height as the button and the line, so the page does not jump when they arrive. */}
+            <div className={`${s.skel} ${s.skelButton}`} aria-hidden="true" />
+            <p className={`${s.streak} ${s.reserved}`} aria-hidden="true">
+              {garden.streakDays}-day streak · keep it going
+            </p>
+          </>
+        )}
+        {checkinNow === 'done' && (
+          <>
+            <Button variant="primary" to="/checkin/results">
               See today’s results
             </Button>
-          </div>
+            <p className={s.streak}>
+              Checked in today <span aria-hidden="true">✓</span> · {garden.streakDays}-day streak
+            </p>
+          </>
+        )}
+        {checkinNow === 'not-done' && (
+          <>
+            <Button variant="primary" to="/checkin">
+              Start today’s check-in · 4 min
+            </Button>
+            <p className={s.streak}>{garden.streakDays}-day streak · keep it going</p>
+          </>
         )}
       </section>
 
