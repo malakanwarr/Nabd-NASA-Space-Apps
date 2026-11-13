@@ -24,8 +24,8 @@ import {
   computeEnergyScore,
   describeChanges,
   isExperimentId,
-  labelWords,
 } from './energyScore.js';
+import HealthScores from '../health/HealthScores.jsx';
 import CycleContext from './CycleContext.jsx';
 import EnergyChart from './EnergyChart.jsx';
 import {
@@ -33,8 +33,6 @@ import {
   advice,
   chartPoints,
   dayName,
-  daysInARow,
-  runLine,
 } from './resultsText.js';
 import s from './styles.module.css';
 
@@ -278,13 +276,9 @@ export default function ResultsPage() {
   const pickedRow = pickedDay === null ? null : known.find((row) => row.missionDay === pickedDay);
   const viewingPast = Boolean(pickedRow) && pickedRow.missionDay !== result.missionDay;
   const shown = viewingPast ? shape(pickedRow) : result;
-  const shownAt = known.findIndex((row) => row.missionDay === shown.missionDay);
 
-  const { energyScore, label, face, voice, reactionMs } = shown;
-  const words = labelWords(label);
+  const { label, face, voice, reactionMs } = shown;
   const changes = describeChanges(face, voice, baseline, reactionMs);
-  const points = chartPoints(known, baselineScore);
-  const run = daysInARow(known.slice(0, shownAt + 1));
 
   // The sleep behind the advice is that day's own sleep.
   const adviceToday = viewingPast
@@ -338,17 +332,8 @@ export default function ResultsPage() {
         title={viewingPast ? `Day ${shown.missionDay} vs your normal` : 'Today vs your normal'}
       />
 
-      <section className={s.score} aria-label="Energy">
-        <p className={s.big}>
-          <strong className={`${s.number} ${s[words.status]}`}>{energyScore}</strong>
-          <span className={s.outOf}>/100</span>
-        </p>
-        <div className={s.scoreWords}>
-          <p className={`${s.scoreTitle} ${s[words.status]}`}>{words.title}</p>
-          <StatusLabel status={words.status} />
-          <p className={s.muted}>{runLine(label, run)}</p>
-        </div>
-      </section>
+      {/* Four scores instead of one energy score. The energy score is still worked out and saved for the 7-day history. */}
+      <HealthScores shown={shown} known={known} today={today} baseline={baseline} crewId={crewId} />
 
       {saveProblem && !viewingPast && (
         <p className={s.problem} role="alert">
@@ -382,26 +367,23 @@ export default function ResultsPage() {
 
       <CycleContext />
 
-      <section className={s.block} aria-label="Energy, last 7 days">
-        <h2 className={s.heading}>Energy, last 7 days</h2>
-        <EnergyChart points={points} normalFrom={normalFrom} normalTo={normalTo} />
-        {known.length > 1 && (
-          <>
-            <p className={s.muted}>Tap a day to see how it went.</p>
-            <div className={s.days}>
-              {known.map((row) => (
-                <Chip
-                  key={row.missionDay}
-                  selected={row.missionDay === shown.missionDay}
-                  onClick={() => pick(row.missionDay)}
-                >
-                  {dayName(row.date, row.missionDay === result.missionDay)}
-                </Chip>
-              ))}
-            </div>
-          </>
-        )}
-      </section>
+      {known.length > 1 && (
+        <section className={s.block} aria-label="Other days">
+          <h2 className={s.heading}>Look at another day</h2>
+          <p className={s.muted}>Tap a day to see how it went.</p>
+          <div className={s.days}>
+            {known.map((row) => (
+              <Chip
+                key={row.missionDay}
+                selected={row.missionDay === shown.missionDay}
+                onClick={() => pick(row.missionDay)}
+              >
+                {dayName(row.date, row.missionDay === result.missionDay)}
+              </Chip>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className={s.block} aria-label="What to do">
         <p className={s.advice}>{advice(label, adviceToday, baseline)}</p>

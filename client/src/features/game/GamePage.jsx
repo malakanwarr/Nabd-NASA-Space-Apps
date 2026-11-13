@@ -143,7 +143,7 @@ export default function GamePage() {
       body: { averageMs: reactionMs, catches: reactionTimes.length, misses },
     })
       .then(() => {
-        if (active) navigate('/checkin/results', { state: { reactionMs } });
+        if (active) navigate('/checkin/sleep', { state: { reactionMs } });
       })
       .catch((error) => {
         if (active) {
@@ -223,7 +223,7 @@ export default function GamePage() {
     <main className={styles.game}>
       <div className={styles.topRow}>
         <Link className={styles.cancel} to="/" onClick={handleCancel}>Cancel</Link>
-        <StepProgress step={2} total={2} label="Pollen catch" />
+        <StepProgress step={2} total={3} label="Pollen catch" />
       </div>
 
       <h1 className={styles.title}>Tap the pollen the moment it glows</h1>
