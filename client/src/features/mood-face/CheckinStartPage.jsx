@@ -81,7 +81,7 @@ export default function CheckinStartPage() {
       <ListRow
         icon={<span className={s.stepIcon}>1</span>}
         title="Face and voice · 30 seconds"
-        subtitle="Read one sentence out loud while the camera and mic run."
+        subtitle="Read one sentence out loud twice while the camera and mic run."
       />
       <ListRow
         icon={<span className={s.stepIcon}>2</span>}
