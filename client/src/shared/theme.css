@@ -12,6 +12,9 @@
   --stable: #6ee0a8;
   --watch: #ffc857;
   --act: #ff6b5b;
+  --phase-period: #e58fb0;
+  --phase-ovulation: #c9a0ff;
+  --phase-luteal: #3b4a80;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -47,6 +50,9 @@
   --stable: #17855a;
   --watch: #9a6700;
   --act: #c9372c;
+  --phase-period: #c2457a;
+  --phase-ovulation: #7a4fd1;
+  --phase-luteal: #b7c3de;
 }
 
 * {
@@ -61,12 +67,15 @@ body {
   font-size: var(--fs-16);
 }
 
-/* Phone pages: 480 px wide, centred, room for the tab bar and the iPhone notch. */
+/* Phone pages: 480 px wide, centred, room for the tab bar and the iPhone notch.
+   The top gap is a real gap PLUS whatever the phone reserves: the inset on its own is 0
+   in Safari, which left the first row of every screen against the status bar. */
 .phone {
   max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
-  padding: env(safe-area-inset-top) var(--space-4) calc(96px + env(safe-area-inset-bottom));
+  padding: calc(var(--space-4) + env(safe-area-inset-top)) var(--space-4)
+    calc(96px + env(safe-area-inset-bottom));
 }
 
 /* Laptop pages (Mission Control, flight surgeon): full width. */
