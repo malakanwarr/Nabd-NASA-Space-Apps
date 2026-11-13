@@ -12,6 +12,7 @@ const H = 640;
 const MARS = { x: 280, y: 110 };
 const EARTH = { x: 84, y: 500 };
 const ROUTE = 'M 118 446 C 20 360, 40 160, 236 124';
+const FLIGHT_MS = 3000; // rocket flight time
 const ECG = 'M0 12 L50 12 L58 6 L66 18 L76 1 L86 23 L94 12 L160 12';
 
 // Fixed star field (same on every load)
@@ -46,11 +47,32 @@ export default function Opening() {
       window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )[0];
   const routeRef = useRef(null);
-  const [still, setStill] = useState(null);
+  const rocketRef = useRef(null);
 
-  // Reduce Motion: SMIL is not switched off by theme.css, so keep the rocket still ourselves.
+  // The rocket is moved with JavaScript (works on every browser and phone; SVG animateMotion did not start).
+  // Reduce Motion: keep the rocket still, two-thirds along the route (day 142 of 210).
   useLayoutEffect(() => {
-    if (reduced && routeRef.current) setStill(pointOnPath(routeRef.current, ROCKET_STILL_T));
+    const path = routeRef.current;
+    const rocket = rocketRef.current;
+    if (!path || !rocket) return undefined;
+    const place = (t) => {
+      const { x, y, angle } = pointOnPath(path, t);
+      rocket.setAttribute('transform', `translate(${x} ${y}) rotate(${angle})`);
+    };
+    if (reduced) {
+      place(ROCKET_STILL_T);
+      return undefined;
+    }
+    place(0);
+    let raf;
+    const start = performance.now();
+    const tick = (now) => {
+      const p = Math.min((now - start) / FLIGHT_MS, 1);
+      place(p * p * (3 - 2 * p)); // soft start and end
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [reduced]);
 
   return (
@@ -69,20 +91,9 @@ export default function Opening() {
           ))}
           <path id="route" ref={routeRef} d={ROUTE} className={s.route} />
 
-          {reduced ? (
-            still && (
-              <g transform={`translate(${still.x} ${still.y}) rotate(${still.angle})`}>
-                <Rocket />
-              </g>
-            )
-          ) : (
-            <g>
-              <Rocket />
-              <animateMotion dur="8s" rotate="auto" fill="freeze" repeatCount="1" begin="0s">
-                <mpath href="#route" />
-              </animateMotion>
-            </g>
-          )}
+          <g ref={rocketRef}>
+            <Rocket />
+          </g>
         </svg>
 
         <div
