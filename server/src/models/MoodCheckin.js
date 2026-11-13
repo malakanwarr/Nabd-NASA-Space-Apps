@@ -11,6 +11,7 @@ const moodSchema = new mongoose.Schema({
   reactionMs: Number,
   energyScore: Number,
   label: String,
+  time: { type: Date, default: Date.now }, // when it was saved; the fatigue experiment sorts by it
 });
 
 export default mongoose.models.MoodCheckin || mongoose.model('MoodCheckin', moodSchema);

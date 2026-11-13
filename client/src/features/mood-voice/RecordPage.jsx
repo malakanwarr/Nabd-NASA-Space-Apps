@@ -13,9 +13,8 @@ import useVoiceMetrics, { DURATION_MS } from './useVoiceMetrics.js';
 import { clearDraft, saveDraft } from './checkinDraft.js';
 import s from './styles.module.css';
 
-// The same sentence every day, so only the voice changes (docs/plan-role2.md).
-const SENTENCE =
-  'Day by day, our crew grows stronger as we travel together toward the red planet.';
+// The same sentence every day, so only the voice changes.
+const SENTENCE = 'Every heartbeat carries us closer to Mars, one calm morning at a time.';
 
 // While the camera is in one of these states, Habiba's component shows its own
 // "We can't see your face" screen, so the rest of this page steps out of the way.
@@ -108,7 +107,7 @@ export default function RecordPage() {
       {!faceTrouble && (
         <>
           <section className={s.sentence} aria-label="Read out loud">
-            <p className={s.eyebrow}>Read this out loud</p>
+            <p className={s.eyebrow}>Read this out loud twice, at a calm pace.</p>
             <p className={s.words}>“{SENTENCE}”</p>
           </section>
 
@@ -117,7 +116,7 @@ export default function RecordPage() {
             aria-label="Microphone"
           >
             {status === 'idle' && (
-              <p className={s.muted}>Tap the button, then read the sentence out loud.</p>
+              <p className={s.muted}>Tap the button, then read the sentence out loud twice.</p>
             )}
 
             {status === 'loading' && <p className={s.muted}>Opening the microphone…</p>}
