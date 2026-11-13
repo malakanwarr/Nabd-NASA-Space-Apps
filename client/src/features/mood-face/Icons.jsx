@@ -43,6 +43,15 @@ export function LockIcon() {
   );
 }
 
+export function CheckCircleIcon() {
+  return (
+    <svg viewBox="0 0 48 48" width="56" height="56" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+      <circle cx="24" cy="24" r="20" />
+      <path d="M15 24.5l6.5 6.5L33 18" />
+    </svg>
+  );
+}
+
 export function FaceScanIcon() {
   return (
     <svg viewBox="0 0 48 48" width="64" height="64" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">

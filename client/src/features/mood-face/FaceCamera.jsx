@@ -11,6 +11,7 @@ import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import Button from '../../shared/Button.jsx';
 import FaceErrorState from './FaceErrorState.jsx';
+import { CheckCircleIcon, LockIcon } from './Icons.jsx';
 import useFaceMetrics from './useFaceMetrics.js';
 import s from './styles.module.css';
 
@@ -72,13 +73,12 @@ export default function FaceCamera({ onDone, onVoiceOnly, onStatus, autoStart })
   }, [status, landmarksRef]);
 
   const failed = ERROR_STATES.includes(status);
-  const live = status === 'running' || status === 'done';
-  const blinks = metrics.blinksPerMin;
-  const eyes = metrics.eyeOpenness;
+  const done = status === 'done';
+  const live = status === 'running';
 
   return (
     <div>
-      <div className={s.panel} hidden={failed}>
+      <div className={s.panel} hidden={failed || done}>
         <video ref={videoRef} className={s.video} playsInline muted aria-label="Camera preview" />
         <canvas ref={canvasRef} className={s.dots} aria-hidden="true" />
         <span className={s.bracketTL} />
@@ -101,24 +101,23 @@ export default function FaceCamera({ onDone, onVoiceOnly, onStatus, autoStart })
         {live && (
           <>
             <span className={`${s.chip} ${s.chipTop}`}>
-              {status === 'done' ? (
-                'Face check done'
-              ) : (
-                <>
-                  <span className={s.recDot} aria-hidden="true" />
-                  <span className={s.num}>REC {clock(elapsedMs)} / {clock(durationMs)}</span>
-                </>
-              )}
-            </span>
-            <span className={`${s.chip} ${s.chipLeft}`}>
-              Blinks <span className={s.num}>{blinks ?? '–'}</span> a min
-            </span>
-            <span className={`${s.chip} ${s.chipRight}`}>
-              Eyelids <span className={s.num}>{eyes == null ? '–' : `${Math.round(eyes * 100)}%`}</span> open
+              <span className={s.recDot} aria-hidden="true" />
+              <span className={s.num}>REC {clock(elapsedMs)} / {clock(durationMs)}</span>
             </span>
           </>
         )}
       </div>
+
+      {done && (
+        <section className={s.done} role="status">
+          <span className={s.doneIcon}><CheckCircleIcon /></span>
+          <h2 className={s.doneTitle}>Face check done</h2>
+          <p className={s.doneNote}>
+            <LockIcon />
+            <span>No video was saved.</span>
+          </p>
+        </section>
+      )}
 
       {failed && (
         <FaceErrorState
