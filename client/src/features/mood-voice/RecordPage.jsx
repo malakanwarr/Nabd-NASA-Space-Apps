@@ -10,7 +10,7 @@ import StepProgress from '../../shared/StepProgress.jsx';
 import Button from '../../shared/Button.jsx';
 import FaceCamera from '../mood-face/FaceCamera.jsx';
 import useVoiceMetrics, { DURATION_MS } from './useVoiceMetrics.js';
-import { saveDraft } from './checkinDraft.js';
+import { clearDraft, saveDraft } from './checkinDraft.js';
 import s from './styles.module.css';
 
 // The same sentence every day, so only the voice changes (docs/plan-role2.md).
@@ -71,7 +71,8 @@ export default function RecordPage() {
   return (
     <main>
       <header className={s.top}>
-        <Link to="/checkin" className={s.cancel}>
+        {/* Leaving half way throws the draft away, so it cannot turn up later as today's news. */}
+        <Link to="/checkin" className={s.cancel} onClick={clearDraft}>
           Cancel
         </Link>
         <div className={s.step}>
