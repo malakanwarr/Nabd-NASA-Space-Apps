@@ -212,6 +212,16 @@ export function sleepNights(history, entries, baselineHours) {
   return nights.sort((a, b) => a.missionDay - b.missionDay);
 }
 
+// Nights in a row, ending on `day`, with less than 6.5 hours of sleep. Counts the astronaut's own answers too,
+// so one good night she reports breaks the run. null when that day has no night.
+export function shortNightStreak(nights, day) {
+  const at = nights.findIndex((n) => n.missionDay === day);
+  if (at < 0) return null;
+  let streak = 0;
+  for (let i = at; i >= 0 && nights[i].hours < 6.5; i -= 1) streak += 1;
+  return streak;
+}
+
 // How regular the last nights were: spread of bedtime and wake-up time, in minutes.
 export function regularity(nights, last = 7) {
   const recent = nights.slice(-last);
@@ -296,7 +306,7 @@ export function buildProfile({ today, baseline, history, reactionTests, checkins
   const todayNight = nights.find((n) => n.missionDay === today.missionDay);
   const sleepSignals = [
     makeSignal({ id: 'duration', label: 'Sleep last night', value: todayNight?.hours ?? today.sleepLastNightHours, baseline: baseline.sleepHours, unit: ' h', dir: 'down', watchAt: 0.1, actAt: 0.2, source: todayNight?.source === 'self' ? 'self' : 'simulated', digits: 1 }),
-    countSignal({ id: 'short', label: 'Short nights in a row', value: today.sleepShortNightsInARow, baseline: 0, unit: '', watchAt: 3, actAt: 5, source: 'simulated' }),
+    countSignal({ id: 'short', label: 'Short nights in a row', value: shortNightStreak(nights, today.missionDay) ?? today.sleepShortNightsInARow, baseline: 0, unit: '', watchAt: 3, actAt: 5, source: 'simulated' }),
     reg && { id: 'regular', label: 'Sleep regularity', value: reg.bedSd, baseline: 30, unit: ' min', digits: 0, status: reg.status, share: clamp((reg.bedSd - 30) / 60, 0, 1.5), changePct: null, source: 'estimated', words: reg.label },
     todayNight?.source === 'self' && isNum(todayNight.quality) &&
       makeSignal({ id: 'quality', label: 'Sleep quality', value: todayNight.quality, baseline: 4, unit: ' of 5', dir: 'down', watchAt: 0.2, actAt: 0.4, source: 'self' }),
