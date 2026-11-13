@@ -80,6 +80,11 @@
   margin-top: var(--space-4);
 }
 
+/* Done: one short line, so no reserved height. The next button follows with the usual gap. */
+.listenDone {
+  min-height: 0;
+}
+
 .muted {
   margin: 0;
   color: var(--muted);
@@ -134,25 +139,11 @@
   }
 }
 
-.doneBlock {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
 .doneWord {
   margin: 0;
   color: var(--stable);
   font-size: var(--fs-16);
   font-weight: 600;
-}
-
-.numbers {
-  margin: 0;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: var(--fs-12);
-  line-height: 1.5;
 }
 
 .problem {
