@@ -34,11 +34,22 @@ const MAX_PITCH_HZ = 500;
 // phrases are the quietest and the lowest, and losing them flattens the pitch range.
 const MIN_VOLUME_DB = -60;
 
-// Anything below this is silence, whatever the room noise is doing.
-const SILENCE_RMS = 0.004;
+// Anything below this is silence, whatever the room noise is doing. It is deliberately
+// very low: a quiet voice close to a phone can sit at an rms of 0.008, and a line of 0.004
+// then cut the softer half of every word away, which read as 70% pauses.
+const SILENCE_RMS = 0.0005;
 
 // How far above the quiet floor a frame has to be to count as speaking.
 const SPEAKING_ABOVE_FLOOR = 0.15;
+
+// Once she is speaking, it takes a drop this far back down towards the quiet floor to count
+// as a pause, so the soft edges of a word are not chopped into little silences. It never goes
+// below the floor itself, or room noise alone would hold the speech open.
+const KEEP_SPEAKING_AT = 0.6;
+
+// Speech has to stand this much above the quiet floor for a recording to count at all.
+// Room noise on its own has a peak barely above its own floor.
+const SPEECH_ABOVE_NOISE = 2.5;
 
 // A quiet moment this long ends a speaking burst, which is how the pace is counted.
 const GAP_MS = 45;
@@ -76,7 +87,18 @@ export function metricsFromFrames(frames, frameMs) {
   const peak = percentile(loudnesses, 0.95);
   const threshold = Math.max(SILENCE_RMS, floor + (peak - floor) * SPEAKING_ABOVE_FLOOR);
 
-  const speaking = frames.map((f) => f.rms >= threshold || f.pitch !== null);
+  // Was anybody speaking? A room humming to itself is not.
+  if (peak < floor * SPEECH_ABOVE_NOISE || peak < SILENCE_RMS * 2) return null;
+
+  // A frame with a clear pitch is always speech. Otherwise it takes `threshold` to start
+  // speaking and a drop below `quieter` to stop (the same idea as a thermostat).
+  const quieter = floor + (threshold - floor) * KEEP_SPEAKING_AT;
+  let onNow = false;
+  const speaking = frames.map((f) => {
+    if (f.pitch !== null) onNow = true;
+    else onNow = f.rms >= (onNow ? quieter : threshold);
+    return onNow;
+  });
 
   // Measure only between the first and the last word: silence before and after is ignored.
   const first = speaking.indexOf(true);
