@@ -18,7 +18,14 @@ import { apiFetch } from '../../shared/api.js';
 import { getSampleData } from '../../shared/sampleData.js';
 import { useSession } from '../../shared/session.js';
 import { clearDraft, readDraft } from '../mood-voice/checkinDraft.js';
-import { computeEnergyScore, describeChanges, labelWords } from './energyScore.js';
+import {
+  FIRST_LABEL,
+  baselineFromCheckin,
+  computeEnergyScore,
+  describeChanges,
+  isExperimentId,
+  labelWords,
+} from './energyScore.js';
 import EnergyChart from './EnergyChart.jsx';
 import {
   NORMAL_SPREAD,
@@ -101,7 +108,14 @@ export default function ResultsPage() {
           getSampleData('today'),
         ]);
         if (!alive) return;
-        setBaseline(baselineFile);
+        // Test people (exp- ids) are compared with their own first check-in, not with Sara.
+        // Sara and the demo crew keep data/baseline.json.
+        const own = isExperimentId(crewId)
+          ? baselineFromCheckin(await apiFetch(`/api/mood/baseline?crewId=${encodeURIComponent(crewId)}`))
+          : null;
+        if (!alive) return;
+        const baselineToUse = own || baselineFile;
+        setBaseline(baselineToUse);
         setToday(todayFile);
 
         // ---- Opened directly: show the latest check-in saved today.
@@ -122,7 +136,10 @@ export default function ResultsPage() {
 
         // ---- Just checked in: score it, show it, save it.
         const { face, voice, reactionMs } = numbers;
-        const { energyScore, label } = computeEnergyScore(face, voice, baselineFile, reactionMs);
+        // No saved first check-in yet: this one is their normal, so it gets the "set" label.
+        const scored = computeEnergyScore(face, voice, baselineToUse, reactionMs);
+        const energyScore = scored.energyScore;
+        const label = isExperimentId(crewId) && !own && energyScore !== null ? FIRST_LABEL : scored.label;
         if (energyScore === null) {
           setProblem('We did not get enough from the camera or the microphone to work out a score.');
           setPhase('error');
