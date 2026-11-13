@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../../shared/api.js';
 import Button from '../../shared/Button.jsx';
+import { useSession } from '../../shared/session.js';
 import StepProgress from '../../shared/StepProgress.jsx';
 import { getSampleData } from '../../shared/sampleData.js';
 import styles from './styles.module.css';
@@ -20,34 +21,63 @@ function formatTime(milliseconds) {
 
 export default function GamePage() {
   const navigate = useNavigate();
+  const session = useSession();
+  const crewId = session?.id;
   const endAtRef = useRef(0);
   const remainingMsRef = useRef(durationMs);
+  const missCountedRef = useRef(false);
   const [phase, setPhase] = useState('playing');
   const [remainingMs, setRemainingMs] = useState(durationMs);
   const [pollen, setPollen] = useState(null);
   const [reactionTimes, setReactionTimes] = useState([]);
   const [misses, setMisses] = useState(0);
-  const [usualMs, setUsualMs] = useState(null);
-  const [usualLoading, setUsualLoading] = useState(true);
-  const [usualError, setUsualError] = useState('');
+  const [age, setAge] = useState(null);
+  const [baselineMs, setBaselineMs] = useState(null);
+  const [baselineLoading, setBaselineLoading] = useState(true);
+  const [baselineError, setBaselineError] = useState('');
+  const [baselineReload, setBaselineReload] = useState(0);
   const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     let active = true;
-    getSampleData('reaction-tests')
-      .then((data) => {
-        if (active) setUsualMs(Number.isFinite(data.usualMs) ? data.usualMs : null);
+    const sampleRequests = crewId === 'sara'
+      ? [getSampleData('profile'), getSampleData('reaction-tests')]
+      : [Promise.resolve(null), Promise.resolve(null)];
+    const historyUrl = `/api/game?crewId=${encodeURIComponent(crewId || '')}`;
+
+    Promise.all([Promise.all(sampleRequests), apiFetch(historyUrl)])
+      .then(([[profile, reactionData], ownHistory]) => {
+        const memberHistory = [
+          ...(Array.isArray(reactionData?.recent) ? reactionData.recent : []),
+          ...(Array.isArray(ownHistory.history) ? ownHistory.history : []),
+        ]
+          .filter((entry) => Number.isFinite(entry.averageMs))
+          .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')))
+          .slice(-7);
+        const baselineValues = [
+          ...(Number.isFinite(reactionData?.usualMs) ? [reactionData.usualMs] : []),
+          ...memberHistory.map((entry) => entry.averageMs),
+        ];
+        if (active) {
+          setAge(profile?.age ?? ownHistory.age ?? null);
+          setBaselineMs(
+            baselineValues.length
+              ? Math.round(baselineValues.reduce((total, value) => total + value, 0) / baselineValues.length)
+              : null,
+          );
+          setBaselineError('');
+        }
       })
       .catch((error) => {
-        if (active) setUsualError(error.message);
+        if (active) setBaselineError(error.message);
       })
       .finally(() => {
-        if (active) setUsualLoading(false);
+        if (active) setBaselineLoading(false);
       });
     return () => {
       active = false;
     };
-  }, []);
+  }, [crewId, baselineReload]);
 
   useEffect(() => {
     if (phase !== 'playing') return undefined;
@@ -65,6 +95,7 @@ export default function GamePage() {
     if (phase !== 'playing' || pollen) return undefined;
     const wait = 700 + Math.random() * 1800;
     const timer = window.setTimeout(() => {
+      missCountedRef.current = false;
       setPollen({
         x: 18 + Math.random() * 64,
         y: 18 + Math.random() * 58,
@@ -78,8 +109,12 @@ export default function GamePage() {
     if (phase !== 'playing' || !pollen) return undefined;
     const remaining = Math.max(0, pollen.shownAt + pollenLifetimeMs - performance.now());
     const timer = window.setTimeout(() => {
+      if (!missCountedRef.current) {
+        missCountedRef.current = true;
+        setMisses((count) => count + 1);
+      }
       setPollen(null);
-      setMisses((count) => count + 1);
+      missCountedRef.current = false;
     }, remaining);
     return () => window.clearTimeout(timer);
   }, [phase, pollen]);
@@ -91,7 +126,7 @@ export default function GamePage() {
       ? Math.round(reactionTimes.reduce((total, value) => total + value, 0) / reactionTimes.length)
       : null;
 
-    apiFetch('/api/game', {
+    apiFetch(`/api/game?crewId=${encodeURIComponent(crewId || '')}`, {
       method: 'POST',
       body: { averageMs, catches: reactionTimes.length, misses },
     })
@@ -107,17 +142,24 @@ export default function GamePage() {
     return () => {
       active = false;
     };
-  }, [phase, reactionTimes, misses, navigate]);
+  }, [phase, reactionTimes, misses, navigate, crewId]);
 
   function handleFieldTap(event) {
     if (phase !== 'playing') return;
     if (!pollen) {
-      setMisses((count) => count + 1);
+      if (!missCountedRef.current) {
+        missCountedRef.current = true;
+        setMisses((count) => count + 1);
+      }
       return;
     }
     if (performance.now() - pollen.shownAt >= pollenLifetimeMs) {
       setPollen(null);
-      setMisses((count) => count + 1);
+      if (!missCountedRef.current) {
+        missCountedRef.current = true;
+        setMisses((count) => count + 1);
+      }
+      missCountedRef.current = false;
       return;
     }
     const bounds = event.currentTarget.getBoundingClientRect();
@@ -125,11 +167,16 @@ export default function GamePage() {
     const pollenY = bounds.top + bounds.height * pollen.y / 100;
     const distance = Math.hypot(event.clientX - pollenX, event.clientY - pollenY);
     if (distance > Math.min(bounds.width, bounds.height) * hitRadiusRatio) {
-      setMisses((count) => count + 1);
+      if (!missCountedRef.current) {
+        missCountedRef.current = true;
+        setMisses((count) => count + 1);
+      }
+      setPollen(null);
       return;
     }
     setReactionTimes((times) => [...times, Math.round(performance.now() - pollen.shownAt)]);
     setPollen(null);
+    missCountedRef.current = false;
   }
 
   function togglePause() {
@@ -165,7 +212,11 @@ export default function GamePage() {
         <div className={styles.stat}>
           <strong>{averageMs == null ? '—' : `${averageMs} ms`}</strong>
           <span>
-            Average · usual {usualLoading ? '…' : usualMs == null ? '—' : `${usualMs} ms`}
+            {baselineLoading
+              ? 'Loading your baseline…'
+              : baselineMs == null
+                ? `Age ${age ?? '—'} · building your baseline`
+                : `Age ${age ?? '—'} · baseline ${baselineMs} ms`}
           </span>
         </div>
         <div className={styles.stat}>
@@ -174,18 +225,14 @@ export default function GamePage() {
         </div>
       </section>
 
-      {usualError && (
+      {baselineError && (
         <div className={styles.notice} role="status">
-          Could not load Sara’s usual reaction time. {usualError}
+          Could not load your personal baseline. {baselineError}
           <Button
             variant="text"
             onClick={() => {
-              setUsualError('');
-              setUsualLoading(true);
-              getSampleData('reaction-tests')
-                .then((data) => setUsualMs(Number.isFinite(data.usualMs) ? data.usualMs : null))
-                .catch((error) => setUsualError(error.message))
-                .finally(() => setUsualLoading(false));
+              setBaselineLoading(true);
+              setBaselineReload((value) => value + 1);
             }}
           >
             Try again
