@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../../shared/api.js';
 import Button from '../../shared/Button.jsx';
 import { useSession } from '../../shared/session.js';
@@ -19,8 +19,22 @@ function formatTime(milliseconds) {
   return `${minutes}:${seconds}`;
 }
 
+function normalizeReactionTestData(data) {
+  const normalizeResult = (result) => (
+    result && typeof result === 'object'
+      ? { ...result, misses: result.misses ?? result.lapses }
+      : result
+  );
+  return {
+    ...data,
+    recent: Array.isArray(data?.recent) ? data.recent.map(normalizeResult) : [],
+    todayExampleAfterPlaying: normalizeResult(data?.todayExampleAfterPlaying),
+  };
+}
+
 export default function GamePage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const session = useSession();
   const crewId = session?.id;
   const endAtRef = useRef(0);
@@ -39,7 +53,9 @@ export default function GamePage() {
 
   useEffect(() => {
     let active = true;
-    const sampleRequest = crewId === 'sara' ? getSampleData('reaction-tests') : Promise.resolve(null);
+    const sampleRequest = crewId === 'sara'
+      ? getSampleData('reaction-tests').then(normalizeReactionTestData)
+      : Promise.resolve(null);
     const historyUrl = `/api/game?crewId=${encodeURIComponent(crewId || '')}`;
 
     Promise.all([sampleRequest, apiFetch(historyUrl)])
@@ -118,16 +134,16 @@ export default function GamePage() {
   useEffect(() => {
     if (phase !== 'saving') return undefined;
     let active = true;
-    const averageMs = reactionTimes.length
+    const reactionMs = reactionTimes.length
       ? Math.round(reactionTimes.reduce((total, value) => total + value, 0) / reactionTimes.length)
       : null;
 
     apiFetch(`/api/game?crewId=${encodeURIComponent(crewId || '')}`, {
       method: 'POST',
-      body: { averageMs, catches: reactionTimes.length, misses },
+      body: { averageMs: reactionMs, catches: reactionTimes.length, misses },
     })
       .then(() => {
-        if (active) navigate('/checkin/results', { state: { reactionMs: averageMs } });
+        if (active) navigate('/checkin/results', { state: { reactionMs } });
       })
       .catch((error) => {
         if (active) {
@@ -189,10 +205,24 @@ export default function GamePage() {
 
   const latestReactionMs = reactionTimes.length ? reactionTimes[reactionTimes.length - 1] : null;
 
+  function handleCancel(event) {
+    const cancelTo = location.state?.cancelTo;
+    if (typeof cancelTo === 'string') {
+      event.preventDefault();
+      navigate(cancelTo);
+      return;
+    }
+    const historyIndex = window.history.state?.idx;
+    if (Number.isInteger(historyIndex) && historyIndex > 0) {
+      event.preventDefault();
+      navigate(-1);
+    }
+  }
+
   return (
     <main className={styles.game}>
       <div className={styles.topRow}>
-        <Link className={styles.cancel} to="/checkin/record">Cancel</Link>
+        <Link className={styles.cancel} to="/" onClick={handleCancel}>Cancel</Link>
         <StepProgress step={2} total={2} label="Pollen catch" />
       </div>
 

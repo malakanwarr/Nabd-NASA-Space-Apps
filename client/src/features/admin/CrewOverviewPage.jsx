@@ -140,7 +140,6 @@ export default function CrewOverviewPage() {
                       <th scope="col">Status</th>
                       <th scope="col">Readiness</th>
                       <th scope="col">Last check-in</th>
-                      <th scope="col">Sleep, 7 days</th>
                       <th scope="col">Alert</th>
                       <th scope="col"><span className={styles.visuallyHidden}>Details</span></th>
                     </tr>
@@ -157,7 +156,6 @@ export default function CrewOverviewPage() {
                           <td><StatusLabel status={String(member.status || 'unknown').toLowerCase()} /></td>
                           <td>{formatReadiness(member.readiness)}</td>
                           <td>{member.lastCheckIn || member.lastCheckin || '—'}</td>
-                          <td>{member.sleep7Days ?? member.sleepAverageHours ?? '—'}</td>
                           <td className={styles.alertCell}>{getAlerts(member.alerts)}</td>
                           <td>
                             {memberId ? <Link className={styles.openLink} to={`/admin/crew/${encodeURIComponent(memberId)}`}>Open</Link> : '—'}
