@@ -10,6 +10,8 @@ import Button from '../../shared/Button.jsx';
 import { apiFetch } from '../../shared/api.js';
 import { getSampleData } from '../../shared/sampleData.js';
 import { useSession } from '../../shared/session.js';
+import SavedNote from './SavedNote.jsx';
+import { loadWithSavedCopy } from './savedData.js';
 import { CheckCircleIcon, LockIcon, PhoneIcon, QuietIcon, SunIcon } from './Icons.jsx';
 import s from './styles.module.css';
 
@@ -18,34 +20,33 @@ export default function CheckinStartPage() {
   const session = useSession();
   const [missionDay, setMissionDay] = useState(null);
   const [doneToday, setDoneToday] = useState(false);
+  const [fromSaved, setFromSaved] = useState(false);
   const [asking, setAsking] = useState(false);
 
+  // Today's mission day and "already checked in today?": GET /api/mood returns her last 7 check-ins, one per
+  // mission day. With no connection we use the copy saved on the phone, but only if it is from today.
   useEffect(() => {
+    if (!session?.id) return undefined;
     let cancelled = false;
-    getSampleData('today')
-      .then((today) => {
-        if (!cancelled) setMissionDay(today.missionDay);
+    loadWithSavedCopy(`checkin-${session.id}`, async () => {
+      const [today, list] = await Promise.all([
+        getSampleData('today'),
+        apiFetch(`/api/mood?crewId=${encodeURIComponent(session.id)}`),
+      ]);
+      return { missionDay: today.missionDay, doneToday: Array.isArray(list) && list.some((c) => c.missionDay === today.missionDay) };
+    }, ['/api/data/today', `/api/mood?crewId=${encodeURIComponent(session.id)}`])
+      .then(({ data, saved, at }) => {
+        if (cancelled) return;
+        const sameDay = !saved || new Date(at).toDateString() === new Date().toDateString();
+        setMissionDay(data.missionDay);
+        setDoneToday(sameDay && data.doneToday);
+        setFromSaved(saved);
       })
-      .catch(() => {}); // no day number is fine: the screen still works
+      .catch(() => {}); // no day number and no banner: the screen still works
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  // Has she already checked in today? GET /api/mood returns her last 7 check-ins, one per mission day.
-  // If the server cannot be reached we simply show the normal start screen.
-  useEffect(() => {
-    if (!missionDay || !session?.id) return undefined;
-    let cancelled = false;
-    apiFetch(`/api/mood?crewId=${encodeURIComponent(session.id)}`)
-      .then((list) => {
-        if (!cancelled && Array.isArray(list)) setDoneToday(list.some((c) => c.missionDay === missionDay));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [missionDay, session?.id]);
+  }, [session?.id]);
 
   // The tap is what lets the phone ask. We stop the test stream at once; the record page opens the camera itself.
   async function allowAndStart() {
@@ -66,6 +67,7 @@ export default function CheckinStartPage() {
     <main>
       <ScreenHeader eyebrow={missionDay ? `Daily · Day ${missionDay}` : 'Daily'} title="Today's check-in" />
       <p className={s.lead}>About 4 minutes · 2 steps</p>
+      {fromSaved && <SavedNote />}
 
       {doneToday && (
         <p className={s.checkedIn} role="status">

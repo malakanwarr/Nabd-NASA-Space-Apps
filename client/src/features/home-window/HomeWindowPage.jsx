@@ -9,6 +9,8 @@ import ListRow from '../../shared/ListRow.jsx';
 import Button from '../../shared/Button.jsx';
 import { getSampleData } from '../../shared/sampleData.js';
 import { CheckCircleIcon } from '../mood-face/Icons.jsx';
+import SavedNote from '../mood-face/SavedNote.jsx';
+import { loadWithSavedCopy } from '../mood-face/savedData.js';
 import { FROM_HOME_FALLBACK } from './fromHomeSample.js';
 import { ImageIcon, MicIcon } from './Icons.jsx';
 import s from './styles.module.css';
@@ -38,19 +40,30 @@ export default function HomeWindowPage() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.allSettled([getSampleData('from-home'), getSampleData('profile'), getSampleData('mission')]).then(
-      ([fromHome, profile, mission]) => {
-        if (cancelled) return;
-        const home = { ...FROM_HOME_FALLBACK, ...(fromHome.status === 'fulfilled' ? fromHome.value : {}) };
-        const delay = mission.status === 'fulfilled' ? mission.value.earthDelayOneWay?.minutes : null;
-        setData({
-          state: 'ready',
-          home,
-          delayMinutes: delay ?? home.delayMinutes,
-          family: profile.status === 'fulfilled' ? (profile.value.family ?? []).map((f) => f.name) : [],
-        });
-      },
-    );
+    // from-home.json may not exist yet (then the local fallback is used). If profile AND mission both fail
+    // there is no connection: throw, so the copy saved on the phone is used instead.
+    loadWithSavedCopy('home-window', async () => {
+      const [fromHome, profile, mission] = await Promise.allSettled([
+        getSampleData('from-home'),
+        getSampleData('profile'),
+        getSampleData('mission'),
+      ]);
+      if (profile.status === 'rejected' && mission.status === 'rejected') throw profile.reason;
+      const home = { ...FROM_HOME_FALLBACK, ...(fromHome.status === 'fulfilled' ? fromHome.value : {}) };
+      const delay = mission.status === 'fulfilled' ? mission.value.earthDelayOneWay?.minutes : null;
+      return {
+        home,
+        delayMinutes: delay ?? home.delayMinutes,
+        family: profile.status === 'fulfilled' ? (profile.value.family ?? []).map((f) => f.name) : [],
+      };
+    }, ['/api/data/profile', '/api/data/mission'])
+      .then(({ data: loaded, saved }) => {
+        if (!cancelled) setData({ state: 'ready', saved, ...loaded });
+      })
+      .catch(() => {
+        // Nothing saved and no connection: still show the window, with the local fallback texts.
+        if (!cancelled) setData({ state: 'ready', saved: false, home: FROM_HOME_FALLBACK, delayMinutes: FROM_HOME_FALLBACK.delayMinutes, family: [] });
+      });
     return () => {
       cancelled = true;
     };
@@ -108,6 +121,8 @@ export default function HomeWindowPage() {
   return (
     <main>
       <ScreenHeader backTo="/family" backLabel="Family" eyebrow="Family" title="Home window" />
+
+      {data.saved && <SavedNote />}
 
       <div className={s.clock}>
         <span className={s.time}>{home.localTime}</span>
