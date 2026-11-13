@@ -1,6 +1,7 @@
 /* Styles for mood-face (owner: Habiba). Use only the variables from shared/theme.css. */
 
 /* ---------- Check-in start (board 7) ---------- */
+.savedNote { margin: 0 0 var(--space-3); color: var(--watch); font-size: var(--fs-14); }
 .lead { margin: 0 0 var(--space-4); color: var(--muted); font-size: var(--fs-16); }
 .stepIcon { display: flex; align-items: center; justify-content: center; flex: none; width: var(--space-6); height: var(--space-6); border-radius: var(--radius-full); background: var(--raised); color: var(--text); font-family: var(--font-mono); font-weight: 700; font-size: var(--fs-14); }
 .checkedIn { display: flex; align-items: center; gap: var(--space-3); margin: 0 0 var(--space-4); padding: var(--space-3) 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: var(--fs-16); }

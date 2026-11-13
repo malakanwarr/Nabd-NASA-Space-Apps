@@ -146,6 +146,8 @@ export default function ResultsPage() {
             method: 'POST',
             body: {
               crewId,
+              missionDay: todayFile.missionDay, // a check-in that waits for a connection keeps its own day
+              date: todayFile.date,
               face,
               voice,
               context: { sleepHours: todayFile.sleepLastNightHours },
@@ -163,6 +165,8 @@ export default function ResultsPage() {
         else {
           // It is saved, so the half-finished draft has done its job.
           clearDraft();
+          // With no connection the check-in waits in the outbox (outcome.saved.queued) and sends itself later.
+          // The astronaut does not need to know, so it counts as saved here.
           if (outcome.saved && outcome.saved.missionDay) {
             setResult({ ...now, missionDay: outcome.saved.missionDay });
           }

@@ -251,7 +251,7 @@ export default function GamePage() {
 
       {baselineError && (
         <div className={styles.notice} role="status">
-          Could not load your personal baseline. {baselineError}
+          We couldn't load your usual reaction time. You can still play.
           <Button
             variant="text"
             onClick={() => {

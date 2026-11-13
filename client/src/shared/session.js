@@ -1,6 +1,7 @@
 // Sign-in session (Malak only). Sign-in is simulated in this prototype: nothing is checked securely.
 // role is 'crew', 'admin' or 'family'.
 import { useSyncExternalStore } from 'react';
+import { clearSavedApi } from './api.js';
 import { getSampleData } from './sampleData.js';
 
 const KEY = 'nabd-session';
@@ -35,6 +36,7 @@ export function signOut() {
   } catch {
     // storage blocked
   }
+  clearSavedApi(); // the next person on this phone must not see the saved copies
   cached = undefined;
   notify();
 }

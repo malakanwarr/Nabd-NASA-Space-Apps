@@ -9,6 +9,8 @@ import { getSampleData } from '../../shared/sampleData.js';
 import { signOut, useSession } from '../../shared/session.js';
 import { getTheme, setTheme } from '../../shared/theme.js';
 import Avatar from './Avatar.jsx';
+import SavedNote from '../mood-face/SavedNote.jsx';
+import { clearSavedCopies, loadWithSavedCopy } from '../mood-face/savedData.js';
 import s from './styles.module.css';
 
 const THEMES = [
@@ -53,11 +55,17 @@ export default function ProfilePage() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getSampleData('crew'), getSampleData('mission')])
-      .then(([crew, mission]) => {
-        if (cancelled) return;
-        const me = crew.crew?.find((c) => c.id === session?.id) ?? null;
-        setData({ state: 'ready', me, surgeon: crew.mission?.flightSurgeon ?? mission.flightSurgeonOnEarth, missionName: mission.name });
+    loadWithSavedCopy(`profile-${session?.id}`, async () => {
+      const [crew, mission] = await Promise.all([getSampleData('crew'), getSampleData('mission')]);
+      const me = crew.crew?.find((c) => c.id === session?.id) ?? null;
+      return {
+        me: me && { role: me.role, avatar: me.avatar },
+        surgeon: crew.mission?.flightSurgeon ?? mission.flightSurgeonOnEarth,
+        missionName: mission.name,
+      };
+    }, ['/api/data/crew', '/api/data/mission'])
+      .then(({ data: loaded, saved }) => {
+        if (!cancelled) setData({ state: 'ready', saved, ...loaded });
       })
       .catch(() => {
         if (!cancelled) setData({ state: 'error' });
@@ -82,6 +90,7 @@ export default function ProfilePage() {
   }
 
   function leave() {
+    clearSavedCopies(); // the next person on this phone must not see saved data
     signOut();
     navigate('/signin');
   }
@@ -94,6 +103,8 @@ export default function ProfilePage() {
   return (
     <main>
       <ScreenHeader backTo="/" backLabel="Home" eyebrow="Profile and settings" title={name} />
+
+      {data.saved && <SavedNote />}
 
       <div className={s.identity}>
         <Avatar avatar={data.me?.avatar} name={name} />
