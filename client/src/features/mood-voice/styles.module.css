@@ -1,11 +1,11 @@
 /* Styles for mood-voice (owner: Malak). Use only the variables from shared/theme.css. */
 
-/* Cancel on the left, the step and its bar on the right (canvas screen #8). */
+/* Cancel on the left, the step and its bar on the right (canvas screen #8).
+   The gap above comes from .phone in theme.css, which keeps clear of the status bar. */
 .top {
   display: flex;
   align-items: flex-start;
   gap: var(--space-4);
-  padding-top: var(--space-4);
 }
 
 .cancel {
