@@ -1,4 +1,4 @@
-// Talks to the server (Malak only). JSON in, JSON out, readable error on failure.
+// Talks to the server (Malak only). Supports JSON and raw request bodies, with readable errors.
 //
 // "Works without Earth": every successful GET of sample data or check-ins is kept on the phone.
 // If the server cannot be reached, the saved copy is returned and wasSavedCopy(path) is true until the next
@@ -139,12 +139,16 @@ export async function apiFetch(path, options = {}) {
   const method = (rest.method || 'GET').toUpperCase();
   const saveable = method === 'GET' && SAVEABLE.test(path);
   const queueable = method === 'POST' && QUEUEABLE.test(path);
+  const rawBody = (typeof Blob !== 'undefined' && body instanceof Blob)
+    || (typeof FormData !== 'undefined' && body instanceof FormData)
+    || (typeof ArrayBuffer !== 'undefined'
+      && (body instanceof ArrayBuffer || ArrayBuffer.isView(body)));
   let res;
   try {
     res = await fetch(BASE + path, {
       ...rest,
-      headers: { 'Content-Type': 'application/json', ...headers },
-      body: body === undefined ? undefined : JSON.stringify(body),
+      headers: { ...(rawBody ? {} : { 'Content-Type': 'application/json' }), ...headers },
+      body: body === undefined ? undefined : rawBody ? body : JSON.stringify(body),
     });
   } catch {
     const copy = savedAnswer(path, saveable);
