@@ -1,2 +1,177 @@
-/* Styles for home (owner: Hana Sakr). Use only the variables from shared/theme.css. */
-.opening { min-height: 100vh; display: grid; place-items: center; text-align: center; }
+/* Styles for the Opening screen (owner: Hana Sakr). Use only the variables from shared/theme.css. */
+.opening {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  justify-content: center;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+/* A 9:16 stage, centred; the planets and the route share its coordinates. */
+.stage {
+  position: relative;
+  aspect-ratio: 9 / 16;
+  height: 100vh;
+  height: 100svh;
+  max-width: 100vw;
+}
+.sky {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.star {
+  fill: var(--text);
+}
+.starTwinkle {
+  fill: var(--text);
+  animation: twinkle 5s ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.route {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1 6;
+}
+
+.body {
+  fill: var(--text);
+}
+.fin {
+  fill: var(--primary);
+}
+.window {
+  fill: var(--primary);
+}
+.flame {
+  fill: var(--watch);
+}
+
+.planet {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  line-height: 0;
+}
+
+/* centre block */
+.center {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+.logo {
+  margin: 0;
+  padding-left: 0.2em;
+  font-size: calc(var(--fs-28) * 1.75);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  line-height: 1;
+}
+.ecg {
+  width: 160px;
+  max-width: 50%;
+  height: 24px;
+}
+.ecgBase,
+.ecgSweep {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ecgBase {
+  stroke: var(--line);
+}
+.ecgSweep {
+  stroke: var(--primary);
+  stroke-dasharray: 22 78;
+  animation: sweep 3.6s linear infinite;
+}
+@keyframes sweep {
+  from {
+    stroke-dashoffset: 22;
+  }
+  to {
+    stroke-dashoffset: -78;
+  }
+}
+.tagline {
+  margin: 0;
+  font-size: var(--fs-14);
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+/* loading bar: fills in about 2 s and simply stays full if the data takes longer */
+.bottom {
+  position: absolute;
+  left: var(--space-5);
+  right: var(--space-5);
+  bottom: calc(var(--space-5) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+.track {
+  width: 100%;
+  height: var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--raised);
+  overflow: hidden;
+}
+.fill {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  transform-origin: left;
+  animation: load 2s ease-out both;
+}
+@keyframes load {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.loading {
+  margin: 0;
+  font-size: var(--fs-14);
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ecgSweep,
+  .starTwinkle,
+  .fill {
+    animation: none;
+  }
+  .ecgSweep {
+    stroke-dasharray: none;
+  }
+}
