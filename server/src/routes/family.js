@@ -6,7 +6,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const router = Router();
-const memoryMessages = [];
 const MAX_MESSAGE_SECONDS = 60;
 
 function isDatabaseConnected() {
@@ -14,7 +13,7 @@ function isDatabaseConnected() {
 }
 
 function messageJson(message) {
-  const id = String(message._id || message.id);
+  const id = String(message._id);
   return {
     id,
     crewId: message.crewId,
@@ -79,30 +78,18 @@ router.post(
       return res.status(400).json({ error: `duration must be from 1 to ${MAX_MESSAGE_SECONDS} seconds` });
     }
 
-    const message = {
-      crewId,
-      mimeType,
-      durationSeconds,
-      audio: req.body,
-      createdAt: new Date(),
-    };
+    if (!isDatabaseConnected()) {
+      return res.status(503).json({ error: 'The database is unavailable. The recording was not saved.' });
+    }
 
     try {
-      let savedMessage;
-      let storage;
-      if (isDatabaseConnected()) {
-        savedMessage = await FamilyMessage.create(message);
-        storage = 'database';
-      } else {
-        savedMessage = {
-          ...message,
-          id: `memory-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        };
-        memoryMessages.push(savedMessage);
-        storage = 'memory';
-      }
-
-      return res.status(201).json({ message: messageJson(savedMessage), storage });
+      const savedMessage = await FamilyMessage.create({
+        crewId,
+        mimeType,
+        durationSeconds,
+        audio: req.body,
+      });
+      return res.status(201).json({ message: messageJson(savedMessage) });
     } catch (error) {
       console.error('Family voice message save error:', error);
       return res.status(500).json({ error: 'Could not save the voice message' });
@@ -113,11 +100,12 @@ router.post(
 router.get('/messages', async (req, res) => {
   const crewId = String(req.query.crewId || '').trim();
   if (!crewId) return res.status(400).json({ error: 'crewId is required' });
+  if (!isDatabaseConnected()) {
+    return res.status(503).json({ error: 'Voice messages are unavailable while the database is disconnected.' });
+  }
 
   try {
-    const messages = isDatabaseConnected()
-      ? await FamilyMessage.find({ crewId }).sort({ createdAt: -1 }).limit(50)
-      : memoryMessages.filter((message) => message.crewId === crewId).slice(-50).reverse();
+    const messages = await FamilyMessage.find({ crewId }).sort({ createdAt: -1 }).limit(50);
     return res.json({ messages: messages.map(messageJson) });
   } catch (error) {
     console.error('Family voice message load error:', error);
@@ -127,10 +115,15 @@ router.get('/messages', async (req, res) => {
 
 router.get('/messages/:id/audio', async (req, res) => {
   const id = String(req.params.id);
+  if (!isDatabaseConnected()) {
+    return res.status(503).json({ error: 'Voice messages are unavailable while the database is disconnected.' });
+  }
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).json({ error: 'Voice message not found' });
+  }
+
   try {
-    const message = isDatabaseConnected() && mongoose.Types.ObjectId.isValid(id)
-      ? await FamilyMessage.findById(id).select('mimeType audio')
-      : memoryMessages.find((entry) => entry.id === id);
+    const message = await FamilyMessage.findById(id).select('mimeType audio');
     if (!message) return res.status(404).json({ error: 'Voice message not found' });
 
     res.set('Content-Type', message.mimeType);

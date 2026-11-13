@@ -56,13 +56,14 @@ export default function HomeWindowPage() {
   const [phase, setPhase] = useState('idle'); // idle | requesting | recording | sending | sent | error
   const [seconds, setSeconds] = useState(0);
   const [recordingError, setRecordingError] = useState('');
-  const [uploadStorage, setUploadStorage] = useState('');
-  const [canRetryUpload, setCanRetryUpload] = useState(false);
+  const [previewError, setPreviewError] = useState('');
+  const [previewRecording, setPreviewRecording] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const previewUrlRef = useRef('');
   const recorder = useRef(null);
   const stream = useRef(null);
   const chunks = useRef([]);
   const startedAt = useRef(0);
-  const pendingRecording = useRef(null);
   const discardRecording = useRef(false);
   const mounted = useRef(true);
   const session = useSession();
@@ -70,8 +71,7 @@ export default function HomeWindowPage() {
 
   useEffect(() => {
     let cancelled = false;
-    // from-home.json may not exist yet (then the local fallback is used). If profile AND mission both fail
-    // there is no connection: throw, so the copy saved on the phone is used instead.
+    // Load the message history and crew context; saved and sample fallbacks keep the screen available offline.
     loadWithSavedCopy('home-window', async () => {
       const [fromHome, profile, mission] = await Promise.allSettled([
         getSampleData('from-home'),
@@ -133,8 +133,25 @@ export default function HomeWindowPage() {
       stream.current?.getTracks().forEach((track) => track.stop());
       stream.current = null;
       recorder.current = null;
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = '';
     };
   }, []);
+
+  function clearPreview() {
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    previewUrlRef.current = '';
+    setPreviewUrl('');
+    setPreviewRecording(null);
+  }
+
+  function showPreview(recording) {
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    const url = URL.createObjectURL(recording.audio);
+    previewUrlRef.current = url;
+    setPreviewUrl(url);
+    setPreviewRecording(recording);
+  }
 
   async function startRecording() {
     if (phase === 'requesting' || phase === 'recording' || phase === 'sending') return;
@@ -145,9 +162,8 @@ export default function HomeWindowPage() {
     }
 
     setRecordingError('');
-    setUploadStorage('');
-    setCanRetryUpload(false);
-    pendingRecording.current = null;
+    setPreviewError('');
+    clearPreview();
     setPhase('requesting');
 
     let activeStream;
@@ -164,8 +180,14 @@ export default function HomeWindowPage() {
         return;
       }
 
-      const supportedTypes = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'];
-      const mimeType = supportedTypes.find((type) => MediaRecorder.isTypeSupported(type));
+      const supportedTypes = ['audio/webm;codecs=opus', 'audio/mp4;codecs=mp4a.40.2', 'audio/mp4'];
+      const audioProbe = document.createElement('audio');
+      const isRecorderTypeSupported = typeof MediaRecorder.isTypeSupported === 'function'
+        ? (type) => MediaRecorder.isTypeSupported(type)
+        : () => false;
+      const mimeType = supportedTypes.find(
+        (type) => isRecorderTypeSupported(type) && audioProbe.canPlayType(type),
+      ) || supportedTypes.find(isRecorderTypeSupported);
       const media = mimeType
         ? new MediaRecorder(activeStream, { mimeType })
         : new MediaRecorder(activeStream);
@@ -192,7 +214,8 @@ export default function HomeWindowPage() {
         if (recorder.current === media) recorder.current = null;
         if (!mounted.current || discardRecording.current) return;
 
-        const audio = new Blob(chunks.current, { type: media.mimeType || 'audio/webm' });
+        const recordedType = chunks.current.find((chunk) => chunk.type)?.type || media.mimeType;
+        const audio = new Blob(chunks.current, recordedType ? { type: recordedType } : undefined);
         chunks.current = [];
         if (!audio.size) {
           setRecordingError('No audio was captured. Check the microphone and try again.');
@@ -204,9 +227,8 @@ export default function HomeWindowPage() {
           1,
           Math.min(MAX_SECONDS, Math.ceil((currentTime() - startedAt.current) / 1000)),
         );
-        pendingRecording.current = { audio, durationSeconds };
-        setCanRetryUpload(true);
-        void uploadRecording(pendingRecording.current);
+        showPreview({ audio, durationSeconds });
+        setPhase('preview');
       };
 
       media.start();
@@ -228,19 +250,17 @@ export default function HomeWindowPage() {
   }
 
   async function uploadRecording(recording) {
+    if (!recording) return;
     setPhase('sending');
     setRecordingError('');
     try {
       const result = await sendVoiceMessage(crewId, recording.audio, recording.durationSeconds);
       if (!result?.message?.id) throw new Error('The server did not confirm the saved message.');
       if (!mounted.current) return;
-      pendingRecording.current = null;
-      setCanRetryUpload(false);
-      setUploadStorage(result.storage || 'database');
+      clearPreview();
       setPhase('sent');
     } catch (error) {
       if (!mounted.current) return;
-      setCanRetryUpload(true);
       setRecordingError(`Your voice message could not be sent: ${error.message}`);
       setPhase('error');
     }
@@ -291,12 +311,25 @@ export default function HomeWindowPage() {
         <p className={s.empty}>No messages yet. Record one for your family.</p>
       ) : (
         home.messages.map((m) => (
-          <ListRow
-            key={m.id}
-            icon={<span className={s.kind}>{m.kind === 'voice' ? <MicIcon /> : <ImageIcon />}</span>}
-            title={m.title}
-            subtitle={m.when}
-          />
+          <div key={m.id}>
+            <ListRow
+              icon={<span className={s.kind}>{m.kind === 'voice' ? <MicIcon /> : <ImageIcon />}</span>}
+              title={m.title}
+              subtitle={m.when}
+            />
+            {m.kind === 'voice' && m.mediaUrl && (
+              m.demoPlaceholder
+                ? <p className={s.emptyMedia}>No audio attached in this demo message.</p>
+                : (
+                  <audio className={s.historyAudio} controls preload="none" src={m.mediaUrl}>
+                    Your browser cannot play this audio.
+                  </audio>
+                )
+            )}
+            {m.kind === 'photo' && m.mediaUrl && (
+              <img className={s.historyPhoto} src={m.mediaUrl} alt={m.alt || m.title} />
+            )}
+          </div>
         ))
       )}
 
@@ -304,20 +337,33 @@ export default function HomeWindowPage() {
         {phase === 'sent' && (
           <p className={s.sent} role="status">
             <span className={s.sentIcon}><CheckCircleIcon /></span>
-            <span>Message sent to your family. {delayLine}</span>
+            <span>Voice message saved for your family. {delayLine}</span>
           </p>
         )}
         {recordingError && <p className={s.problem} role="alert">{recordingError}</p>}
+        {previewError && <p className={s.problem} role="alert">{previewError}</p>}
         {phase === 'requesting' && (
           <p className={s.status} role="status">Connecting to the microphone…</p>
         )}
         {phase === 'sending' && (
           <p className={s.status} role="status">Sending your voice message…</p>
         )}
-        {phase === 'sent' && uploadStorage === 'memory' && (
-          <p className={s.note} role="status">
-            The server is using temporary storage. This message may be lost if the server restarts.
-          </p>
+        {previewRecording && previewUrl && (phase === 'preview' || phase === 'sending' || phase === 'error') && (
+          <div className={s.preview}>
+            <p className={s.previewTitle}>Listen before sending · {clock(previewRecording.durationSeconds)}</p>
+            <audio
+              className={s.previewAudio}
+              controls
+              src={previewUrl}
+              aria-label="Preview your voice message"
+              onError={() => setPreviewError('This browser could not play the recording. Try recording again or use another browser.')}
+              onLoadedMetadata={(event) => {
+                if (!Number.isFinite(event.currentTarget.duration) || event.currentTarget.duration <= 0) {
+                  setPreviewError('The recording has no playable audio. Try recording again.');
+                }
+              }}
+            />
+          </div>
         )}
         {phase === 'recording' ? (
           <>
@@ -325,27 +371,37 @@ export default function HomeWindowPage() {
               <span className={s.recDot} aria-hidden="true" />
               <span className={s.num}>Recording {clock(seconds)}</span>
             </p>
-            <Button onClick={stopRecording}>Stop and send</Button>
+            <Button onClick={stopRecording}>Stop recording</Button>
           </>
+        ) : phase === 'preview' ? (
+          <div className={s.previewActions}>
+            <Button variant="secondary" onClick={startRecording}>Record again</Button>
+            <Button disabled={Boolean(previewError)} onClick={() => uploadRecording(previewRecording)}>
+              Send voice message
+            </Button>
+          </div>
+        ) : phase === 'error' && previewRecording ? (
+          <div className={s.previewActions}>
+            <Button variant="secondary" onClick={startRecording}>Record again</Button>
+            <Button disabled={Boolean(previewError)} onClick={() => uploadRecording(previewRecording)}>
+              Try sending again
+            </Button>
+          </div>
         ) : (
           <Button
             variant={phase === 'sent' ? 'secondary' : 'primary'}
-            onClick={phase === 'error' && canRetryUpload
-              ? () => uploadRecording(pendingRecording.current)
-              : startRecording}
             disabled={phase === 'requesting' || phase === 'sending'}
+            onClick={startRecording}
           >
             {phase === 'requesting'
               ? 'Connecting…'
               : phase === 'sending'
                 ? 'Sending…'
-                : phase === 'error' && canRetryUpload
-                  ? 'Try sending again'
-                  : phase === 'sent'
-                    ? 'Record another message'
-                    : phase === 'error'
-                      ? 'Try recording again'
-                      : 'Record a message home'}
+                : phase === 'sent'
+                  ? 'Record another message'
+                  : phase === 'error'
+                    ? 'Try recording again'
+                    : 'Record a message home'}
           </Button>
         )}
         {phase !== 'sent' && <p className={s.note}>{delayLine}</p>}
