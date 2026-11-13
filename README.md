@@ -23,6 +23,17 @@ In `npm run dev`, add this to any URL: `?as=sara` signs in as Sara (crew), `?as=
 3. Forward `5173` to `localhost:5173` and `5050` to `localhost:5050`.
 4. Open `http://localhost:5173` in Chrome on the phone.
 
+## Who owns what
+
+| Name | Folders she owns |
+| --- | --- |
+| Habiba (Role 1) | client/src/features/mood-face/, profile/, home-window/ |
+| Malak (Role 2, team lead) | client/src/shared/, mood-voice/, mood-results/, App.jsx, main.jsx, vite.config.js, server/src/index.js, db.js, routes/data.js, routes/mood.js, seed.js, all package.json files |
+| Hana Haytham (Role 3) | features/ai-doctor/, body/, surgeon/, server/src/routes/doctor.js, routes/surgeon.js, server/src/doctor/ |
+| Layal (Role 4) | features/womens-health/, measure/, avatar/, server/src/routes/womens.js, measurements.js, docs/ |
+| Hana Sakr (Role 5) | features/home/, auth/, hugs/, family-app/, server/src/routes/auth.js, hugs.js, family.js |
+| Salma (Role 6) | features/game/, garden/, admin/, server/src/routes/game.js, crew.js, admin.js, docs/ |
+
 Models in `server/src/models/` belong to the owner of the matching route.
 
 ## Git rules
