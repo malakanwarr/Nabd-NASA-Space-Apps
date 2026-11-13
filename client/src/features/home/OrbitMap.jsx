@@ -1,31 +1,46 @@
 import s from './homePage.module.css';
 
-// The road to Mars: Earth on the left, Mars on the right, the route between them as an arc, and Sara's
-// ship on it. The solid line is the way travelled, the dotted line the way still to go.
-// Illustrative, not to scale. Coordinates are SVG units on a 360 x 150 canvas.
+// The road to Mars: Earth on the left, Mars on the right, and between them a heartbeat pulse like the logo
+// ("Pulse to Mars"). The solid part is the way travelled, the dashed part the way still to go, and Sara's
+// dot sits on the pulse at the mission progress. Illustrative, not to scale. SVG units on a 360 x 150 canvas.
 const W = 360;
 const H = 150;
 const EARTH = { x: 46, y: 88, r: 24 };
 const MARS = { x: 312, y: 88, r: 15 };
-const START = [EARTH.x + EARTH.r - 2, EARTH.y - 10];
-const CONTROL = [180, -4];
-const END = [MARS.x - MARS.r + 2, MARS.y - 8];
 const LABEL_Y = 136;
 
-// A point a share t (0 to 1) of the way along the curve.
-function along(t) {
-  const u = 1 - t;
-  return [
-    u * u * START[0] + 2 * u * t * CONTROL[0] + t * t * END[0],
-    u * u * START[1] + 2 * u * t * CONTROL[1] + t * t * END[1],
-  ];
+// From Earth's right edge to Mars's left edge, at the planets' height.
+const X0 = EARTH.x + EARTH.r + 2;
+const X1 = MARS.x - MARS.r - 1;
+const BASE_Y = EARTH.y;
+
+// The heartbeat: [share of the way across, height above the line].
+// Flat, a small bump, a tall sharp spike, a dip, a smaller spike, then flat into Mars.
+const BEAT = [
+  [0, 0], [0.12, 0], [0.16, 9], [0.2, 0], [0.27, 0], [0.3, -5], [0.35, 62],
+  [0.41, -26], [0.45, 0], [0.51, 0], [0.55, 26], [0.59, 0], [1, 0],
+];
+const POINTS = BEAT.map(([share, up]) => [X0 + (X1 - X0) * share, BASE_Y - up]);
+
+// The pulse split at a share p of the way across, Earth to Mars: the points up to there, and the point itself.
+// (By distance across, not by line length, so the spikes do not hold her back: day 142 of 210 sits about
+// 68 % of the way to Mars.)
+function splitAt(p) {
+  const x = X0 + (X1 - X0) * p;
+  for (let i = 1; i < POINTS.length; i += 1) {
+    const [ax, ay] = POINTS[i - 1];
+    const [bx, by] = POINTS[i];
+    if (x <= bx) {
+      const k = bx === ax ? 0 : (x - ax) / (bx - ax);
+      const at = [x, ay + (by - ay) * k];
+      return { before: [...POINTS.slice(0, i), at], after: [at, ...POINTS.slice(i)], at };
+    }
+  }
+  const at = POINTS[POINTS.length - 1];
+  return { before: POINTS, after: [at], at };
 }
 
-function toPath(from, to, steps = 40) {
-  return Array.from({ length: steps + 1 }, (_, i) => along(from + ((to - from) * i) / steps))
-    .map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`)
-    .join(' ');
-}
+const toPath = (pts) => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
 
 const STARS = [
   [120, 24, 1.2],
@@ -43,7 +58,8 @@ const STARS = [
 
 export default function OrbitMap({ day, totalDays }) {
   const p = Math.max(0, Math.min(1, day / totalDays));
-  const [sx, sy] = along(p);
+  const { before, after, at } = splitAt(p);
+  const [sx, sy] = at;
 
   return (
     <svg
@@ -56,8 +72,9 @@ export default function OrbitMap({ day, totalDays }) {
         <circle key={`${x}-${y}`} cx={x} cy={y} r={r} className={s.orbitStar} />
       ))}
 
-      <path d={toPath(0, 1)} className={s.orbitPlan} />
-      <path d={toPath(0, p)} className={s.orbitTrail} />
+      {/* Still to go: the same pulse, dashed and faint. Travelled: solid, drawn in once when Home opens. */}
+      <path d={toPath(after)} className={s.orbitPlan} />
+      <path d={toPath(before)} pathLength="100" className={s.orbitTrail} />
 
       {/* Earth: ocean, a hint of land, and a thin glow */}
       <circle cx={EARTH.x} cy={EARTH.y} r={EARTH.r + 5} className={s.earthGlow} />
@@ -77,11 +94,16 @@ export default function OrbitMap({ day, totalDays }) {
       <text x={MARS.x} y={LABEL_Y} textAnchor="middle" className={s.orbitLabel}>
         Mars
       </text>
+      {/* The pulse's end on Mars, like the logo */}
+      <circle cx={X1} cy={BASE_Y} r="3.5" className={s.pulseEnd} />
 
-      {/* Sara's ship, with her name above it */}
-      <circle cx={sx} cy={sy} r="11" className={s.shipHalo} />
-      <circle cx={sx} cy={sy} r="5" className={s.ship} />
-      <g transform={`translate(${sx} ${sy - 22})`}>
+      {/* Sara on the pulse, with her name above it. She appears when the line reaches her, then her halo
+          beats slowly. */}
+      <g className={s.shipArrive}>
+        <circle cx={sx} cy={sy} r="11" className={s.shipHalo} />
+        <circle cx={sx} cy={sy} r="5" className={s.ship} />
+      </g>
+      <g className={s.shipArrive} transform={`translate(${sx} ${sy - 22})`}>
         <rect x="-22" y="-12" width="44" height="22" rx="11" className={s.shipTag} />
         <text x="0" y="4" textAnchor="middle" className={s.orbitLabelStrong}>
           Sara
