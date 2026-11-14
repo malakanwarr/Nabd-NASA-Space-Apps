@@ -17,6 +17,7 @@ import { buildSystemPrompt, getCrewMedicalOfficer } from '../doctor/buildContext
 import { checkRedFlags } from '../doctor/redFlags.js';
 import { demoAnswer, emergencyLine } from '../doctor/demoAnswers.js';
 import { retrieve, toPromptSources, toSourceList } from '../doctor/retrieve.js';
+import { trimOffTopicWarnings } from '../doctor/checkReply.js';
 
 const router = Router();
 
@@ -137,6 +138,8 @@ router.post('/chat', async (req, res) => {
   try {
     const systemPrompt = `${buildSystemPrompt(crewId)}\n\n<nasa_sources>\n${toPromptSources(chunks)}\n</nasa_sources>`;
     reply = await askGemini({ systemPrompt, history: toGeminiHistory(history), message: clean });
+    // No self-harm / "unable to cope" signs in the "Get help now" line unless she mentioned mood (checkReply.js).
+    reply = trimOffTopicWarnings(reply, clean, { redFlag: flag });
     sources = citedSources(reply, chunks);
     // Safety net: if our check found an emergency, the answer MUST open with the emergency line.
     if (flag && !reply.slice(0, 120).includes('⚠️')) reply = `⚠️ **${emergencyLine(officer).replace('⚠️ ', '')}**\n${reply}`;
