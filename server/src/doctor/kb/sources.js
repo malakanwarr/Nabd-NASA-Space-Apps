@@ -40,6 +40,9 @@ export const SOURCES = [
   // ---- The 5 hazards (one page) ----
   { id: 'hazards', type: 'hazard', category: 'overview', title: '5 Hazards of Human Spaceflight', hazards: Object.keys(HAZARDS), risk: null, url: 'https://www.nasa.gov/hrp/hazards/' },
 
+  // ---- Closed cabin: carbon dioxide (a common cause of crew headaches on the ISS) ----
+  { id: 'co2', type: 'context', category: 'physiology', title: 'Carbon Dioxide (NASA medical technical brief)', hazards: ['environment'], risk: null, url: 'https://www.nasa.gov/ochmo-tb-004-carbon-dioxide-2/' },
+
   // ---- Research pages (https://www.nasa.gov/hrp/ongoing-hrp-research/) ----
   { id: 'b_complex', type: 'research', category: 'physiology', title: 'B-Complex', hazards: ['gravity'], risk: 'sans', url: REF + 'b-complex/' },
   { id: 'thigh_cuff', type: 'research', category: 'physiology', title: 'Thigh Cuff', hazards: ['gravity'], risk: 'sans', url: REF + 'thigh-cuff/' },

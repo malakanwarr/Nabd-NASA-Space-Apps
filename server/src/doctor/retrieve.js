@@ -20,8 +20,10 @@ const TOP_K = 4; // passages handed to the doctor
 const MAX_PER_PAGE = 2; // so one NASA page can't fill every slot
 const EMBED_TIMEOUT_MS = 4000; // the chat must stay fast; past this we use keywords
 // Lowest meaning-match score we accept (1 = identical). Tune it with the test command above.
-// 0.57 from testing: related questions scored 0.57-0.66, an unrelated one ("I bumped my elbow") 0.556.
-const MIN_SCORE = Number(process.env.KB_MIN_SCORE) || 0.57;
+// 0.58 from testing (library with 87 passages, incl. the CO2 brief): the weakest good match was
+// "I feel lonely" -> Behavioral 0.584; weak noise like headache -> Vestibular scored 0.574.
+// Don't go much higher: good and weak matches overlap (e.g. "bumped my elbow" -> Zero T2 scored 0.591).
+const MIN_SCORE = Number(process.env.KB_MIN_SCORE) || 0.58;
 
 // ---------------------------------------------------------------- the library
 
